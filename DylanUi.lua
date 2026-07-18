@@ -1,5 +1,5 @@
 --[[
-    Custom Styled UI Library - Complete Version
+    Custom Styled UI Library - Complete Version with Scrolling
     Exact UI replication with all original functionality preserved
 --]]
 
@@ -172,6 +172,7 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     panel.Frame.BackgroundColor3 = Color3.fromRGB(255,255,255)
     panel.Frame.BackgroundTransparency = 0.15
     panel.Frame.BorderSizePixel = 0
+    panel.Frame.ClipsDescendants = true -- Important for scrolling
     panel.Frame.Parent = parent
     Instance.new("UICorner", panel.Frame).CornerRadius = UDim.new(0, cornerRadius or 20)
 
@@ -223,7 +224,7 @@ function library:AddWindow(title, options)
     options = (typeof(options) == "table") and options or ui_options
     options.tween_time = 0.1
     
-    -- LAYOUT PARAMETERS (exact match)
+    -- LAYOUT PARAMETERS
     local MainWidth = 0.40
     local MainHeight = 0.75
     local SideWidth = 0.15
@@ -241,7 +242,7 @@ function library:AddWindow(title, options)
     local SideSize = UDim2.fromScale(SideWidth, SideHeight)
     local SidePanel = CreatePanel("Side" .. windows, SidePos, SideSize, 20, 1, Windows)
     
-    -- HEADER (only on the main panel) - Exact replica
+    -- HEADER (only on the main panel)
     local HeaderShadow = Instance.new("Frame")
     HeaderShadow.Name = "HeaderShadow"
     HeaderShadow.AnchorPoint = Vector2.new(0.5, 0)
@@ -281,7 +282,7 @@ function library:AddWindow(title, options)
     Title.Name = "Title"
     Title.AnchorPoint = Vector2.new(0.5,0.5)
     Title.Position = UDim2.fromScale(0.5,0.5)
-    Title.Size = UDim2.fromScale(0.9,0.8)
+    Title.Size = UDim2.fromScale(0.7,0.8)
     Title.BackgroundTransparency = 1
     Title.Font = Enum.Font.Bangers
     Title.Text = title
@@ -289,11 +290,11 @@ function library:AddWindow(title, options)
     Title.TextColor3 = Color3.fromRGB(255,255,255)
     Title.Parent = Header
     
-    -- CLOSE/MINIMIZE BUTTON (exact replica)
+    -- CLOSE/MINIMIZE BUTTON
     local CloseButton = Instance.new("ImageButton")
     CloseButton.Name = "CloseButton"
     CloseButton.AnchorPoint = Vector2.new(0.5, 0.5)
-    CloseButton.Position = UDim2.new(1, 0, 0, 0)
+    CloseButton.Position = UDim2.new(1, -5, 0, 0)
     CloseButton.Size = UDim2.fromOffset(56, 56)
     CloseButton.BackgroundTransparency = 1
     CloseButton.BorderSizePixel = 0
@@ -310,7 +311,7 @@ function library:AddWindow(title, options)
         CloseButton:TweenSize(UDim2.fromOffset(56, 56), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
     
-    -- MINIMIZED STATE (exact replica)
+    -- MINIMIZED STATE
     local MinimizedFrame = Instance.new("ImageButton")
     MinimizedFrame.Name = "MinimizedFrame" .. windows
     MinimizedFrame.AnchorPoint = Vector2.new(1, 0)
@@ -332,29 +333,79 @@ function library:AddWindow(title, options)
     MinimizedStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     MinimizedStroke.Parent = MinimizedFrame
     
-    -- Create containers for tabs
+    -- SCROLLABLE MAIN CONTENT AREA
+    local MainScrollFrame = Instance.new("ScrollingFrame")
+    MainScrollFrame.Name = "MainScroll"
+    MainScrollFrame.Size = UDim2.new(1, -20, 1, -50)
+    MainScrollFrame.Position = UDim2.new(0, 10, 0, 40)
+    MainScrollFrame.BackgroundTransparency = 1
+    MainScrollFrame.BorderSizePixel = 0
+    MainScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    MainScrollFrame.ScrollBarThickness = 4
+    MainScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 255, 255)
+    MainScrollFrame.ScrollBarImageTransparency = 0.5
+    MainScrollFrame.Parent = MainPanel.Frame
+    
+    -- Container for tabs inside scroll frame
     local TabsContainer = Instance.new("Frame")
-    TabsContainer.Name = "Tabs"
-    TabsContainer.Size = UDim2.new(1, -20, 1, -40)
-    TabsContainer.Position = UDim2.new(0, 10, 0, 30)
+    TabsContainer.Name = "TabsContainer"
+    TabsContainer.Size = UDim2.new(1, 0, 0, 0) -- Will auto-size based on content
     TabsContainer.BackgroundTransparency = 1
     TabsContainer.BorderSizePixel = 0
-    TabsContainer.Parent = MainPanel.Frame
+    TabsContainer.Parent = MainScrollFrame
     
-    local TabButtonsContainer = Instance.new("ScrollingFrame")
-    TabButtonsContainer.Name = "TabButtons"
-    TabButtonsContainer.Size = UDim2.new(1, -10, 1, -20)
-    TabButtonsContainer.Position = UDim2.new(0, 5, 0, 10)
+    local TabsLayout = Instance.new("UIListLayout")
+    TabsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    TabsLayout.Padding = UDim.new(0, 0)
+    TabsLayout.Parent = TabsContainer
+    
+    -- Auto-size the container and canvas
+    TabsContainer.Changed:Connect(function()
+        local totalHeight = 0
+        for _, child in pairs(TabsContainer:GetChildren()) do
+            if child:IsA("Frame") and child.Visible then
+                totalHeight = totalHeight + child.AbsoluteSize.Y
+            end
+        end
+        MainScrollFrame.CanvasSize = UDim2.new(0, 0, 0, totalHeight + 10)
+    end)
+    
+    -- SCROLLABLE SIDE PANEL FOR TABS
+    local SideScrollFrame = Instance.new("ScrollingFrame")
+    SideScrollFrame.Name = "SideScroll"
+    SideScrollFrame.Size = UDim2.new(1, -10, 1, -20)
+    SideScrollFrame.Position = UDim2.new(0, 5, 0, 10)
+    SideScrollFrame.BackgroundTransparency = 1
+    SideScrollFrame.BorderSizePixel = 0
+    SideScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    SideScrollFrame.ScrollBarThickness = 4
+    SideScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 255, 255)
+    SideScrollFrame.ScrollBarImageTransparency = 0.5
+    SideScrollFrame.Parent = SidePanel.Frame
+    
+    local TabButtonsContainer = Instance.new("Frame")
+    TabButtonsContainer.Name = "TabButtonsContainer"
+    TabButtonsContainer.Size = UDim2.new(1, 0, 0, 0) -- Will auto-size
     TabButtonsContainer.BackgroundTransparency = 1
     TabButtonsContainer.BorderSizePixel = 0
-    TabButtonsContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
-    TabButtonsContainer.ScrollBarThickness = 4
-    TabButtonsContainer.Parent = SidePanel.Frame
+    TabButtonsContainer.Parent = SideScrollFrame
     
     local TabButtonsList = Instance.new("UIListLayout")
     TabButtonsList.SortOrder = Enum.SortOrder.LayoutOrder
     TabButtonsList.Padding = UDim.new(0, 8)
     TabButtonsList.Parent = TabButtonsContainer
+    
+    -- Auto-size the side container and canvas
+    TabButtonsContainer.Changed:Connect(function()
+        local totalHeight = 0
+        for _, child in pairs(TabButtonsContainer:GetChildren()) do
+            if child:IsA("TextButton") then
+                totalHeight = totalHeight + child.AbsoluteSize.Y + 8 -- Include padding
+            end
+        end
+        TabButtonsContainer.Size = UDim2.new(1, 0, 0, totalHeight)
+        SideScrollFrame.CanvasSize = UDim2.new(0, 0, 0, totalHeight + 10)
+    end)
     
     -- Minimize/Restore functionality
     local isMinimized = false
@@ -421,21 +472,37 @@ function library:AddWindow(title, options)
                 new_button.Parent = TabButtonsContainer
                 Instance.new("UICorner", new_button).CornerRadius = UDim.new(0, 12)
                 
-                TabButtonsContainer.CanvasSize = UDim2.new(0, 0, 0, (#TabButtonsContainer:GetChildren() - 1) * 48)
-                
-                -- Create tab content in main panel
+                -- Create tab content in main panel (inside scrollable area)
                 local new_tab = Instance.new("Frame")
                 new_tab.Name = "Tab_" .. tab_name
-                new_tab.Size = UDim2.new(1, 0, 1, 0)
+                new_tab.Size = UDim2.new(1, 0, 0, 0) -- Will auto-size
                 new_tab.BackgroundTransparency = 1
                 new_tab.BorderSizePixel = 0
                 new_tab.Visible = false
                 new_tab.Parent = TabsContainer
                 
-                local tabLayout = Instance.new("UIListLayout")
-                tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-                tabLayout.Padding = UDim.new(0, 8)
-                tabLayout.Parent = new_tab
+                -- Container with UIListLayout for tab elements
+                local tabContentLayout = Instance.new("UIListLayout")
+                tabContentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                tabContentLayout.Padding = UDim.new(0, 8)
+                tabContentLayout.Parent = new_tab
+                
+                -- Auto-resize tab based on content
+                local function updateTabSize()
+                    local totalHeight = 0
+                    for _, child in pairs(new_tab:GetChildren()) do
+                        if not child:IsA("UIListLayout") then
+                            totalHeight = totalHeight + child.AbsoluteSize.Y + 8
+                        end
+                    end
+                    new_tab.Size = UDim2.new(1, 0, 0, totalHeight > 0 and totalHeight or 10)
+                end
+                
+                new_tab.ChildAdded:Connect(updateTabSize)
+                new_tab.ChildRemoved:Connect(function()
+                    task.wait(0.1)
+                    updateTabSize()
+                end)
                 
                 local function show()
                     if dropdown_open then return end
@@ -451,6 +518,7 @@ function library:AddWindow(title, options)
                     end
                     new_button.BackgroundTransparency = 0.5
                     new_tab.Visible = true
+                    updateTabSize()
                 end
                 
                 new_button.MouseButton1Click:Connect(function()
@@ -474,6 +542,7 @@ function library:AddWindow(title, options)
                     label.TextSize = 14
                     label.TextXAlignment = Enum.TextXAlignment.Left
                     label.Parent = new_tab
+                    updateTabSize()
                     return label
                 end
                 
@@ -505,6 +574,7 @@ function library:AddWindow(title, options)
                         ripple(button, mouse.X, mouse.Y)
                         pcall(callback)
                     end)
+                    updateTabSize()
                     return button
                 end
                 
@@ -566,6 +636,7 @@ function library:AddWindow(title, options)
                         switchGradient.Transparency = toggled and NumberSequence.new(0) or NumberSequence.new(0.5)
                         pcall(callback, toggled)
                     end
+                    updateTabSize()
                     return switch_data, switchFrame
                 end
                 
@@ -601,6 +672,7 @@ function library:AddWindow(title, options)
                             end
                         end
                     end)
+                    updateTabSize()
                     return textbox
                 end
                 
@@ -717,6 +789,7 @@ function library:AddWindow(title, options)
                         end
                         slider_data:Set(slider_options["min"])
                     end
+                    updateTabSize()
                     return slider_data, slider
                 end
                 
@@ -797,6 +870,7 @@ function library:AddWindow(title, options)
                         keybind_data:SetKeybind(a.KeyCode)
                     end)
                     
+                    updateTabSize()
                     return keybind_data, keybindFrame
                 end
                 
@@ -805,18 +879,24 @@ function library:AddWindow(title, options)
                     dropdown_name = tostring(dropdown_name or "New Dropdown")
                     callback = typeof(callback) == "function" and callback or function()end
                     
-                    local dropdown = Instance.new("TextButton")
-                    dropdown.Size = UDim2.new(1, 0, 0, 35)
-                    dropdown.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                    dropdown.BackgroundTransparency = 0.8
+                    local dropdown = Instance.new("Frame")
+                    dropdown.Size = UDim2.new(1, 0, 0, 0) -- Will auto-size
+                    dropdown.BackgroundTransparency = 1
                     dropdown.BorderSizePixel = 0
-                    dropdown.Font = Enum.Font.GothamBold
-                    dropdown.Text = " " .. dropdown_name
-                    dropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    dropdown.TextSize = 14
-                    dropdown.TextXAlignment = Enum.TextXAlignment.Left
                     dropdown.Parent = new_tab
-                    Instance.new("UICorner", dropdown).CornerRadius = UDim.new(0, 10)
+                    
+                    local dropdownButton = Instance.new("TextButton")
+                    dropdownButton.Size = UDim2.new(1, 0, 0, 35)
+                    dropdownButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                    dropdownButton.BackgroundTransparency = 0.8
+                    dropdownButton.BorderSizePixel = 0
+                    dropdownButton.Font = Enum.Font.GothamBold
+                    dropdownButton.Text = " " .. dropdown_name
+                    dropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    dropdownButton.TextSize = 14
+                    dropdownButton.TextXAlignment = Enum.TextXAlignment.Left
+                    dropdownButton.Parent = dropdown
+                    Instance.new("UICorner", dropdownButton).CornerRadius = UDim.new(0, 10)
                     
                     local indicator = Instance.new("TextLabel")
                     indicator.Size = UDim2.new(0, 20, 1, 0)
@@ -826,7 +906,7 @@ function library:AddWindow(title, options)
                     indicator.Text = "▼"
                     indicator.TextColor3 = Color3.fromRGB(255, 255, 255)
                     indicator.TextSize = 14
-                    indicator.Parent = dropdown
+                    indicator.Parent = dropdownButton
                     
                     local box = Instance.new("Frame")
                     box.Size = UDim2.new(1, 0, 0, 0)
@@ -852,7 +932,7 @@ function library:AddWindow(title, options)
                     objectsLayout.Parent = objects
                     
                     local open = false
-                    dropdown.MouseButton1Click:Connect(function()
+                    dropdownButton.MouseButton1Click:Connect(function()
                         open = not open
                         local len = (#objects:GetChildren() - 1) * 35
                         if #objects:GetChildren() - 1 >= 10 then
@@ -863,12 +943,15 @@ function library:AddWindow(title, options)
                             if dropdown_open then return end
                             dropdown_open = true
                             Resize(box, {Size = UDim2.new(1, 0, 0, len)}, options.tween_time)
+                            dropdown.Size = UDim2.new(1, 0, 0, 40 + len)
                             indicator.Text = "▲"
                         else
                             dropdown_open = false
                             Resize(box, {Size = UDim2.new(1, 0, 0, 0)}, options.tween_time)
+                            dropdown.Size = UDim2.new(1, 0, 0, 35)
                             indicator.Text = "▼"
                         end
+                        updateTabSize()
                     end)
                     
                     function dropdown_data:Add(n)
@@ -901,24 +984,39 @@ function library:AddWindow(title, options)
                                 objects.CanvasSize = UDim2.new(0, 0, 0, (#objects:GetChildren() - 1) * 35)
                             end
                             Resize(box, {Size = UDim2.new(1, 0, 0, len)}, options.tween_time)
+                            dropdown.Size = UDim2.new(1, 0, 0, 40 + len)
                         end
                         
                         object.MouseButton1Click:Connect(function()
                             if dropdown_open then
-                                dropdown.Text = " [ " .. n .. " ]"
+                                dropdownButton.Text = " [ " .. n .. " ]"
                                 dropdown_open = false
                                 open = false
                                 Resize(box, {Size = UDim2.new(1, 0, 0, 0)}, options.tween_time)
+                                dropdown.Size = UDim2.new(1, 0, 0, 35)
                                 indicator.Text = "▼"
                                 pcall(callback, n)
+                                updateTabSize()
                             end
                         end)
                         
                         function object_data:Remove()
                             object:Destroy()
+                            if open then
+                                local len = (#objects:GetChildren() - 1) * 35
+                                if #objects:GetChildren() - 1 >= 10 then
+                                    len = 10 * 35
+                                    objects.CanvasSize = UDim2.new(0, 0, 0, (#objects:GetChildren() - 1) * 35)
+                                end
+                                Resize(box, {Size = UDim2.new(1, 0, 0, len)}, options.tween_time)
+                                dropdown.Size = UDim2.new(1, 0, 0, 40 + len)
+                            end
+                            updateTabSize()
                         end
+                        updateTabSize()
                         return object, object_data
                     end
+                    updateTabSize()
                     return dropdown_data, dropdown
                 end
                 
@@ -1052,6 +1150,7 @@ function library:AddWindow(title, options)
                             pcall(callback, color)
                         end
                     end
+                    updateTabSize()
                     return color_picker_data, color_picker
                 end
                 
@@ -1066,7 +1165,7 @@ function library:AddWindow(title, options)
                     }
                     
                     local console = Instance.new("Frame")
-                    console.Size = UDim2.new(1, 0, console_options.full and 1 or 0, console_options.y)
+                    console.Size = UDim2.new(1, 0, 0, console_options.y)
                     console.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                     console.BackgroundTransparency = 0.8
                     console.BorderSizePixel = 0
@@ -1110,74 +1209,6 @@ function library:AddWindow(title, options)
                     
                     Source.TextEditable = not console_options.readonly
                     
-                    -- Syntax highlighting helpers (PRESERVED FROM ORIGINAL)
-                    local lua_keywords = {"and", "break", "do", "else", "elseif", "end", "false", "for", "function", "goto", "if", "in", "local", "nil", "not", "or", "repeat", "return", "then", "true", "until", "while"}
-                    local global_env = {"getrawmetatable", "newcclosure", "islclosure", "setclipboard", "game", "workspace", "script", "math", "string", "table", "print", "wait", "BrickColor", "Color3", "next", "pairs", "ipairs", "select", "unpack", "Instance", "Vector2", "Vector3", "CFrame", "Ray", "UDim2", "Enum", "assert", "error", "warn", "tick", "loadstring", "_G", "shared", "getfenv", "setfenv", "newproxy", "setmetatable", "getmetatable", "os", "debug", "pcall", "ypcall", "xpcall", "rawequal", "rawset", "rawget", "tonumber", "tostring", "type", "typeof", "_VERSION", "coroutine", "delay", "require", "spawn", "LoadLibrary", "settings", "stats", "time", "UserSettings", "version", "Axes", "ColorSequence", "Faces", "ColorSequenceKeypoint", "NumberRange", "NumberSequence", "NumberSequenceKeypoint", "gcinfo", "elapsedTime", "collectgarbage", "PhysicalProperties", "Rect", "Region3", "Region3int16", "UDim", "Vector2int16", "Vector3int16"}
-                    
-                    local Highlight = function(string, keywords)
-                        local K = {}
-                        local S = string
-                        local Token = {
-                            ["="] = true, ["."] = true, [","] = true, ["("] = true, [")"] = true,
-                            ["["] = true, ["]"] = true, ["{"] = true, ["}"] = true, [":"] = true,
-                            ["*"] = true, ["/"] = true, ["+"] = true, ["-"] = true, ["%"] = true,
-                            [";"] = true, ["~"] = true
-                        }
-                        for i, v in pairs(keywords) do
-                            K[v] = true
-                        end
-                        S = S:gsub(".", function(c)
-                            if Token[c] ~= nil then
-                                return "\32"
-                            else
-                                return c
-                            end
-                        end)
-                        S = S:gsub("%S+", function(c)
-                            if K[c] ~= nil then
-                                return c
-                            else
-                                return (" "):rep(#c)
-                            end
-                        end)
-                        return S
-                    end
-                    
-                    local comments = function(string)
-                        local ret = ""
-                        string:gsub("[^\r\n]+", function(c)
-                            local comm = false
-                            local i = 0
-                            c:gsub(".", function(n)
-                                i = i + 1
-                                if c:sub(i, i + 1) == "--" then
-                                    comm = true
-                                end
-                                if comm == true then
-                                    ret = ret .. n
-                                else
-                                    ret = ret .. "\32"
-                                end
-                            end)
-                            ret = ret
-                        end)
-                        return ret
-                    end
-                    
-                    local numbers = function(string)
-                        local A = ""
-                        string:gsub(".", function(c)
-                            if tonumber(c) ~= nil then
-                                A = A .. c
-                            elseif c == "\n" then
-                                A = A .. "\n"
-                            else
-                                A = A .. "\32"
-                            end
-                        end)
-                        return A
-                    end
-                    
                     function console_data:Set(code)
                         Source.Text = tostring(code)
                     end
@@ -1187,6 +1218,7 @@ function library:AddWindow(title, options)
                     function console_data:Log(msg)
                         Source.Text = Source.Text .. "[*] " .. tostring(msg) .. "\n"
                     end
+                    updateTabSize()
                     return console_data, console
                 end
                 
@@ -1220,6 +1252,7 @@ function library:AddWindow(title, options)
                             return object
                         end
                     end
+                    updateTabSize()
                     return ha_data, ha
                 end
                 
@@ -1283,9 +1316,11 @@ function library:AddWindow(title, options)
                         spawn(function()
                             while true do
                                 Resize(folder, {Size = UDim2.new(1, 0, 0, (open and gFolderLen() or 35))}, options.tween_time)
+                                updateTabSize()
                                 wait()
                             end
                         end)
+                        updateTabSize()
                     end)
                     
                     for i,v in pairs(tab_data) do
@@ -1296,17 +1331,21 @@ function library:AddWindow(title, options)
                                 data = ret[1]
                                 object = ret[2]
                                 object.Parent = objects
+                                updateTabSize()
                                 return data, object
                             else
                                 object = ret[1]
                                 object.Parent = objects
+                                updateTabSize()
                                 return object
                             end
                         end
                     end
+                    updateTabSize()
                     return folder_data, folder
                 end
                 
+                updateTabSize()
                 return tab_data, new_tab
             end
         end
