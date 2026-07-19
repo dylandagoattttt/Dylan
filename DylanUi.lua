@@ -978,7 +978,7 @@ function library:FormatWindows()
     format_windows()
 end
 
--- Helper function to create panels with opaque design and new background
+-- Helper function to create panels with new background
 local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     local panel = {}
     
@@ -1023,7 +1023,7 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     }
     gradient.Parent = panel.Frame
 
-    -- New background image (asset ID: 16736132788)
+    -- New background image on panels
     local bgImage = Instance.new("ImageLabel")
     bgImage.Name = "BackgroundImage"
     bgImage.Size = UDim2.fromScale(1,1)
@@ -1207,18 +1207,6 @@ function library:AddWindow(title, options)
     Tabs.BackgroundTransparency = 1
     Tabs.BorderSizePixel = 0
     Tabs.Parent = MainPanel.Frame
-
-    -- Add background image to Tabs container
-    local TabsBg = Instance.new("ImageLabel")
-    TabsBg.Name = "TabsBackground"
-    TabsBg.Size = UDim2.fromScale(1,1)
-    TabsBg.BackgroundTransparency = 1
-    TabsBg.BorderSizePixel = 0
-    TabsBg.Image = "rbxassetid://16736132788"
-    TabsBg.ImageTransparency = 0
-    TabsBg.ScaleType = Enum.ScaleType.Stretch
-    TabsBg.Parent = Tabs
-    Instance.new("UICorner", TabsBg).CornerRadius = UDim.new(0, 20)
     
     local TabButtons = Instance.new("ScrollingFrame")
     TabButtons.Name = "TabButtons"
@@ -1240,36 +1228,36 @@ function library:AddWindow(title, options)
             local tab_data = {}
             tab_name = tostring(tab_name or "New Tab")
             
-            -- Create tab button with improved visibility
-            local new_button = Instance.new("TextButton")
+            -- Create tab button with background image
+            local new_button = Instance.new("ImageButton")
             new_button.Name = "TabButton_" .. tab_name
             new_button.Size = UDim2.new(1, 0, 0, 35)
-            new_button.BackgroundTransparency = 0.2
-            new_button.BackgroundColor3 = Color3.fromRGB(80, 40, 120)
+            new_button.BackgroundTransparency = 1
             new_button.BorderSizePixel = 0
-            new_button.Font = Enum.Font.LuckiestGuy
-            new_button.Text = tab_name
-            new_button.TextColor3 = Color3.fromRGB(255, 255, 255)
-            new_button.TextScaled = true
-            new_button.TextSize = 14
-            new_button.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-            new_button.TextStrokeTransparency = 0
+            new_button.Image = "rbxassetid://16736132788"
+            new_button.ImageTransparency = 0.3
+            new_button.ScaleType = Enum.ScaleType.Stretch
             new_button.Parent = TabButtons
             Instance.new("UICorner", new_button).CornerRadius = UDim.new(0, 10)
             
-            -- Purple gradient on button
-            local buttonGradient = Instance.new("UIGradient")
-            buttonGradient.Rotation = 90
-            buttonGradient.Color = ColorSequence.new{
-                ColorSequenceKeypoint.new(0.00, Color3.fromRGB(110,45,220)),
-                ColorSequenceKeypoint.new(1.00, Color3.fromRGB(176,96,244))
-            }
-            buttonGradient.Parent = new_button
+            -- Text label on top of the image button
+            local buttonLabel = Instance.new("TextLabel")
+            buttonLabel.Name = "ButtonLabel"
+            buttonLabel.Size = UDim2.new(1, 0, 1, 0)
+            buttonLabel.BackgroundTransparency = 1
+            buttonLabel.Font = Enum.Font.LuckiestGuy
+            buttonLabel.Text = tab_name
+            buttonLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            buttonLabel.TextScaled = true
+            buttonLabel.TextSize = 14
+            buttonLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            buttonLabel.TextStrokeTransparency = 0
+            buttonLabel.Parent = new_button
             
             -- Update canvas size
             TabButtons.CanvasSize = UDim2.new(0, 0, 0, (#TabButtons:GetChildren() - 1) * 40)
             
-            -- Create tab content
+            -- Create tab content (transparent background)
             local tabContainer = Instance.new("ScrollingFrame")
             tabContainer.Name = "TabContainer_" .. tab_name
             tabContainer.Size = UDim2.new(1, 0, 1, 0)
@@ -1279,18 +1267,6 @@ function library:AddWindow(title, options)
             tabContainer.ScrollBarThickness = 4
             tabContainer.Visible = false
             tabContainer.Parent = Tabs
-            
-            -- Add background image to each tab container
-            local TabBg = Instance.new("ImageLabel")
-            TabBg.Name = "TabBackground"
-            TabBg.Size = UDim2.fromScale(1,1)
-            TabBg.BackgroundTransparency = 1
-            TabBg.BorderSizePixel = 0
-            TabBg.Image = "rbxassetid://16736132788"
-            TabBg.ImageTransparency = 0
-            TabBg.ScaleType = Enum.ScaleType.Stretch
-            TabBg.Parent = tabContainer
-            Instance.new("UICorner", TabBg).CornerRadius = UDim.new(0, 20)
             
             local tabLayout = Instance.new("UIListLayout")
             tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -1320,9 +1296,8 @@ function library:AddWindow(title, options)
                 if dropdown_open then return end
                 -- Reset all tabs
                 for i, v in pairs(TabButtons:GetChildren()) do
-                    if v:IsA("TextButton") then
-                        v.BackgroundTransparency = 0.2
-                        v.BackgroundColor3 = Color3.fromRGB(80, 40, 120)
+                    if v:IsA("ImageButton") then
+                        v.ImageTransparency = 0.3
                         local ind = v:FindFirstChild("SelectedIndicator")
                         if ind then
                             ind.Size = UDim2.new(0, 4, 0, 4)
@@ -1336,8 +1311,7 @@ function library:AddWindow(title, options)
                     end
                 end
                 -- Activate current tab
-                new_button.BackgroundTransparency = 0.1
-                new_button.BackgroundColor3 = Color3.fromRGB(176, 96, 244)
+                new_button.ImageTransparency = 0
                 if selectedIndicator then
                     selectedIndicator.Size = UDim2.new(0, 4, 0, 16)
                     selectedIndicator.BackgroundTransparency = 0
@@ -1357,7 +1331,6 @@ function library:AddWindow(title, options)
             end
             
             -- All tab elements now parent to tabContainer (the ScrollingFrame)
-            -- Each element gets black outline
             function tab_data:AddLabel(label_text)
                 label_text = tostring(label_text or "New Label")
                 local label = Instance.new("TextLabel")
