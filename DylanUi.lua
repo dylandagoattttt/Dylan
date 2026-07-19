@@ -651,7 +651,8 @@ infoLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
 infoLabel.TextStrokeTransparency = 0
 
 linesLabel.Name = "Lines"
-linesLabel.Parent = scrollingFramelinesLabel.BackgroundColor3 = Color3.new(1, 1, 1)
+linesLabel.Parent = scrollingFrame
+linesLabel.BackgroundColor3 = Color3.new(1, 1, 1)
 linesLabel.BackgroundTransparency = 1
 linesLabel.BorderSizePixel = 0
 linesLabel.Size = UDim2.new(0, 40, 0, 10000)
@@ -977,7 +978,7 @@ function library:FormatWindows()
     format_windows()
 end
 
--- Helper function to create panels with opaque design
+-- Helper function to create panels with opaque design and new background
 local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     local panel = {}
     
@@ -1022,16 +1023,17 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     }
     gradient.Parent = panel.Frame
 
-    local marble = Instance.new("ImageLabel")
-    marble.Name = "MarbleTexture"
-    marble.Size = UDim2.fromScale(1,1)
-    marble.BackgroundTransparency = 1
-    marble.BorderSizePixel = 0
-    marble.Image = "rbxassetid://16736132788"
-    marble.ImageTransparency = 0
-    marble.ScaleType = Enum.ScaleType.Stretch
-    marble.Parent = panel.Frame
-    Instance.new("UICorner", marble).CornerRadius = UDim.new(0, cornerRadius or 20)
+    -- New background image (asset ID: 16736132788)
+    local bgImage = Instance.new("ImageLabel")
+    bgImage.Name = "BackgroundImage"
+    bgImage.Size = UDim2.fromScale(1,1)
+    bgImage.BackgroundTransparency = 1
+    bgImage.BorderSizePixel = 0
+    bgImage.Image = "rbxassetid://16736132788"
+    bgImage.ImageTransparency = 0
+    bgImage.ScaleType = Enum.ScaleType.Stretch
+    bgImage.Parent = panel.Frame
+    Instance.new("UICorner", bgImage).CornerRadius = UDim.new(0, cornerRadius or 20)
 
     return panel
 end
@@ -1080,6 +1082,7 @@ function library:AddWindow(title, options)
     Header.Position = UDim2.new(0.5,0,-0.04,0)
     Header.Size = UDim2.fromScale(0.5,0.09)
     Header.BackgroundColor3 = Color3.fromRGB(255,255,255)
+    Header.BackgroundTransparency = 0.15
     Header.BorderSizePixel = 0
     Header.Parent = MainPanel.Frame
     Instance.new("UICorner", Header).CornerRadius = UDim.new(0,18)
@@ -1087,15 +1090,15 @@ function library:AddWindow(title, options)
     local HeaderGradient = MainPanel.Frame:FindFirstChildWhichIsA("UIGradient"):Clone()
     HeaderGradient.Parent = Header
 
-    local HeaderMarble = Instance.new("ImageLabel")
-    HeaderMarble.Size = UDim2.fromScale(1,1)
-    HeaderMarble.BackgroundTransparency = 1
-    HeaderMarble.BorderSizePixel = 0
-    HeaderMarble.Image = "rbxassetid://16736132788"
-    HeaderMarble.ImageTransparency = 0
-    HeaderMarble.ScaleType = Enum.ScaleType.Stretch
-    HeaderMarble.Parent = Header
-    Instance.new("UICorner", HeaderMarble).CornerRadius = UDim.new(0, 18)
+    local HeaderBg = Instance.new("ImageLabel")
+    HeaderBg.Size = UDim2.fromScale(1,1)
+    HeaderBg.BackgroundTransparency = 1
+    HeaderBg.BorderSizePixel = 0
+    HeaderBg.Image = "rbxassetid://16736132788"
+    HeaderBg.ImageTransparency = 0
+    HeaderBg.ScaleType = Enum.ScaleType.Stretch
+    HeaderBg.Parent = Header
+    Instance.new("UICorner", HeaderBg).CornerRadius = UDim.new(0, 18)
 
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Name = "Title"
@@ -1111,7 +1114,7 @@ function library:AddWindow(title, options)
     TitleLabel.TextStrokeTransparency = 0
     TitleLabel.Parent = Header
 
-    -- CLOSE/MINIMIZE BUTTON (original position)
+    -- CLOSE/MINIMIZE BUTTON (original position - NOT moved)
     local CloseButton = Instance.new("ImageButton")
     CloseButton.Name = "CloseButton"
     CloseButton.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -1132,7 +1135,7 @@ function library:AddWindow(title, options)
         CloseButton:TweenSize(UDim2.fromOffset(56, 56), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
 
-    -- MINIMIZED STATE (circle button - moved left)
+    -- MINIMIZED STATE (restore/circle button) - moved LEFT to avoid being cut off
     local MinimizedFrame = Instance.new("ImageButton")
     MinimizedFrame.Name = "MinimizedFrame_" .. windows
     MinimizedFrame.AnchorPoint = Vector2.new(1, 0)
@@ -1204,6 +1207,18 @@ function library:AddWindow(title, options)
     Tabs.BackgroundTransparency = 1
     Tabs.BorderSizePixel = 0
     Tabs.Parent = MainPanel.Frame
+
+    -- Add background image to Tabs container
+    local TabsBg = Instance.new("ImageLabel")
+    TabsBg.Name = "TabsBackground"
+    TabsBg.Size = UDim2.fromScale(1,1)
+    TabsBg.BackgroundTransparency = 1
+    TabsBg.BorderSizePixel = 0
+    TabsBg.Image = "rbxassetid://16736132788"
+    TabsBg.ImageTransparency = 0
+    TabsBg.ScaleType = Enum.ScaleType.Stretch
+    TabsBg.Parent = Tabs
+    Instance.new("UICorner", TabsBg).CornerRadius = UDim.new(0, 20)
     
     local TabButtons = Instance.new("ScrollingFrame")
     TabButtons.Name = "TabButtons"
@@ -1225,11 +1240,11 @@ function library:AddWindow(title, options)
             local tab_data = {}
             tab_name = tostring(tab_name or "New Tab")
             
-            -- Create tab button with gradient + image
+            -- Create tab button with improved visibility
             local new_button = Instance.new("TextButton")
             new_button.Name = "TabButton_" .. tab_name
             new_button.Size = UDim2.new(1, 0, 0, 35)
-            new_button.BackgroundTransparency = 0
+            new_button.BackgroundTransparency = 0.2
             new_button.BackgroundColor3 = Color3.fromRGB(80, 40, 120)
             new_button.BorderSizePixel = 0
             new_button.Font = Enum.Font.LuckiestGuy
@@ -1251,22 +1266,6 @@ function library:AddWindow(title, options)
             }
             buttonGradient.Parent = new_button
             
-            -- Background image on button (same as main background)
-            local buttonImage = Instance.new("ImageLabel")
-            buttonImage.Name = "ButtonImage"
-            buttonImage.Size = UDim2.fromScale(1, 1)
-            buttonImage.BackgroundTransparency = 1
-            buttonImage.BorderSizePixel = 0
-            buttonImage.Image = "rbxassetid://16736132788"
-            buttonImage.ImageTransparency = 0.5
-            buttonImage.ScaleType = Enum.ScaleType.Stretch
-            buttonImage.Parent = new_button
-            buttonImage.ZIndex = 0
-            Instance.new("UICorner", buttonImage).CornerRadius = UDim.new(0, 10)
-            
-            -- Bring text to front
-            new_button.ZIndex = 2
-            
             -- Update canvas size
             TabButtons.CanvasSize = UDim2.new(0, 0, 0, (#TabButtons:GetChildren() - 1) * 40)
             
@@ -1280,6 +1279,18 @@ function library:AddWindow(title, options)
             tabContainer.ScrollBarThickness = 4
             tabContainer.Visible = false
             tabContainer.Parent = Tabs
+            
+            -- Add background image to each tab container
+            local TabBg = Instance.new("ImageLabel")
+            TabBg.Name = "TabBackground"
+            TabBg.Size = UDim2.fromScale(1,1)
+            TabBg.BackgroundTransparency = 1
+            TabBg.BorderSizePixel = 0
+            TabBg.Image = "rbxassetid://16736132788"
+            TabBg.ImageTransparency = 0
+            TabBg.ScaleType = Enum.ScaleType.Stretch
+            TabBg.Parent = tabContainer
+            Instance.new("UICorner", TabBg).CornerRadius = UDim.new(0, 20)
             
             local tabLayout = Instance.new("UIListLayout")
             tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -1303,7 +1314,6 @@ function library:AddWindow(title, options)
             selectedIndicator.BackgroundTransparency = 1
             selectedIndicator.BorderSizePixel = 0
             selectedIndicator.Parent = new_button
-            selectedIndicator.ZIndex = 3
             Instance.new("UICorner", selectedIndicator).CornerRadius = UDim.new(0.5, 0)
             
             local function show()
@@ -1311,7 +1321,7 @@ function library:AddWindow(title, options)
                 -- Reset all tabs
                 for i, v in pairs(TabButtons:GetChildren()) do
                     if v:IsA("TextButton") then
-                        v.BackgroundTransparency = 0
+                        v.BackgroundTransparency = 0.2
                         v.BackgroundColor3 = Color3.fromRGB(80, 40, 120)
                         local ind = v:FindFirstChild("SelectedIndicator")
                         if ind then
@@ -1326,6 +1336,7 @@ function library:AddWindow(title, options)
                     end
                 end
                 -- Activate current tab
+                new_button.BackgroundTransparency = 0.1
                 new_button.BackgroundColor3 = Color3.fromRGB(176, 96, 244)
                 if selectedIndicator then
                     selectedIndicator.Size = UDim2.new(0, 4, 0, 16)
@@ -1346,6 +1357,7 @@ function library:AddWindow(title, options)
             end
             
             -- All tab elements now parent to tabContainer (the ScrollingFrame)
+            -- Each element gets black outline
             function tab_data:AddLabel(label_text)
                 label_text = tostring(label_text or "New Label")
                 local label = Instance.new("TextLabel")
