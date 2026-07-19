@@ -103,6 +103,8 @@ label.Text = "Hello, world 123"
 label.TextColor3 = Color3.new(1, 1, 1)
 label.TextSize = 14
 label.TextXAlignment = Enum.TextXAlignment.Left
+label.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+label.TextStrokeTransparency = 0
 
 window.Name = "Window"
 window.Parent = prefabs
@@ -184,6 +186,8 @@ titleLabel.Text = "Gamer Time"
 titleLabel.TextColor3 = Color3.new(1, 1, 1)
 titleLabel.TextSize = 14
 titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+titleLabel.TextStrokeTransparency = 0
 
 tabSelection.Name = "TabSelection"
 tabSelection.Parent = window
@@ -238,6 +242,8 @@ textBox.PlaceholderText = "Input Text"
 textBox.Text = ""
 textBox.TextColor3 = Color3.new(0.784314, 0.784314, 0.784314)
 textBox.TextSize = 14
+textBox.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+textBox.TextStrokeTransparency = 0
 
 textBoxRoundify4px.Name = "TextBox_Roundify_4px"
 textBoxRoundify4px.Parent = textBox
@@ -271,6 +277,8 @@ sliderTitle.Font = Enum.Font.GothamBold
 sliderTitle.Text = "Slider"
 sliderTitle.TextColor3 = Color3.new(0.784314, 0.784314, 0.784314)
 sliderTitle.TextSize = 14
+sliderTitle.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+sliderTitle.TextStrokeTransparency = 0
 
 indicator.Name = "Indicator"
 indicator.Parent = slider
@@ -292,6 +300,8 @@ sliderValue.Font = Enum.Font.GothamBold
 sliderValue.Text = "0%"
 sliderValue.TextColor3 = Color3.new(0.784314, 0.784314, 0.784314)
 sliderValue.TextSize = 14
+sliderValue.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+sliderValue.TextStrokeTransparency = 0
 
 textLabel.Parent = slider
 textLabel.BackgroundColor3 = Color3.new(1, 1, 1)
@@ -302,6 +312,8 @@ textLabel.Font = Enum.Font.GothamBold
 textLabel.Text = "]"
 textLabel.TextColor3 = Color3.new(0.627451, 0.627451, 0.627451)
 textLabel.TextSize = 14
+textLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+textLabel.TextStrokeTransparency = 0
 
 textLabel2.Parent = slider
 textLabel2.BackgroundColor3 = Color3.new(1, 1, 1)
@@ -312,6 +324,8 @@ textLabel2.Font = Enum.Font.GothamBold
 textLabel2.Text = "["
 textLabel2.TextColor3 = Color3.new(0.627451, 0.627451, 0.627451)
 textLabel2.TextSize = 14
+textLabel2.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+textLabel2.TextStrokeTransparency = 0
 
 circle.Name = "Circle"
 circle.Parent = prefabs
@@ -338,6 +352,8 @@ dropdown.Text = " Dropdown"
 dropdown.TextColor3 = Color3.new(0.784314, 0.784314, 0.784314)
 dropdown.TextSize = 14
 dropdown.TextXAlignment = Enum.TextXAlignment.Left
+dropdown.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+dropdown.TextStrokeTransparency = 0
 
 dropdownIndicator.Name = "Indicator"
 dropdownIndicator.Parent = dropdown
@@ -396,6 +412,8 @@ tabButton.Font = Enum.Font.GothamSemibold
 tabButton.Text = "Test tab"
 tabButton.TextColor3 = Color3.new(0.784314, 0.784314, 0.784314)
 tabButton.TextSize = 14
+tabButton.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+tabButton.TextStrokeTransparency = 0
 
 textButtonRoundify4px_2.Name = "TextButton_Roundify_4px"
 textButtonRoundify4px_2.Parent = tabButton
@@ -430,6 +448,8 @@ button.Text = " Folder"
 button.TextColor3 = Color3.new(1, 1, 1)
 button.TextSize = 14
 button.TextXAlignment = Enum.TextXAlignment.Left
+button.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+button.TextStrokeTransparency = 0
 
 textButtonRoundify4px_3.Name = "TextButton_Roundify_4px"
 textButtonRoundify4px_3.Parent = button
@@ -508,6 +528,8 @@ source.TextStrokeColor3 = Color3.new(1, 1, 1)
 source.TextWrapped = true
 source.TextXAlignment = Enum.TextXAlignment.Left
 source.TextYAlignment = Enum.TextYAlignment.Top
+source.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+source.TextStrokeTransparency = 0
 
 commentsLabel.Name = "Comments"
 commentsLabel.Parent = source
@@ -521,6 +543,8 @@ commentsLabel.TextColor3 = Color3.new(0.231373, 0.784314, 0.231373)
 commentsLabel.TextSize = 15
 commentsLabel.TextXAlignment = Enum.TextXAlignment.Left
 commentsLabel.TextYAlignment = Enum.TextYAlignment.Top
+commentsLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+commentsLabel.TextStrokeTransparency = 0
 
 globalsLabel.Name = "Globals"
 globalsLabel.Parent = source
@@ -534,6 +558,8 @@ globalsLabel.TextColor3 = Color3.new(0.517647, 0.839216, 0.968628)
 globalsLabel.TextSize = 15
 globalsLabel.TextXAlignment = Enum.TextXAlignment.Left
 globalsLabel.TextYAlignment = Enum.TextYAlignment.Top
+globalsLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+globalsLabel.TextStrokeTransparency = 0
 
 keywordsLabel.Name = "Keywords"
 keywordsLabel.Parent = source
@@ -547,6 +573,8 @@ keywordsLabel.TextColor3 = Color3.new(0.972549, 0.427451, 0.486275)
 keywordsLabel.TextSize = 15
 keywordsLabel.TextXAlignment = Enum.TextXAlignment.Left
 keywordsLabel.TextYAlignment = Enum.TextYAlignment.Top
+keywordsLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+keywordsLabel.TextStrokeTransparency = 0
 
 remoteHighlight.Name = "RemoteHighlight"
 remoteHighlight.Parent = source
@@ -560,6 +588,8 @@ remoteHighlight.TextColor3 = Color3.new(0, 0.568627, 1)
 remoteHighlight.TextSize = 15
 remoteHighlight.TextXAlignment = Enum.TextXAlignment.Left
 remoteHighlight.TextYAlignment = Enum.TextYAlignment.Top
+remoteHighlight.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+remoteHighlight.TextStrokeTransparency = 0
 
 stringsLabel.Name = "Strings"
 stringsLabel.Parent = source
@@ -573,6 +603,8 @@ stringsLabel.TextColor3 = Color3.new(0.678431, 0.945098, 0.584314)
 stringsLabel.TextSize = 15
 stringsLabel.TextXAlignment = Enum.TextXAlignment.Left
 stringsLabel.TextYAlignment = Enum.TextYAlignment.Top
+stringsLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+stringsLabel.TextStrokeTransparency = 0
 
 tokensLabel.Name = "Tokens"
 tokensLabel.Parent = source
@@ -586,6 +618,8 @@ tokensLabel.TextColor3 = Color3.new(1, 1, 1)
 tokensLabel.TextSize = 15
 tokensLabel.TextXAlignment = Enum.TextXAlignment.Left
 tokensLabel.TextYAlignment = Enum.TextYAlignment.Top
+tokensLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+tokensLabel.TextStrokeTransparency = 0
 
 numbersLabel.Name = "Numbers"
 numbersLabel.Parent = source
@@ -599,6 +633,8 @@ numbersLabel.TextColor3 = Color3.new(1, 0.776471, 0)
 numbersLabel.TextSize = 15
 numbersLabel.TextXAlignment = Enum.TextXAlignment.Left
 numbersLabel.TextYAlignment = Enum.TextYAlignment.Top
+numbersLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+numbersLabel.TextStrokeTransparency = 0
 
 infoLabel.Name = "Info"
 infoLabel.Parent = source
@@ -612,6 +648,8 @@ infoLabel.TextColor3 = Color3.new(0, 0.635294, 1)
 infoLabel.TextSize = 15
 infoLabel.TextXAlignment = Enum.TextXAlignment.Left
 infoLabel.TextYAlignment = Enum.TextYAlignment.Top
+infoLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+infoLabel.TextStrokeTransparency = 0
 
 linesLabel.Name = "Lines"
 linesLabel.Parent = scrollingFrame
@@ -626,6 +664,8 @@ linesLabel.TextColor3 = Color3.new(1, 1, 1)
 linesLabel.TextSize = 15
 linesLabel.TextWrapped = true
 linesLabel.TextYAlignment = Enum.TextYAlignment.Top
+linesLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+linesLabel.TextStrokeTransparency = 0
 
 colorPicker.Name = "ColorPicker"
 colorPicker.Parent = prefabs
@@ -694,6 +734,8 @@ switchButton.Font = Enum.Font.SourceSans
 switchButton.Text = ""
 switchButton.TextColor3 = Color3.new(1, 1, 1)
 switchButton.TextSize = 18
+switchButton.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+switchButton.TextStrokeTransparency = 0
 
 textButtonRoundify4px_4.Name = "TextButton_Roundify_4px"
 textButtonRoundify4px_4.Parent = switchButton
@@ -717,6 +759,8 @@ title3Label.Text = "Switch"
 title3Label.TextColor3 = Color3.new(0.784314, 0.784314, 0.784314)
 title3Label.TextSize = 14
 title3Label.TextXAlignment = Enum.TextXAlignment.Left
+title3Label.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+title3Label.TextStrokeTransparency = 0
 
 button2.Name = "Button"
 button2.Parent = prefabs
@@ -728,6 +772,8 @@ button2.ZIndex = 2
 button2.Font = Enum.Font.GothamSemibold
 button2.TextColor3 = Color3.new(1, 1, 1)
 button2.TextSize = 14
+button2.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+button2.TextStrokeTransparency = 0
 
 textButtonRoundify4px_5.Name = "TextButton_Roundify_4px"
 textButtonRoundify4px_5.Parent = button2
@@ -750,6 +796,8 @@ dropdownButton.Text = " Button"
 dropdownButton.TextColor3 = Color3.new(0.784314, 0.784314, 0.784314)
 dropdownButton.TextSize = 14
 dropdownButton.TextXAlignment = Enum.TextXAlignment.Left
+dropdownButton.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+dropdownButton.TextStrokeTransparency = 0
 
 keybind.Name = "Keybind"
 keybind.Parent = prefabs
@@ -771,6 +819,8 @@ title4Label.Text = "Keybind"
 title4Label.TextColor3 = Color3.new(0.784314, 0.784314, 0.784314)
 title4Label.TextSize = 14
 title4Label.TextXAlignment = Enum.TextXAlignment.Left
+title4Label.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+title4Label.TextStrokeTransparency = 0
 
 inputButton.Name = "Input"
 inputButton.Parent = keybind
@@ -785,6 +835,8 @@ inputButton.Text = "RShift"
 inputButton.TextColor3 = Color3.new(0.784314, 0.784314, 0.784314)
 inputButton.TextSize = 12
 inputButton.TextWrapped = true
+inputButton.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+inputButton.TextStrokeTransparency = 0
 
 inputRoundify4px.Name = "Input_Roundify_4px"
 inputRoundify4px.Parent = inputButton
@@ -927,7 +979,7 @@ function library:FormatWindows()
     format_windows()
 end
 
--- Helper function to create panels with the new design
+-- Helper function to create panels with opaque design
 local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     local panel = {}
     
@@ -944,14 +996,14 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     panel.Shadow.Parent = parent or windowsFrame
     Instance.new("UICorner", panel.Shadow).CornerRadius = UDim.new(0, cornerRadius or 20)
 
-    -- Main frame
+    -- Main frame - fully opaque
     panel.Frame = Instance.new("Frame")
     panel.Frame.Name = name
     panel.Frame.AnchorPoint = Vector2.new(0.5, 0.5)
     panel.Frame.Position = anchorPos
     panel.Frame.Size = size
     panel.Frame.BackgroundColor3 = Color3.fromRGB(255,255,255)
-    panel.Frame.BackgroundTransparency = 0.15
+    panel.Frame.BackgroundTransparency = 0       -- fully opaque
     panel.Frame.BorderSizePixel = 0
     panel.Frame.Parent = parent or windowsFrame
     Instance.new("UICorner", panel.Frame).CornerRadius = UDim.new(0, cornerRadius or 20)
@@ -978,7 +1030,7 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     marble.BackgroundTransparency = 1
     marble.BorderSizePixel = 0
     marble.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=133709037992585&width=678&height=810&format=png"
-    marble.ImageTransparency = 0.6
+    marble.ImageTransparency = 0               -- fully opaque
     marble.ScaleType = Enum.ScaleType.Stretch
     marble.Parent = panel.Frame
     Instance.new("UICorner", marble).CornerRadius = UDim.new(0, cornerRadius or 20)
@@ -1002,12 +1054,12 @@ function library:AddWindow(title, options)
 
     -- Main panel (perfectly centered)
     local MainSize = UDim2.fromScale(MainWidth, MainHeight)
-    local MainPos = UDim2.fromScale(0.5, 0.5)  -- centered both axes
+    local MainPos = UDim2.fromScale(0.5, 0.5)
     local MainPanel = CreatePanel("Main_" .. windows, MainPos, MainSize, 20, 1, windowsFrame)
 
     -- Side panel
     local SideX = (0.5 - MainWidth/2) - Gap - SideWidth/2
-    local SidePos = UDim2.new(SideX, 0, 0.5, 0)  -- centered vertically
+    local SidePos = UDim2.new(SideX, 0, 0.5, 0)
     local SideSize = UDim2.fromScale(SideWidth, SideHeight)
     local SidePanel = CreatePanel("Side_" .. windows, SidePos, SideSize, 20, 1, windowsFrame)
 
@@ -1042,7 +1094,7 @@ function library:AddWindow(title, options)
     HeaderMarble.BackgroundTransparency = 1
     HeaderMarble.BorderSizePixel = 0
     HeaderMarble.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=133709037992585&width=678&height=810&format=png"
-    HeaderMarble.ImageTransparency = 0.6
+    HeaderMarble.ImageTransparency = 0
     HeaderMarble.ScaleType = Enum.ScaleType.Stretch
     HeaderMarble.Parent = Header
     Instance.new("UICorner", HeaderMarble).CornerRadius = UDim.new(0, 18)
@@ -1057,13 +1109,15 @@ function library:AddWindow(title, options)
     TitleLabel.Text = title
     TitleLabel.TextScaled = true
     TitleLabel.TextColor3 = Color3.fromRGB(255,255,255)
+    TitleLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+    TitleLabel.TextStrokeTransparency = 0
     TitleLabel.Parent = Header
 
-    -- CLOSE/MINIMIZE BUTTON (moved left by 30px to avoid being cut off)
+    -- CLOSE/MINIMIZE BUTTON (moved left)
     local CloseButton = Instance.new("ImageButton")
     CloseButton.Name = "CloseButton"
     CloseButton.AnchorPoint = Vector2.new(0.5, 0.5)
-    CloseButton.Position = UDim2.new(1, -30, 0, 0)  -- offset left by 30 pixels
+    CloseButton.Position = UDim2.new(1, -30, 0, 0)
     CloseButton.Size = UDim2.fromOffset(56, 56)
     CloseButton.BackgroundTransparency = 1
     CloseButton.BorderSizePixel = 0
@@ -1168,16 +1222,16 @@ function library:AddWindow(title, options)
     TabButtonsList.Padding = UDim.new(0, 5)
     TabButtonsList.Parent = TabButtons
 
-    do -- Add Tab
+    do -- Add Tab (improved version)
         function window_data:AddTab(tab_name)
             local tab_data = {}
             tab_name = tostring(tab_name or "New Tab")
             
-            -- Create tab button (NO transparency)
+            -- Create tab button with improved visibility
             local new_button = Instance.new("TextButton")
             new_button.Name = "TabButton_" .. tab_name
             new_button.Size = UDim2.new(1, 0, 0, 35)
-            new_button.BackgroundTransparency = 0
+            new_button.BackgroundTransparency = 0.2
             new_button.BackgroundColor3 = Color3.fromRGB(80, 40, 120)
             new_button.BorderSizePixel = 0
             new_button.Font = Enum.Font.LuckiestGuy
@@ -1186,7 +1240,7 @@ function library:AddWindow(title, options)
             new_button.TextScaled = true
             new_button.TextSize = 14
             new_button.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-            new_button.TextStrokeTransparency = 0.4
+            new_button.TextStrokeTransparency = 0
             new_button.Parent = TabButtons
             Instance.new("UICorner", new_button).CornerRadius = UDim.new(0, 10)
             
@@ -1225,7 +1279,7 @@ function library:AddWindow(title, options)
                 tabContainer.CanvasSize = UDim2.new(0, 0, 0, tabLayout.AbsoluteContentSize.Y + 10)
             end)
             
-            -- Highlight indicator (same as Antora)
+            -- Highlight indicator
             local selectedIndicator = Instance.new("Frame")
             selectedIndicator.Name = "SelectedIndicator"
             selectedIndicator.Size = UDim2.new(0, 4, 0, 4)
@@ -1242,7 +1296,7 @@ function library:AddWindow(title, options)
                 -- Reset all tabs
                 for i, v in pairs(TabButtons:GetChildren()) do
                     if v:IsA("TextButton") then
-                        v.BackgroundTransparency = 0
+                        v.BackgroundTransparency = 0.2
                         v.BackgroundColor3 = Color3.fromRGB(80, 40, 120)
                         local ind = v:FindFirstChild("SelectedIndicator")
                         if ind then
@@ -1257,7 +1311,7 @@ function library:AddWindow(title, options)
                     end
                 end
                 -- Activate current tab
-                new_button.BackgroundTransparency = 0
+                new_button.BackgroundTransparency = 0.1
                 new_button.BackgroundColor3 = Color3.fromRGB(176, 96, 244)
                 if selectedIndicator then
                     selectedIndicator.Size = UDim2.new(0, 4, 0, 16)
@@ -1277,8 +1331,8 @@ function library:AddWindow(title, options)
                 show()
             end
             
-            -- All tab elements now parent to tabContainer
-            -- ADD LABEL
+            -- All tab elements now parent to tabContainer (the ScrollingFrame)
+            -- Each element gets black outline
             function tab_data:AddLabel(label_text)
                 label_text = tostring(label_text or "New Label")
                 local label = Instance.new("TextLabel")
@@ -1290,39 +1344,28 @@ function library:AddWindow(title, options)
                 label.TextColor3 = Color3.new(1, 1, 1)
                 label.TextSize = 14
                 label.TextXAlignment = Enum.TextXAlignment.Left
+                label.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                label.TextStrokeTransparency = 0
                 label.Parent = tabContainer
                 return label
             end
             
-            -- ADD BUTTON (with shadow and hover)
             function tab_data:AddButton(button_text, callback)
                 button_text = tostring(button_text or "New Button")
                 callback = typeof(callback) == "function" and callback or function()end
                 
-                -- Shadow
-                local shadow = Instance.new("Frame")
-                shadow.Size = UDim2.new(1, 0, 1, 0)
-                shadow.Position = UDim2.new(0, 2, 0, 2)
-                shadow.BackgroundColor3 = Color3.fromRGB(0,0,0)
-                shadow.BackgroundTransparency = 0.4
-                shadow.BorderSizePixel = 0
-                shadow.Parent = tabContainer
-                Instance.new("UICorner", shadow).CornerRadius = UDim.new(0, 10)
-                shadow.ZIndex = 0
-
                 local button = Instance.new("TextButton")
                 button.Size = UDim2.new(1, 0, 0, 35)
-                button.Position = UDim2.new(0, 0, 0, 0)
                 button.BackgroundColor3 = options.main_color or Color3.fromRGB(110,45,220)
-                button.BackgroundTransparency = 0
                 button.BorderSizePixel = 0
                 button.Font = Enum.Font.GothamBold
                 button.Text = button_text
                 button.TextColor3 = Color3.fromRGB(255, 255, 255)
                 button.TextSize = 14
+                button.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                button.TextStrokeTransparency = 0
                 button.Parent = tabContainer
                 Instance.new("UICorner", button).CornerRadius = UDim.new(0, 10)
-                button.ZIndex = 1
                 
                 local btnGradient = Instance.new("UIGradient")
                 btnGradient.Rotation = 90
@@ -1332,13 +1375,6 @@ function library:AddWindow(title, options)
                 }
                 btnGradient.Parent = button
                 
-                button.MouseEnter:Connect(function()
-                    button.BackgroundColor3 = Color3.fromRGB(176, 96, 244)
-                end)
-                button.MouseLeave:Connect(function()
-                    button.BackgroundColor3 = options.main_color or Color3.fromRGB(110,45,220)
-                end)
-                
                 button.MouseButton1Click:Connect(function()
                     ripple(button, mouse.X, mouse.Y)
                     pcall(callback)
@@ -1346,7 +1382,6 @@ function library:AddWindow(title, options)
                 return button
             end
             
-            -- ADD SWITCH (real toggle slider)
             function tab_data:AddSwitch(switch_text, callback)
                 local switch_data = {}
                 switch_text = tostring(switch_text or "New Switch")
@@ -1357,69 +1392,60 @@ function library:AddWindow(title, options)
                 switchFrame.BackgroundTransparency = 1
                 switchFrame.BorderSizePixel = 0
                 switchFrame.Parent = tabContainer
-
-                -- Label
+                
+                local switchButton = Instance.new("TextButton")
+                switchButton.Size = UDim2.new(0, 30, 0, 30)
+                switchButton.Position = UDim2.new(0, 5, 0, 2)
+                switchButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                switchButton.BackgroundTransparency = 0.7
+                switchButton.BorderSizePixel = 0
+                switchButton.Font = Enum.Font.SourceSans
+                switchButton.Text = ""
+                switchButton.TextColor3 = Color3.new(1, 1, 1)
+                switchButton.TextSize = 18
+                switchButton.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                switchButton.TextStrokeTransparency = 0
+                switchButton.Parent = switchFrame
+                Instance.new("UICorner", switchButton).CornerRadius = UDim.new(0, 8)
+                
                 local titleLabel = Instance.new("TextLabel")
-                titleLabel.Size = UDim2.new(1, -55, 1, 0)
-                titleLabel.Position = UDim2.new(0, 50, 0, 0)
+                titleLabel.Size = UDim2.new(1, -45, 1, 0)
+                titleLabel.Position = UDim2.new(0, 40, 0, 0)
                 titleLabel.BackgroundTransparency = 1
                 titleLabel.Font = Enum.Font.GothamSemibold
                 titleLabel.Text = switch_text
                 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
                 titleLabel.TextSize = 14
                 titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+                titleLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                titleLabel.TextStrokeTransparency = 0
                 titleLabel.Parent = switchFrame
-
-                -- Track
-                local track = Instance.new("Frame")
-                track.Size = UDim2.new(0, 40, 0, 20)
-                track.Position = UDim2.new(0, 5, 0.5, -10)
-                track.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-                track.BorderSizePixel = 0
-                track.Parent = switchFrame
-                Instance.new("UICorner", track).CornerRadius = UDim.new(1, 0)
-
-                -- Thumb
-                local thumb = Instance.new("Frame")
-                thumb.Size = UDim2.new(0, 16, 0, 16)
-                thumb.Position = UDim2.new(0, 2, 0.5, -8)
-                thumb.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                thumb.BorderSizePixel = 0
-                thumb.Parent = track
-                Instance.new("UICorner", thumb).CornerRadius = UDim.new(1, 0)
-
+                
                 local toggled = false
-                local function updateSwitch()
+                switchButton.MouseButton1Click:Connect(function()
+                    toggled = not toggled
+                    switchButton.Text = toggled and utf8.char(10003) or ""
                     if toggled then
-                        track.BackgroundColor3 = Color3.fromRGB(110, 45, 220)
-                        thumb.Position = UDim2.new(0, 22, 0.5, -8)
+                        switchButton.BackgroundTransparency = 0.3
                     else
-                        track.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-                        thumb.Position = UDim2.new(0, 2, 0.5, -8)
+                        switchButton.BackgroundTransparency = 0.7
                     end
-                end
-                updateSwitch()
-
-                track.MouseButton1Click:Connect(function()
-                    toggled = not toggled
-                    updateSwitch()
-                    pcall(callback, toggled)
-                end)
-                thumb.MouseButton1Click:Connect(function()
-                    toggled = not toggled
-                    updateSwitch()
                     pcall(callback, toggled)
                 end)
                 
                 function switch_data:Set(bool)
                     toggled = (typeof(bool) == "boolean") and bool or false
-                    updateSwitch()
+                    switchButton.Text = toggled and utf8.char(10003) or ""
+                    if toggled then
+                        switchButton.BackgroundTransparency = 0.3
+                    else
+                        switchButton.BackgroundTransparency = 0.7
+                    end
                     pcall(callback, toggled)
                 end
                 return switch_data, switchFrame
             end
             
-            -- ADD TEXTBOX (with glass background)
             function tab_data:AddTextBox(textbox_text, callback, textbox_options)
                 textbox_text = tostring(textbox_text or "New TextBox")
                 callback = typeof(callback) == "function" and callback or function()end
@@ -1431,22 +1457,18 @@ function library:AddWindow(title, options)
                 local textbox = Instance.new("TextBox")
                 textbox.Size = UDim2.new(1, 0, 0, 35)
                 textbox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                textbox.BackgroundTransparency = 0.1
+                textbox.BackgroundTransparency = 0.8
                 textbox.BorderSizePixel = 0
                 textbox.Font = Enum.Font.GothamSemibold
-                textbox.PlaceholderColor3 = Color3.fromRGB(180, 180, 180)
+                textbox.PlaceholderColor3 = Color3.fromRGB(200, 200, 200)
                 textbox.PlaceholderText = textbox_text
                 textbox.Text = ""
                 textbox.TextColor3 = Color3.fromRGB(255, 255, 255)
                 textbox.TextSize = 14
+                textbox.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                textbox.TextStrokeTransparency = 0
                 textbox.Parent = tabContainer
                 Instance.new("UICorner", textbox).CornerRadius = UDim.new(0, 10)
-                
-                local stroke = Instance.new("UIStroke")
-                stroke.Color = Color3.fromRGB(255,255,255)
-                stroke.Thickness = 1
-                stroke.Transparency = 0.3
-                stroke.Parent = textbox
                 
                 textbox.FocusLost:Connect(function(ep)
                     if ep then
@@ -1461,7 +1483,6 @@ function library:AddWindow(title, options)
                 return textbox
             end
             
-            -- ADD SLIDER (polished track and fill)
             function tab_data:AddSlider(slider_text, callback, slider_options)
                 local slider_data = {}
                 slider_text = tostring(slider_text or "New Slider")
@@ -1487,13 +1508,15 @@ function library:AddWindow(title, options)
                 title.TextColor3 = Color3.fromRGB(255, 255, 255)
                 title.TextSize = 12
                 title.TextXAlignment = Enum.TextXAlignment.Left
+                title.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                title.TextStrokeTransparency = 0
                 title.Parent = slider
                 
                 local sliderBg = Instance.new("Frame")
                 sliderBg.Size = UDim2.new(1, -50, 0, 15)
                 sliderBg.Position = UDim2.new(0, 0, 0, 20)
                 sliderBg.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                sliderBg.BackgroundTransparency = 0.15
+                sliderBg.BackgroundTransparency = 0.8
                 sliderBg.BorderSizePixel = 0
                 sliderBg.Parent = slider
                 Instance.new("UICorner", sliderBg).CornerRadius = UDim.new(0, 7)
@@ -1505,14 +1528,6 @@ function library:AddWindow(title, options)
                 indicator.Parent = sliderBg
                 Instance.new("UICorner", indicator).CornerRadius = UDim.new(0, 7)
                 
-                local fillGradient = Instance.new("UIGradient")
-                fillGradient.Rotation = 90
-                fillGradient.Color = ColorSequence.new{
-                    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(110,45,220)),
-                    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(176,96,244))
-                }
-                fillGradient.Parent = indicator
-                
                 local value = Instance.new("TextLabel")
                 value.Size = UDim2.new(0, 45, 0, 15)
                 value.Position = UDim2.new(1, -45, 0, 20)
@@ -1521,6 +1536,8 @@ function library:AddWindow(title, options)
                 value.Text = "0"
                 value.TextColor3 = Color3.fromRGB(255, 255, 255)
                 value.TextSize = 12
+                value.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                value.TextStrokeTransparency = 0
                 value.Parent = slider
                 
                 do -- Slider Math
@@ -1586,7 +1603,6 @@ function library:AddWindow(title, options)
                 return slider_data, slider
             end
             
-            -- ADD KEYBIND (glass style)
             function tab_data:AddKeybind(keybind_name, callback, keybind_options)
                 local keybind_data = {}
                 keybind_name = tostring(keybind_name or "New Keybind")
@@ -1598,11 +1614,9 @@ function library:AddWindow(title, options)
                 
                 local keybindFrame = Instance.new("Frame")
                 keybindFrame.Size = UDim2.new(1, 0, 0, 35)
-                keybindFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                keybindFrame.BackgroundTransparency = 0.1
+                keybindFrame.BackgroundTransparency = 1
                 keybindFrame.BorderSizePixel = 0
                 keybindFrame.Parent = tabContainer
-                Instance.new("UICorner", keybindFrame).CornerRadius = UDim.new(0, 10)
                 
                 local title = Instance.new("TextLabel")
                 title.Size = UDim2.new(0.5, 0, 1, 0)
@@ -1612,18 +1626,22 @@ function library:AddWindow(title, options)
                 title.TextColor3 = Color3.fromRGB(255, 255, 255)
                 title.TextSize = 14
                 title.TextXAlignment = Enum.TextXAlignment.Left
+                title.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                title.TextStrokeTransparency = 0
                 title.Parent = keybindFrame
                 
                 local input = Instance.new("TextButton")
                 input.Size = UDim2.new(0, 80, 1, -4)
                 input.Position = UDim2.new(1, -85, 0, 2)
                 input.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                input.BackgroundTransparency = 0.15
+                input.BackgroundTransparency = 0.7
                 input.BorderSizePixel = 0
                 input.Font = Enum.Font.GothamSemibold
                 input.Text = "RShift"
                 input.TextColor3 = Color3.fromRGB(255, 255, 255)
                 input.TextSize = 12
+                input.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                input.TextStrokeTransparency = 0
                 input.Parent = keybindFrame
                 Instance.new("UICorner", input).CornerRadius = UDim.new(0, 8)
                 
@@ -1669,7 +1687,6 @@ function library:AddWindow(title, options)
                 return keybind_data, keybindFrame
             end
             
-            -- ADD DROPDOWN (glass style)
             function tab_data:AddDropdown(dropdown_name, callback)
                 local dropdown_data = {}
                 dropdown_name = tostring(dropdown_name or "New Dropdown")
@@ -1678,13 +1695,15 @@ function library:AddWindow(title, options)
                 local dropdown = Instance.new("TextButton")
                 dropdown.Size = UDim2.new(1, 0, 0, 35)
                 dropdown.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                dropdown.BackgroundTransparency = 0.1
+                dropdown.BackgroundTransparency = 0.8
                 dropdown.BorderSizePixel = 0
                 dropdown.Font = Enum.Font.GothamBold
                 dropdown.Text = " " .. dropdown_name
                 dropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
                 dropdown.TextSize = 14
                 dropdown.TextXAlignment = Enum.TextXAlignment.Left
+                dropdown.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                dropdown.TextStrokeTransparency = 0
                 dropdown.Parent = tabContainer
                 Instance.new("UICorner", dropdown).CornerRadius = UDim.new(0, 10)
                 
@@ -1696,13 +1715,15 @@ function library:AddWindow(title, options)
                 indicator.Text = "▼"
                 indicator.TextColor3 = Color3.fromRGB(255, 255, 255)
                 indicator.TextSize = 14
+                indicator.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                indicator.TextStrokeTransparency = 0
                 indicator.Parent = dropdown
                 
                 local box = Instance.new("Frame")
                 box.Size = UDim2.new(1, 0, 0, 0)
                 box.Position = UDim2.new(0, 0, 1, 5)
                 box.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                box.BackgroundTransparency = 0.15
+                box.BackgroundTransparency = 0.9
                 box.BorderSizePixel = 0
                 box.ClipsDescendants = true
                 box.Parent = dropdown
@@ -1755,6 +1776,8 @@ function library:AddWindow(title, options)
                     object.TextColor3 = Color3.fromRGB(255, 255, 255)
                     object.TextSize = 14
                     object.TextXAlignment = Enum.TextXAlignment.Left
+                    object.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                    object.TextStrokeTransparency = 0
                     object.Parent = objects
                     
                     object.MouseEnter:Connect(function()
@@ -1792,7 +1815,6 @@ function library:AddWindow(title, options)
                 return dropdown_data, dropdown
             end
             
-            -- ADD COLOR PICKER
             function tab_data:AddColorPicker(callback)
                 local color_picker_data = {}
                 callback = typeof(callback) == "function" and callback or function()end
@@ -1800,7 +1822,7 @@ function library:AddWindow(title, options)
                 local color_picker = Instance.new("Frame")
                 color_picker.Size = UDim2.new(1, 0, 0, 110)
                 color_picker.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                color_picker.BackgroundTransparency = 0.1
+                color_picker.BackgroundTransparency = 0.8
                 color_picker.BorderSizePixel = 0
                 color_picker.Parent = tabContainer
                 Instance.new("UICorner", color_picker).CornerRadius = UDim.new(0, 10)
@@ -1926,7 +1948,6 @@ function library:AddWindow(title, options)
                 return color_picker_data, color_picker
             end
             
-            -- ADD CONSOLE
             function tab_data:AddConsole(console_options)
                 local console_data = {}
                 console_options = typeof(console_options) == "table" and console_options or {["readonly"] = true,["full"] = false,}
@@ -1940,7 +1961,7 @@ function library:AddWindow(title, options)
                 local console = Instance.new("Frame")
                 console.Size = UDim2.new(1, 0, console_options.full and 1 or 0, console_options.y)
                 console.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                console.BackgroundTransparency = 0.1
+                console.BackgroundTransparency = 0.8
                 console.BorderSizePixel = 0
                 console.Parent = tabContainer
                 Instance.new("UICorner", console).CornerRadius = UDim.new(0, 10)
@@ -1966,6 +1987,8 @@ function library:AddWindow(title, options)
                 Source.TextSize = 15
                 Source.TextXAlignment = Enum.TextXAlignment.Left
                 Source.TextYAlignment = Enum.TextYAlignment.Top
+                Source.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                Source.TextStrokeTransparency = 0
                 Source.Parent = sf
                 
                 local Lines = Instance.new("TextLabel")
@@ -1978,6 +2001,8 @@ function library:AddWindow(title, options)
                 Lines.TextColor3 = Color3.new(1, 1, 1)
                 Lines.TextSize = 15
                 Lines.TextYAlignment = Enum.TextYAlignment.Top
+                Lines.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                Lines.TextStrokeTransparency = 0
                 Lines.Parent = sf
                 
                 Source.TextEditable = not console_options.readonly
@@ -1994,7 +2019,6 @@ function library:AddWindow(title, options)
                 return console_data, console
             end
             
-            -- ADD HORIZONTAL ALIGNMENT
             function tab_data:AddHorizontalAlignment()
                 local ha_data = {}
                 local ha = Instance.new("Frame")
@@ -2026,7 +2050,6 @@ function library:AddWindow(title, options)
                 return ha_data, ha
             end
             
-            -- ADD FOLDER (glass style)
             function tab_data:AddFolder(folder_name)
                 local folder_data = {}
                 folder_name = tostring(folder_name or "New Folder")
@@ -2034,7 +2057,7 @@ function library:AddWindow(title, options)
                 local folder = Instance.new("Frame")
                 folder.Size = UDim2.new(1, 0, 0, 35)
                 folder.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                folder.BackgroundTransparency = 0.1
+                folder.BackgroundTransparency = 0.8
                 folder.BorderSizePixel = 0
                 folder.Parent = tabContainer
                 Instance.new("UICorner", folder).CornerRadius = UDim.new(0, 10)
@@ -2048,6 +2071,8 @@ function library:AddWindow(title, options)
                 button.TextColor3 = Color3.fromRGB(255, 255, 255)
                 button.TextSize = 14
                 button.TextXAlignment = Enum.TextXAlignment.Left
+                button.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                button.TextStrokeTransparency = 0
                 button.Parent = folder
                 
                 local objects = Instance.new("Frame")
