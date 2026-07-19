@@ -1168,25 +1168,28 @@ function library:AddWindow(title, options)
     TabButtonsList.Padding = UDim.new(0, 5)
     TabButtonsList.Parent = TabButtons
 
-    do -- Add Tab
+    do -- Add Tab (improved version)
         function window_data:AddTab(tab_name)
             local tab_data = {}
             tab_name = tostring(tab_name or "New Tab")
             
-            -- Create tab button (with LuckiestGuy font, white text)
+            -- Create tab button with improved visibility
             local new_button = Instance.new("TextButton")
             new_button.Name = "TabButton_" .. tab_name
             new_button.Size = UDim2.new(1, 0, 0, 35)
-            new_button.BackgroundTransparency = 0.7
-            new_button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            new_button.BackgroundTransparency = 0.2
+            new_button.BackgroundColor3 = Color3.fromRGB(80, 40, 120)
             new_button.BorderSizePixel = 0
-            new_button.Font = Enum.Font.LuckiestGuy   -- <<-- changed to LuckiestGuy
+            new_button.Font = Enum.Font.LuckiestGuy
             new_button.Text = tab_name
-            new_button.TextColor3 = Color3.fromRGB(255, 255, 255)  -- white
+            new_button.TextColor3 = Color3.fromRGB(255, 255, 255)
             new_button.TextSize = 14
+            new_button.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            new_button.TextStrokeTransparency = 0.4
             new_button.Parent = TabButtons
             Instance.new("UICorner", new_button).CornerRadius = UDim.new(0, 10)
             
+            -- Purple gradient on button
             local buttonGradient = Instance.new("UIGradient")
             buttonGradient.Rotation = 90
             buttonGradient.Color = ColorSequence.new{
@@ -1195,9 +1198,10 @@ function library:AddWindow(title, options)
             }
             buttonGradient.Parent = new_button
             
+            -- Update canvas size
             TabButtons.CanvasSize = UDim2.new(0, 0, 0, (#TabButtons:GetChildren() - 1) * 40)
             
-            -- Create tab content with its own ScrollingFrame
+            -- Create tab content
             local tabContainer = Instance.new("ScrollingFrame")
             tabContainer.Name = "TabContainer_" .. tab_name
             tabContainer.Size = UDim2.new(1, 0, 1, 0)
@@ -1208,26 +1212,43 @@ function library:AddWindow(title, options)
             tabContainer.Visible = false
             tabContainer.Parent = Tabs
             
-            -- UIListLayout inside the ScrollingFrame to arrange elements
             local tabLayout = Instance.new("UIListLayout")
             tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
             tabLayout.Padding = UDim.new(0, 5)
             tabLayout.Parent = tabContainer
             
-            -- Update CanvasSize when layout changes
             tabLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
                 tabContainer.CanvasSize = UDim2.new(0, 0, 0, tabLayout.AbsoluteContentSize.Y + 10)
             end)
-            -- Also update after a small delay to catch initial content
             task.delay(0.1, function()
                 tabContainer.CanvasSize = UDim2.new(0, 0, 0, tabLayout.AbsoluteContentSize.Y + 10)
             end)
             
+            -- Highlight indicator (same as Antora)
+            local selectedIndicator = Instance.new("Frame")
+            selectedIndicator.Name = "SelectedIndicator"
+            selectedIndicator.Size = UDim2.new(0, 4, 0, 4)
+            selectedIndicator.Position = UDim2.new(0, 1, 0.5)
+            selectedIndicator.AnchorPoint = Vector2.new(0, 0.5)
+            selectedIndicator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            selectedIndicator.BackgroundTransparency = 1
+            selectedIndicator.BorderSizePixel = 0
+            selectedIndicator.Parent = new_button
+            Instance.new("UICorner", selectedIndicator).CornerRadius = UDim.new(0.5, 0)
+            
             local function show()
                 if dropdown_open then return end
+                -- Reset all tabs
                 for i, v in pairs(TabButtons:GetChildren()) do
                     if v:IsA("TextButton") then
-                        v.BackgroundTransparency = 0.7
+                        v.BackgroundTransparency = 0.2
+                        v.BackgroundColor3 = Color3.fromRGB(80, 40, 120)
+                        -- Reset indicator
+                        local ind = v:FindFirstChild("SelectedIndicator")
+                        if ind then
+                            ind.Size = UDim2.new(0, 4, 0, 4)
+                            ind.BackgroundTransparency = 1
+                        end
                     end
                 end
                 for i, v in pairs(Tabs:GetChildren()) do
@@ -1235,9 +1256,14 @@ function library:AddWindow(title, options)
                         v.Visible = false
                     end
                 end
-                new_button.BackgroundTransparency = 0.3
+                -- Activate current tab
+                new_button.BackgroundTransparency = 0.1
+                new_button.BackgroundColor3 = Color3.fromRGB(176, 96, 244)
+                if selectedIndicator then
+                    selectedIndicator.Size = UDim2.new(0, 4, 0, 16)
+                    selectedIndicator.BackgroundTransparency = 0
+                end
                 tabContainer.Visible = true
-                -- Update CanvasSize for the visible tab
                 task.delay(0.05, function()
                     tabContainer.CanvasSize = UDim2.new(0, 0, 0, tabLayout.AbsoluteContentSize.Y + 10)
                 end)
