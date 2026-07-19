@@ -1080,7 +1080,7 @@ function library:AddWindow(title, options)
         CloseButton:TweenSize(UDim2.fromOffset(56, 56), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
 
-    -- MINIMIZED STATE (restore button) - also adjust position
+    -- MINIMIZED STATE
     local MinimizedFrame = Instance.new("ImageButton")
     MinimizedFrame.Name = "MinimizedFrame_" .. windows
     MinimizedFrame.AnchorPoint = Vector2.new(1, 0)
@@ -1168,23 +1168,23 @@ function library:AddWindow(title, options)
     TabButtonsList.Padding = UDim.new(0, 5)
     TabButtonsList.Parent = TabButtons
 
-    do -- Add Tab (improved version)
+    do -- Add Tab
         function window_data:AddTab(tab_name)
             local tab_data = {}
             tab_name = tostring(tab_name or "New Tab")
             
-            -- Create tab button with improved visibility
+            -- Create tab button (NO transparency)
             local new_button = Instance.new("TextButton")
             new_button.Name = "TabButton_" .. tab_name
             new_button.Size = UDim2.new(1, 0, 0, 35)
-            new_button.BackgroundTransparency = 0.2
+            new_button.BackgroundTransparency = 0
             new_button.BackgroundColor3 = Color3.fromRGB(80, 40, 120)
             new_button.BorderSizePixel = 0
             new_button.Font = Enum.Font.LuckiestGuy
             new_button.Text = tab_name
             new_button.TextColor3 = Color3.fromRGB(255, 255, 255)
-            new_button.TextScaled = true                    -- auto size
-            new_button.TextSize = 14                         -- max size (scales down if needed)
+            new_button.TextScaled = true
+            new_button.TextSize = 14
             new_button.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
             new_button.TextStrokeTransparency = 0.4
             new_button.Parent = TabButtons
@@ -1242,7 +1242,7 @@ function library:AddWindow(title, options)
                 -- Reset all tabs
                 for i, v in pairs(TabButtons:GetChildren()) do
                     if v:IsA("TextButton") then
-                        v.BackgroundTransparency = 0.2
+                        v.BackgroundTransparency = 0
                         v.BackgroundColor3 = Color3.fromRGB(80, 40, 120)
                         local ind = v:FindFirstChild("SelectedIndicator")
                         if ind then
@@ -1257,7 +1257,7 @@ function library:AddWindow(title, options)
                     end
                 end
                 -- Activate current tab
-                new_button.BackgroundTransparency = 0.1
+                new_button.BackgroundTransparency = 0
                 new_button.BackgroundColor3 = Color3.fromRGB(176, 96, 244)
                 if selectedIndicator then
                     selectedIndicator.Size = UDim2.new(0, 4, 0, 16)
@@ -1277,7 +1277,8 @@ function library:AddWindow(title, options)
                 show()
             end
             
-            -- All tab elements now parent to tabContainer (the ScrollingFrame)
+            -- All tab elements now parent to tabContainer
+            -- ADD LABEL
             function tab_data:AddLabel(label_text)
                 label_text = tostring(label_text or "New Label")
                 local label = Instance.new("TextLabel")
@@ -1293,13 +1294,27 @@ function library:AddWindow(title, options)
                 return label
             end
             
+            -- ADD BUTTON (with shadow and hover)
             function tab_data:AddButton(button_text, callback)
                 button_text = tostring(button_text or "New Button")
                 callback = typeof(callback) == "function" and callback or function()end
                 
+                -- Shadow
+                local shadow = Instance.new("Frame")
+                shadow.Size = UDim2.new(1, 0, 1, 0)
+                shadow.Position = UDim2.new(0, 2, 0, 2)
+                shadow.BackgroundColor3 = Color3.fromRGB(0,0,0)
+                shadow.BackgroundTransparency = 0.4
+                shadow.BorderSizePixel = 0
+                shadow.Parent = tabContainer
+                Instance.new("UICorner", shadow).CornerRadius = UDim.new(0, 10)
+                shadow.ZIndex = 0
+
                 local button = Instance.new("TextButton")
                 button.Size = UDim2.new(1, 0, 0, 35)
+                button.Position = UDim2.new(0, 0, 0, 0)
                 button.BackgroundColor3 = options.main_color or Color3.fromRGB(110,45,220)
+                button.BackgroundTransparency = 0
                 button.BorderSizePixel = 0
                 button.Font = Enum.Font.GothamBold
                 button.Text = button_text
@@ -1307,6 +1322,7 @@ function library:AddWindow(title, options)
                 button.TextSize = 14
                 button.Parent = tabContainer
                 Instance.new("UICorner", button).CornerRadius = UDim.new(0, 10)
+                button.ZIndex = 1
                 
                 local btnGradient = Instance.new("UIGradient")
                 btnGradient.Rotation = 90
@@ -1316,6 +1332,13 @@ function library:AddWindow(title, options)
                 }
                 btnGradient.Parent = button
                 
+                button.MouseEnter:Connect(function()
+                    button.BackgroundColor3 = Color3.fromRGB(176, 96, 244)
+                end)
+                button.MouseLeave:Connect(function()
+                    button.BackgroundColor3 = options.main_color or Color3.fromRGB(110,45,220)
+                end)
+                
                 button.MouseButton1Click:Connect(function()
                     ripple(button, mouse.X, mouse.Y)
                     pcall(callback)
@@ -1323,6 +1346,7 @@ function library:AddWindow(title, options)
                 return button
             end
             
+            -- ADD SWITCH (real toggle slider)
             function tab_data:AddSwitch(switch_text, callback)
                 local switch_data = {}
                 switch_text = tostring(switch_text or "New Switch")
@@ -1333,23 +1357,11 @@ function library:AddWindow(title, options)
                 switchFrame.BackgroundTransparency = 1
                 switchFrame.BorderSizePixel = 0
                 switchFrame.Parent = tabContainer
-                
-                local switchButton = Instance.new("TextButton")
-                switchButton.Size = UDim2.new(0, 30, 0, 30)
-                switchButton.Position = UDim2.new(0, 5, 0, 2)
-                switchButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                switchButton.BackgroundTransparency = 0.7
-                switchButton.BorderSizePixel = 0
-                switchButton.Font = Enum.Font.SourceSans
-                switchButton.Text = ""
-                switchButton.TextColor3 = Color3.new(1, 1, 1)
-                switchButton.TextSize = 18
-                switchButton.Parent = switchFrame
-                Instance.new("UICorner", switchButton).CornerRadius = UDim.new(0, 8)
-                
+
+                -- Label
                 local titleLabel = Instance.new("TextLabel")
-                titleLabel.Size = UDim2.new(1, -45, 1, 0)
-                titleLabel.Position = UDim2.new(0, 40, 0, 0)
+                titleLabel.Size = UDim2.new(1, -55, 1, 0)
+                titleLabel.Position = UDim2.new(0, 50, 0, 0)
                 titleLabel.BackgroundTransparency = 1
                 titleLabel.Font = Enum.Font.GothamSemibold
                 titleLabel.Text = switch_text
@@ -1357,32 +1369,57 @@ function library:AddWindow(title, options)
                 titleLabel.TextSize = 14
                 titleLabel.TextXAlignment = Enum.TextXAlignment.Left
                 titleLabel.Parent = switchFrame
-                
+
+                -- Track
+                local track = Instance.new("Frame")
+                track.Size = UDim2.new(0, 40, 0, 20)
+                track.Position = UDim2.new(0, 5, 0.5, -10)
+                track.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                track.BorderSizePixel = 0
+                track.Parent = switchFrame
+                Instance.new("UICorner", track).CornerRadius = UDim.new(1, 0)
+
+                -- Thumb
+                local thumb = Instance.new("Frame")
+                thumb.Size = UDim2.new(0, 16, 0, 16)
+                thumb.Position = UDim2.new(0, 2, 0.5, -8)
+                thumb.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                thumb.BorderSizePixel = 0
+                thumb.Parent = track
+                Instance.new("UICorner", thumb).CornerRadius = UDim.new(1, 0)
+
                 local toggled = false
-                switchButton.MouseButton1Click:Connect(function()
-                    toggled = not toggled
-                    switchButton.Text = toggled and utf8.char(10003) or ""
+                local function updateSwitch()
                     if toggled then
-                        switchButton.BackgroundTransparency = 0.3
+                        track.BackgroundColor3 = Color3.fromRGB(110, 45, 220)
+                        thumb.Position = UDim2.new(0, 22, 0.5, -8)
                     else
-                        switchButton.BackgroundTransparency = 0.7
+                        track.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                        thumb.Position = UDim2.new(0, 2, 0.5, -8)
                     end
+                end
+                updateSwitch()
+
+                track.MouseButton1Click:Connect(function()
+                    toggled = not toggled
+                    updateSwitch()
+                    pcall(callback, toggled)
+                end)
+                thumb.MouseButton1Click:Connect(function()
+                    toggled = not toggled
+                    updateSwitch()
                     pcall(callback, toggled)
                 end)
                 
                 function switch_data:Set(bool)
                     toggled = (typeof(bool) == "boolean") and bool or false
-                    switchButton.Text = toggled and utf8.char(10003) or ""
-                    if toggled then
-                        switchButton.BackgroundTransparency = 0.3
-                    else
-                        switchButton.BackgroundTransparency = 0.7
-                    end
+                    updateSwitch()
                     pcall(callback, toggled)
                 end
                 return switch_data, switchFrame
             end
             
+            -- ADD TEXTBOX (with glass background)
             function tab_data:AddTextBox(textbox_text, callback, textbox_options)
                 textbox_text = tostring(textbox_text or "New TextBox")
                 callback = typeof(callback) == "function" and callback or function()end
@@ -1394,16 +1431,22 @@ function library:AddWindow(title, options)
                 local textbox = Instance.new("TextBox")
                 textbox.Size = UDim2.new(1, 0, 0, 35)
                 textbox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                textbox.BackgroundTransparency = 0.8
+                textbox.BackgroundTransparency = 0.1
                 textbox.BorderSizePixel = 0
                 textbox.Font = Enum.Font.GothamSemibold
-                textbox.PlaceholderColor3 = Color3.fromRGB(200, 200, 200)
+                textbox.PlaceholderColor3 = Color3.fromRGB(180, 180, 180)
                 textbox.PlaceholderText = textbox_text
                 textbox.Text = ""
                 textbox.TextColor3 = Color3.fromRGB(255, 255, 255)
                 textbox.TextSize = 14
                 textbox.Parent = tabContainer
                 Instance.new("UICorner", textbox).CornerRadius = UDim.new(0, 10)
+                
+                local stroke = Instance.new("UIStroke")
+                stroke.Color = Color3.fromRGB(255,255,255)
+                stroke.Thickness = 1
+                stroke.Transparency = 0.3
+                stroke.Parent = textbox
                 
                 textbox.FocusLost:Connect(function(ep)
                     if ep then
@@ -1418,6 +1461,7 @@ function library:AddWindow(title, options)
                 return textbox
             end
             
+            -- ADD SLIDER (polished track and fill)
             function tab_data:AddSlider(slider_text, callback, slider_options)
                 local slider_data = {}
                 slider_text = tostring(slider_text or "New Slider")
@@ -1449,7 +1493,7 @@ function library:AddWindow(title, options)
                 sliderBg.Size = UDim2.new(1, -50, 0, 15)
                 sliderBg.Position = UDim2.new(0, 0, 0, 20)
                 sliderBg.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                sliderBg.BackgroundTransparency = 0.8
+                sliderBg.BackgroundTransparency = 0.15
                 sliderBg.BorderSizePixel = 0
                 sliderBg.Parent = slider
                 Instance.new("UICorner", sliderBg).CornerRadius = UDim.new(0, 7)
@@ -1460,6 +1504,14 @@ function library:AddWindow(title, options)
                 indicator.BorderSizePixel = 0
                 indicator.Parent = sliderBg
                 Instance.new("UICorner", indicator).CornerRadius = UDim.new(0, 7)
+                
+                local fillGradient = Instance.new("UIGradient")
+                fillGradient.Rotation = 90
+                fillGradient.Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(110,45,220)),
+                    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(176,96,244))
+                }
+                fillGradient.Parent = indicator
                 
                 local value = Instance.new("TextLabel")
                 value.Size = UDim2.new(0, 45, 0, 15)
@@ -1534,6 +1586,7 @@ function library:AddWindow(title, options)
                 return slider_data, slider
             end
             
+            -- ADD KEYBIND (glass style)
             function tab_data:AddKeybind(keybind_name, callback, keybind_options)
                 local keybind_data = {}
                 keybind_name = tostring(keybind_name or "New Keybind")
@@ -1545,9 +1598,11 @@ function library:AddWindow(title, options)
                 
                 local keybindFrame = Instance.new("Frame")
                 keybindFrame.Size = UDim2.new(1, 0, 0, 35)
-                keybindFrame.BackgroundTransparency = 1
+                keybindFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                keybindFrame.BackgroundTransparency = 0.1
                 keybindFrame.BorderSizePixel = 0
                 keybindFrame.Parent = tabContainer
+                Instance.new("UICorner", keybindFrame).CornerRadius = UDim.new(0, 10)
                 
                 local title = Instance.new("TextLabel")
                 title.Size = UDim2.new(0.5, 0, 1, 0)
@@ -1563,7 +1618,7 @@ function library:AddWindow(title, options)
                 input.Size = UDim2.new(0, 80, 1, -4)
                 input.Position = UDim2.new(1, -85, 0, 2)
                 input.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                input.BackgroundTransparency = 0.7
+                input.BackgroundTransparency = 0.15
                 input.BorderSizePixel = 0
                 input.Font = Enum.Font.GothamSemibold
                 input.Text = "RShift"
@@ -1614,6 +1669,7 @@ function library:AddWindow(title, options)
                 return keybind_data, keybindFrame
             end
             
+            -- ADD DROPDOWN (glass style)
             function tab_data:AddDropdown(dropdown_name, callback)
                 local dropdown_data = {}
                 dropdown_name = tostring(dropdown_name or "New Dropdown")
@@ -1622,7 +1678,7 @@ function library:AddWindow(title, options)
                 local dropdown = Instance.new("TextButton")
                 dropdown.Size = UDim2.new(1, 0, 0, 35)
                 dropdown.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                dropdown.BackgroundTransparency = 0.8
+                dropdown.BackgroundTransparency = 0.1
                 dropdown.BorderSizePixel = 0
                 dropdown.Font = Enum.Font.GothamBold
                 dropdown.Text = " " .. dropdown_name
@@ -1646,7 +1702,7 @@ function library:AddWindow(title, options)
                 box.Size = UDim2.new(1, 0, 0, 0)
                 box.Position = UDim2.new(0, 0, 1, 5)
                 box.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                box.BackgroundTransparency = 0.9
+                box.BackgroundTransparency = 0.15
                 box.BorderSizePixel = 0
                 box.ClipsDescendants = true
                 box.Parent = dropdown
@@ -1736,6 +1792,7 @@ function library:AddWindow(title, options)
                 return dropdown_data, dropdown
             end
             
+            -- ADD COLOR PICKER
             function tab_data:AddColorPicker(callback)
                 local color_picker_data = {}
                 callback = typeof(callback) == "function" and callback or function()end
@@ -1743,7 +1800,7 @@ function library:AddWindow(title, options)
                 local color_picker = Instance.new("Frame")
                 color_picker.Size = UDim2.new(1, 0, 0, 110)
                 color_picker.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                color_picker.BackgroundTransparency = 0.8
+                color_picker.BackgroundTransparency = 0.1
                 color_picker.BorderSizePixel = 0
                 color_picker.Parent = tabContainer
                 Instance.new("UICorner", color_picker).CornerRadius = UDim.new(0, 10)
@@ -1869,6 +1926,7 @@ function library:AddWindow(title, options)
                 return color_picker_data, color_picker
             end
             
+            -- ADD CONSOLE
             function tab_data:AddConsole(console_options)
                 local console_data = {}
                 console_options = typeof(console_options) == "table" and console_options or {["readonly"] = true,["full"] = false,}
@@ -1882,7 +1940,7 @@ function library:AddWindow(title, options)
                 local console = Instance.new("Frame")
                 console.Size = UDim2.new(1, 0, console_options.full and 1 or 0, console_options.y)
                 console.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                console.BackgroundTransparency = 0.8
+                console.BackgroundTransparency = 0.1
                 console.BorderSizePixel = 0
                 console.Parent = tabContainer
                 Instance.new("UICorner", console).CornerRadius = UDim.new(0, 10)
@@ -1936,6 +1994,7 @@ function library:AddWindow(title, options)
                 return console_data, console
             end
             
+            -- ADD HORIZONTAL ALIGNMENT
             function tab_data:AddHorizontalAlignment()
                 local ha_data = {}
                 local ha = Instance.new("Frame")
@@ -1967,6 +2026,7 @@ function library:AddWindow(title, options)
                 return ha_data, ha
             end
             
+            -- ADD FOLDER (glass style)
             function tab_data:AddFolder(folder_name)
                 local folder_data = {}
                 folder_name = tostring(folder_name or "New Folder")
@@ -1974,7 +2034,7 @@ function library:AddWindow(title, options)
                 local folder = Instance.new("Frame")
                 folder.Size = UDim2.new(1, 0, 0, 35)
                 folder.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                folder.BackgroundTransparency = 0.8
+                folder.BackgroundTransparency = 0.1
                 folder.BorderSizePixel = 0
                 folder.Parent = tabContainer
                 Instance.new("UICorner", folder).CornerRadius = UDim.new(0, 10)
