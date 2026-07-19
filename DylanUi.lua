@@ -994,10 +994,10 @@ function library:AddWindow(title, options)
     options.tween_time = 0.1
     
     -- LAYOUT PARAMETERS
-    local MainWidth = 0.40
-    local MainHeight = 0.75
+    local MainWidth = 0.50
+    local MainHeight = 0.80
     local SideWidth = 0.15
-    local SideHeight = 0.75
+    local SideHeight = 0.80
     local Gap = 0.025
 
     -- Main panel
