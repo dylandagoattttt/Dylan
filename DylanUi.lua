@@ -995,19 +995,19 @@ function library:AddWindow(title, options)
     
     -- LAYOUT PARAMETERS
     local MainWidth = 0.40
-    local MainHeight = 0.90
-    local SideWidth = 0.10
-    local SideHeight = 0.90
+    local MainHeight = 0.75
+    local SideWidth = 0.15
+    local SideHeight = 0.75
     local Gap = 0.025
 
-    -- Main panel
+    -- Main panel (perfectly centered)
     local MainSize = UDim2.fromScale(MainWidth, MainHeight)
-    local MainPos = UDim2.fromScale(0.5, 0.54)
+    local MainPos = UDim2.fromScale(0.5, 0.5)  -- centered both axes
     local MainPanel = CreatePanel("Main_" .. windows, MainPos, MainSize, 20, 1, windowsFrame)
 
     -- Side panel
     local SideX = (0.5 - MainWidth/2) - Gap - SideWidth/2
-    local SidePos = UDim2.new(SideX, 0, 0.54, 0)
+    local SidePos = UDim2.new(SideX, 0, 0.5, 0)  -- centered vertically
     local SideSize = UDim2.fromScale(SideWidth, SideHeight)
     local SidePanel = CreatePanel("Side_" .. windows, SidePos, SideSize, 20, 1, windowsFrame)
 
@@ -1059,11 +1059,11 @@ function library:AddWindow(title, options)
     TitleLabel.TextColor3 = Color3.fromRGB(255,255,255)
     TitleLabel.Parent = Header
 
-    -- CLOSE/MINIMIZE BUTTON
+    -- CLOSE/MINIMIZE BUTTON (moved left by 30px to avoid being cut off)
     local CloseButton = Instance.new("ImageButton")
     CloseButton.Name = "CloseButton"
     CloseButton.AnchorPoint = Vector2.new(0.5, 0.5)
-    CloseButton.Position = UDim2.new(1, 0, 0, 0)
+    CloseButton.Position = UDim2.new(1, -30, 0, 0)  -- offset left by 30 pixels
     CloseButton.Size = UDim2.fromOffset(56, 56)
     CloseButton.BackgroundTransparency = 1
     CloseButton.BorderSizePixel = 0
@@ -1080,7 +1080,7 @@ function library:AddWindow(title, options)
         CloseButton:TweenSize(UDim2.fromOffset(56, 56), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
 
-    -- MINIMIZED STATE
+    -- MINIMIZED STATE (restore button) - also adjust position
     local MinimizedFrame = Instance.new("ImageButton")
     MinimizedFrame.Name = "MinimizedFrame_" .. windows
     MinimizedFrame.AnchorPoint = Vector2.new(1, 0)
@@ -1183,7 +1183,8 @@ function library:AddWindow(title, options)
             new_button.Font = Enum.Font.LuckiestGuy
             new_button.Text = tab_name
             new_button.TextColor3 = Color3.fromRGB(255, 255, 255)
-            new_button.TextSize = 14
+            new_button.TextScaled = true                    -- auto size
+            new_button.TextSize = 14                         -- max size (scales down if needed)
             new_button.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
             new_button.TextStrokeTransparency = 0.4
             new_button.Parent = TabButtons
@@ -1243,7 +1244,6 @@ function library:AddWindow(title, options)
                     if v:IsA("TextButton") then
                         v.BackgroundTransparency = 0.2
                         v.BackgroundColor3 = Color3.fromRGB(80, 40, 120)
-                        -- Reset indicator
                         local ind = v:FindFirstChild("SelectedIndicator")
                         if ind then
                             ind.Size = UDim2.new(0, 4, 0, 4)
