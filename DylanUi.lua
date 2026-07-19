@@ -1,5 +1,5 @@
 local ui_options = {
-    main_color = Color3.fromRGB(110, 45, 220),
+    main_color = Color3.fromRGB(123, 53, 232),
     min_size = Vector2.new(400, 300),
     toggle_key = Enum.KeyCode.RightShift,
     can_resize = true,
@@ -93,17 +93,28 @@ prefabs.BackgroundColor3 = Color3.new(1, 1, 1)
 prefabs.Size = UDim2.new(0, 100, 0, 100)
 prefabs.Visible = false
 
+-- Text color constants
+local TEXT_COLOR = Color3.fromRGB(248, 246, 255)
+local TEXT_OUTLINE = Color3.fromRGB(53, 16, 93)
+local BORDER_COLOR = Color3.fromRGB(201, 164, 255)
+local PANEL_COLOR = Color3.fromRGB(123, 53, 232)
+local SIDEBAR_COLOR = Color3.fromRGB(90, 35, 191)
+local BUTTON_COLOR = Color3.fromRGB(110, 45, 226)
+local SELECTED_COLOR = Color3.fromRGB(166, 107, 255)
+local DROPDOWN_BG = Color3.fromRGB(90, 35, 191)
+local DROPDOWN_BORDER = Color3.fromRGB(184, 135, 255)
+
 label.Name = "Label"
 label.Parent = prefabs
 label.BackgroundColor3 = Color3.new(1, 1, 1)
 label.BackgroundTransparency = 1
 label.Size = UDim2.new(0, 200, 0, 20)
-label.Font = Enum.Font.GothamSemibold
+label.Font = Enum.Font.GothamBold
 label.Text = "Hello, world 123"
-label.TextColor3 = Color3.new(1, 1, 1)
+label.TextColor3 = TEXT_COLOR
 label.TextSize = 14
 label.TextXAlignment = Enum.TextXAlignment.Left
-label.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+label.TextStrokeColor3 = TEXT_OUTLINE
 label.TextStrokeTransparency = 0
 
 window.Name = "Window"
@@ -131,7 +142,7 @@ resizer.Size = UDim2.new(0, 20, 0, 20)
 
 bar.Name = "Bar"
 bar.Parent = window
-bar.BackgroundColor3 = Color3.new(0.160784, 0.290196, 0.478431)
+bar.BackgroundColor3 = PANEL_COLOR
 bar.BorderSizePixel = 0
 bar.Position = UDim2.new(0, 0, 0, 5)
 bar.Size = UDim2.new(1, 0, 0, 15)
@@ -148,12 +159,12 @@ toggle.Image = "https://www.roblox.com/Thumbs/Asset.ashx?width=420&height=420&as
 
 base.Name = "Base"
 base.Parent = bar
-base.BackgroundColor3 = Color3.new(0.160784, 0.290196, 0.478431)
+base.BackgroundColor3 = PANEL_COLOR
 base.BorderSizePixel = 0
 base.Position = UDim2.new(0, 0, 0.800000012, 0)
 base.Size = UDim2.new(1, 0, 0, 10)
 base.Image = "rbxassetid://2851926732"
-base.ImageColor3 = Color3.new(0.160784, 0.290196, 0.478431)
+base.ImageColor3 = PANEL_COLOR
 base.ScaleType = Enum.ScaleType.Slice
 base.SliceCenter = Rect.new(12, 12, 12, 12)
 
@@ -164,7 +175,7 @@ top.BackgroundTransparency = 1
 top.Position = UDim2.new(0, 0, 0, -5)
 top.Size = UDim2.new(1, 0, 0, 10)
 top.Image = "rbxassetid://2851926732"
-top.ImageColor3 = Color3.new(0.160784, 0.290196, 0.478431)
+top.ImageColor3 = PANEL_COLOR
 top.ScaleType = Enum.ScaleType.Slice
 top.SliceCenter = Rect.new(12, 12, 12, 12)
 
@@ -183,10 +194,10 @@ titleLabel.Position = UDim2.new(0, 30, 0, 3)
 titleLabel.Size = UDim2.new(0, 200, 0, 20)
 titleLabel.Font = Enum.Font.GothamBold
 titleLabel.Text = "Gamer Time"
-titleLabel.TextColor3 = Color3.new(1, 1, 1)
+titleLabel.TextColor3 = TEXT_COLOR
 titleLabel.TextSize = 14
 titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-titleLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+titleLabel.TextStrokeColor3 = TEXT_OUTLINE
 titleLabel.TextStrokeTransparency = 0
 
 tabSelection.Name = "TabSelection"
@@ -213,8 +224,8 @@ uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 uiListLayout.Padding = UDim.new(0, 2)
 
 frame.Parent = tabSelection
-frame.BackgroundColor3 = Color3.new(0.12549, 0.227451, 0.372549)
-frame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+frame.BackgroundColor3 = PANEL_COLOR
+frame.BorderColor3 = BORDER_COLOR
 frame.BorderSizePixel = 0
 frame.Position = UDim2.new(0, 0, 1, 0)
 frame.Size = UDim2.new(1, 0, 0, 2)
@@ -228,7 +239,7 @@ tab.Visible = false
 
 uiListLayout2.Parent = tab
 uiListLayout2.SortOrder = Enum.SortOrder.LayoutOrder
-uiListLayout2.Padding = UDim.new(0, 5)
+uiListLayout2.Padding = UDim.new(0, 10)
 
 textBox.Parent = prefabs
 textBox.BackgroundColor3 = Color3.new(1, 1, 1)
@@ -236,13 +247,13 @@ textBox.BackgroundTransparency = 1
 textBox.BorderSizePixel = 0
 textBox.Size = UDim2.new(1, 0, 0, 20)
 textBox.ZIndex = 2
-textBox.Font = Enum.Font.GothamSemibold
-textBox.PlaceholderColor3 = Color3.new(0.698039, 0.698039, 0.698039)
+textBox.Font = Enum.Font.GothamBold
+textBox.PlaceholderColor3 = TEXT_COLOR
 textBox.PlaceholderText = "Input Text"
 textBox.Text = ""
-textBox.TextColor3 = Color3.new(0.784314, 0.784314, 0.784314)
+textBox.TextColor3 = TEXT_COLOR
 textBox.TextSize = 14
-textBox.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+textBox.TextStrokeColor3 = TEXT_OUTLINE
 textBox.TextStrokeTransparency = 0
 
 textBoxRoundify4px.Name = "TextBox_Roundify_4px"
@@ -251,7 +262,7 @@ textBoxRoundify4px.BackgroundColor3 = Color3.new(1, 1, 1)
 textBoxRoundify4px.BackgroundTransparency = 1
 textBoxRoundify4px.Size = UDim2.new(1, 0, 1, 0)
 textBoxRoundify4px.Image = "rbxassetid://2851929490"
-textBoxRoundify4px.ImageColor3 = Color3.new(0.203922, 0.207843, 0.219608)
+textBoxRoundify4px.ImageColor3 = DROPDOWN_BG
 textBoxRoundify4px.ScaleType = Enum.ScaleType.Slice
 textBoxRoundify4px.SliceCenter = Rect.new(4, 4, 4, 4)
 
@@ -262,7 +273,7 @@ slider.BackgroundTransparency = 1
 slider.Position = UDim2.new(0, 0, 0.178571433, 0)
 slider.Size = UDim2.new(1, 0, 0, 20)
 slider.Image = "rbxassetid://2851929490"
-slider.ImageColor3 = Color3.new(0.145098, 0.14902, 0.156863)
+slider.ImageColor3 = DROPDOWN_BG
 slider.ScaleType = Enum.ScaleType.Slice
 slider.SliceCenter = Rect.new(4, 4, 4, 4)
 
@@ -275,9 +286,9 @@ sliderTitle.Size = UDim2.new(0, 0, 0, 20)
 sliderTitle.ZIndex = 2
 sliderTitle.Font = Enum.Font.GothamBold
 sliderTitle.Text = "Slider"
-sliderTitle.TextColor3 = Color3.new(0.784314, 0.784314, 0.784314)
+sliderTitle.TextColor3 = TEXT_COLOR
 sliderTitle.TextSize = 14
-sliderTitle.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+sliderTitle.TextStrokeColor3 = TEXT_OUTLINE
 sliderTitle.TextStrokeTransparency = 0
 
 indicator.Name = "Indicator"
@@ -286,7 +297,7 @@ indicator.BackgroundColor3 = Color3.new(1, 1, 1)
 indicator.BackgroundTransparency = 1
 indicator.Size = UDim2.new(0, 0, 0, 20)
 indicator.Image = "rbxassetid://2851929490"
-indicator.ImageColor3 = Color3.new(0.254902, 0.262745, 0.278431)
+indicator.ImageColor3 = SELECTED_COLOR
 indicator.ScaleType = Enum.ScaleType.Slice
 indicator.SliceCenter = Rect.new(4, 4, 4, 4)
 
@@ -298,9 +309,9 @@ sliderValue.Position = UDim2.new(1, -55, 0.5, -10)
 sliderValue.Size = UDim2.new(0, 50, 0, 20)
 sliderValue.Font = Enum.Font.GothamBold
 sliderValue.Text = "0%"
-sliderValue.TextColor3 = Color3.new(0.784314, 0.784314, 0.784314)
+sliderValue.TextColor3 = TEXT_COLOR
 sliderValue.TextSize = 14
-sliderValue.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+sliderValue.TextStrokeColor3 = TEXT_OUTLINE
 sliderValue.TextStrokeTransparency = 0
 
 textLabel.Parent = slider
@@ -310,9 +321,9 @@ textLabel.Position = UDim2.new(1, -20, -0.75, 0)
 textLabel.Size = UDim2.new(0, 26, 0, 50)
 textLabel.Font = Enum.Font.GothamBold
 textLabel.Text = "]"
-textLabel.TextColor3 = Color3.new(0.627451, 0.627451, 0.627451)
+textLabel.TextColor3 = TEXT_COLOR
 textLabel.TextSize = 14
-textLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+textLabel.TextStrokeColor3 = TEXT_OUTLINE
 textLabel.TextStrokeTransparency = 0
 
 textLabel2.Parent = slider
@@ -322,9 +333,9 @@ textLabel2.Position = UDim2.new(1, -65, -0.75, 0)
 textLabel2.Size = UDim2.new(0, 26, 0, 50)
 textLabel2.Font = Enum.Font.GothamBold
 textLabel2.Text = "["
-textLabel2.TextColor3 = Color3.new(0.627451, 0.627451, 0.627451)
+textLabel2.TextColor3 = TEXT_COLOR
 textLabel2.TextSize = 14
-textLabel2.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+textLabel2.TextStrokeColor3 = TEXT_OUTLINE
 textLabel2.TextStrokeTransparency = 0
 
 circle.Name = "Circle"
@@ -349,10 +360,10 @@ dropdown.Size = UDim2.new(0, 200, 0, 20)
 dropdown.ZIndex = 2
 dropdown.Font = Enum.Font.GothamBold
 dropdown.Text = " Dropdown"
-dropdown.TextColor3 = Color3.new(0.784314, 0.784314, 0.784314)
+dropdown.TextColor3 = TEXT_COLOR
 dropdown.TextSize = 14
 dropdown.TextXAlignment = Enum.TextXAlignment.Left
-dropdown.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+dropdown.TextStrokeColor3 = TEXT_OUTLINE
 dropdown.TextStrokeTransparency = 0
 
 dropdownIndicator.Name = "Indicator"
@@ -373,7 +384,7 @@ dropdownBox.Position = UDim2.new(0, 0, 0, 25)
 dropdownBox.Size = UDim2.new(1, 0, 0, 150)
 dropdownBox.ZIndex = 3
 dropdownBox.Image = "rbxassetid://2851929490"
-dropdownBox.ImageColor3 = Color3.new(0.129412, 0.133333, 0.141176)
+dropdownBox.ImageColor3 = DROPDOWN_BG
 dropdownBox.ScaleType = Enum.ScaleType.Slice
 dropdownBox.SliceCenter = Rect.new(4, 4, 4, 4)
 
@@ -396,23 +407,23 @@ textButtonRoundify4px.BackgroundColor3 = Color3.new(1, 1, 1)
 textButtonRoundify4px.BackgroundTransparency = 1
 textButtonRoundify4px.Size = UDim2.new(1, 0, 1, 0)
 textButtonRoundify4px.Image = "rbxassetid://2851929490"
-textButtonRoundify4px.ImageColor3 = Color3.new(0.203922, 0.207843, 0.219608)
+textButtonRoundify4px.ImageColor3 = DROPDOWN_BG
 textButtonRoundify4px.ScaleType = Enum.ScaleType.Slice
 textButtonRoundify4px.SliceCenter = Rect.new(4, 4, 4, 4)
 
 tabButton.Name = "TabButton"
 tabButton.Parent = prefabs
-tabButton.BackgroundColor3 = Color3.new(0.160784, 0.290196, 0.478431)
+tabButton.BackgroundColor3 = BUTTON_COLOR
 tabButton.BackgroundTransparency = 1
 tabButton.BorderSizePixel = 0
 tabButton.Position = UDim2.new(0.185185179, 0, 0, 0)
 tabButton.Size = UDim2.new(0, 71, 0, 20)
 tabButton.ZIndex = 2
-tabButton.Font = Enum.Font.GothamSemibold
+tabButton.Font = Enum.Font.GothamBold
 tabButton.Text = "Test tab"
-tabButton.TextColor3 = Color3.new(0.784314, 0.784314, 0.784314)
+tabButton.TextColor3 = TEXT_COLOR
 tabButton.TextSize = 14
-tabButton.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+tabButton.TextStrokeColor3 = TEXT_OUTLINE
 tabButton.TextStrokeTransparency = 0
 
 textButtonRoundify4px_2.Name = "TextButton_Roundify_4px"
@@ -421,7 +432,7 @@ textButtonRoundify4px_2.BackgroundColor3 = Color3.new(1, 1, 1)
 textButtonRoundify4px_2.BackgroundTransparency = 1
 textButtonRoundify4px_2.Size = UDim2.new(1, 0, 1, 0)
 textButtonRoundify4px_2.Image = "rbxassetid://2851929490"
-textButtonRoundify4px_2.ImageColor3 = Color3.new(0.203922, 0.207843, 0.219608)
+textButtonRoundify4px_2.ImageColor3 = BUTTON_COLOR
 textButtonRoundify4px_2.ScaleType = Enum.ScaleType.Slice
 textButtonRoundify4px_2.SliceCenter = Rect.new(4, 4, 4, 4)
 
@@ -432,23 +443,23 @@ folder.BackgroundTransparency = 1
 folder.Position = UDim2.new(0, 0, 0, 50)
 folder.Size = UDim2.new(1, 0, 0, 20)
 folder.Image = "rbxassetid://2851929490"
-folder.ImageColor3 = Color3.new(0.0823529, 0.0862745, 0.0901961)
+folder.ImageColor3 = DROPDOWN_BG
 folder.ScaleType = Enum.ScaleType.Slice
 folder.SliceCenter = Rect.new(4, 4, 4, 4)
 
 button.Name = "Button"
 button.Parent = folder
-button.BackgroundColor3 = Color3.new(0.160784, 0.290196, 0.478431)
+button.BackgroundColor3 = BUTTON_COLOR
 button.BackgroundTransparency = 1
 button.BorderSizePixel = 0
 button.Size = UDim2.new(1, 0, 0, 20)
 button.ZIndex = 2
-button.Font = Enum.Font.GothamSemibold
+button.Font = Enum.Font.GothamBold
 button.Text = " Folder"
-button.TextColor3 = Color3.new(1, 1, 1)
+button.TextColor3 = TEXT_COLOR
 button.TextSize = 14
 button.TextXAlignment = Enum.TextXAlignment.Left
-button.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+button.TextStrokeColor3 = TEXT_OUTLINE
 button.TextStrokeTransparency = 0
 
 textButtonRoundify4px_3.Name = "TextButton_Roundify_4px"
@@ -457,7 +468,7 @@ textButtonRoundify4px_3.BackgroundColor3 = Color3.new(1, 1, 1)
 textButtonRoundify4px_3.BackgroundTransparency = 1
 textButtonRoundify4px_3.Size = UDim2.new(1, 0, 1, 0)
 textButtonRoundify4px_3.Image = "rbxassetid://2851929490"
-textButtonRoundify4px_3.ImageColor3 = Color3.new(0.160784, 0.290196, 0.478431)
+textButtonRoundify4px_3.ImageColor3 = BUTTON_COLOR
 textButtonRoundify4px_3.ScaleType = Enum.ScaleType.Slice
 textButtonRoundify4px_3.SliceCenter = Rect.new(4, 4, 4, 4)
 
@@ -479,7 +490,7 @@ objects2.Visible = false
 
 uiListLayout5.Parent = objects2
 uiListLayout5.SortOrder = Enum.SortOrder.LayoutOrder
-uiListLayout5.Padding = UDim.new(0, 5)
+uiListLayout5.Padding = UDim.new(0, 10)
 
 horizontalAlignment.Name = "HorizontalAlignment"
 horizontalAlignment.Parent = prefabs
@@ -498,7 +509,7 @@ console.BackgroundColor3 = Color3.new(1, 1, 1)
 console.BackgroundTransparency = 1
 console.Size = UDim2.new(1, 0, 0, 200)
 console.Image = "rbxassetid://2851928141"
-console.ImageColor3 = Color3.new(0.129412, 0.133333, 0.141176)
+console.ImageColor3 = DROPDOWN_BG
 console.ScaleType = Enum.ScaleType.Slice
 console.SliceCenter = Rect.new(8, 8, 8, 8)
 
@@ -520,14 +531,14 @@ source.ZIndex = 3
 source.ClearTextOnFocus = false
 source.Font = Enum.Font.Code
 source.MultiLine = true
-source.PlaceholderColor3 = Color3.new(0.8, 0.8, 0.8)
+source.PlaceholderColor3 = TEXT_COLOR
 source.Text = ""
-source.TextColor3 = Color3.new(1, 1, 1)
+source.TextColor3 = TEXT_COLOR
 source.TextSize = 15
 source.TextWrapped = true
 source.TextXAlignment = Enum.TextXAlignment.Left
 source.TextYAlignment = Enum.TextYAlignment.Top
-source.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+source.TextStrokeColor3 = TEXT_OUTLINE
 source.TextStrokeTransparency = 0
 
 commentsLabel.Name = "Comments"
@@ -542,7 +553,7 @@ commentsLabel.TextColor3 = Color3.new(0.231373, 0.784314, 0.231373)
 commentsLabel.TextSize = 15
 commentsLabel.TextXAlignment = Enum.TextXAlignment.Left
 commentsLabel.TextYAlignment = Enum.TextYAlignment.Top
-commentsLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+commentsLabel.TextStrokeColor3 = TEXT_OUTLINE
 commentsLabel.TextStrokeTransparency = 0
 
 globalsLabel.Name = "Globals"
@@ -557,7 +568,7 @@ globalsLabel.TextColor3 = Color3.new(0.517647, 0.839216, 0.968628)
 globalsLabel.TextSize = 15
 globalsLabel.TextXAlignment = Enum.TextXAlignment.Left
 globalsLabel.TextYAlignment = Enum.TextYAlignment.Top
-globalsLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+globalsLabel.TextStrokeColor3 = TEXT_OUTLINE
 globalsLabel.TextStrokeTransparency = 0
 
 keywordsLabel.Name = "Keywords"
@@ -572,7 +583,7 @@ keywordsLabel.TextColor3 = Color3.new(0.972549, 0.427451, 0.486275)
 keywordsLabel.TextSize = 15
 keywordsLabel.TextXAlignment = Enum.TextXAlignment.Left
 keywordsLabel.TextYAlignment = Enum.TextYAlignment.Top
-keywordsLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+keywordsLabel.TextStrokeColor3 = TEXT_OUTLINE
 keywordsLabel.TextStrokeTransparency = 0
 
 remoteHighlight.Name = "RemoteHighlight"
@@ -587,7 +598,7 @@ remoteHighlight.TextColor3 = Color3.new(0, 0.568627, 1)
 remoteHighlight.TextSize = 15
 remoteHighlight.TextXAlignment = Enum.TextXAlignment.Left
 remoteHighlight.TextYAlignment = Enum.TextYAlignment.Top
-remoteHighlight.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+remoteHighlight.TextStrokeColor3 = TEXT_OUTLINE
 remoteHighlight.TextStrokeTransparency = 0
 
 stringsLabel.Name = "Strings"
@@ -602,7 +613,7 @@ stringsLabel.TextColor3 = Color3.new(0.678431, 0.945098, 0.584314)
 stringsLabel.TextSize = 15
 stringsLabel.TextXAlignment = Enum.TextXAlignment.Left
 stringsLabel.TextYAlignment = Enum.TextYAlignment.Top
-stringsLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+stringsLabel.TextStrokeColor3 = TEXT_OUTLINE
 stringsLabel.TextStrokeTransparency = 0
 
 tokensLabel.Name = "Tokens"
@@ -613,11 +624,11 @@ tokensLabel.Size = UDim2.new(1, 0, 1, 0)
 tokensLabel.ZIndex = 5
 tokensLabel.Font = Enum.Font.Code
 tokensLabel.Text = ""
-tokensLabel.TextColor3 = Color3.new(1, 1, 1)
+tokensLabel.TextColor3 = TEXT_COLOR
 tokensLabel.TextSize = 15
 tokensLabel.TextXAlignment = Enum.TextXAlignment.Left
 tokensLabel.TextYAlignment = Enum.TextYAlignment.Top
-tokensLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+tokensLabel.TextStrokeColor3 = TEXT_OUTLINE
 tokensLabel.TextStrokeTransparency = 0
 
 numbersLabel.Name = "Numbers"
@@ -632,7 +643,7 @@ numbersLabel.TextColor3 = Color3.new(1, 0.776471, 0)
 numbersLabel.TextSize = 15
 numbersLabel.TextXAlignment = Enum.TextXAlignment.Left
 numbersLabel.TextYAlignment = Enum.TextYAlignment.Top
-numbersLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+numbersLabel.TextStrokeColor3 = TEXT_OUTLINE
 numbersLabel.TextStrokeTransparency = 0
 
 infoLabel.Name = "Info"
@@ -647,7 +658,7 @@ infoLabel.TextColor3 = Color3.new(0, 0.635294, 1)
 infoLabel.TextSize = 15
 infoLabel.TextXAlignment = Enum.TextXAlignment.Left
 infoLabel.TextYAlignment = Enum.TextYAlignment.Top
-infoLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+infoLabel.TextStrokeColor3 = TEXT_OUTLINE
 infoLabel.TextStrokeTransparency = 0
 
 linesLabel.Name = "Lines"
@@ -659,11 +670,11 @@ linesLabel.Size = UDim2.new(0, 40, 0, 10000)
 linesLabel.ZIndex = 4
 linesLabel.Font = Enum.Font.Code
 linesLabel.Text = "1\n"
-linesLabel.TextColor3 = Color3.new(1, 1, 1)
+linesLabel.TextColor3 = TEXT_COLOR
 linesLabel.TextSize = 15
 linesLabel.TextWrapped = true
 linesLabel.TextYAlignment = Enum.TextYAlignment.Top
-linesLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+linesLabel.TextStrokeColor3 = TEXT_OUTLINE
 linesLabel.TextStrokeTransparency = 0
 
 colorPicker.Name = "ColorPicker"
@@ -672,7 +683,7 @@ colorPicker.BackgroundColor3 = Color3.new(1, 1, 1)
 colorPicker.BackgroundTransparency = 1
 colorPicker.Size = UDim2.new(0, 180, 0, 110)
 colorPicker.Image = "rbxassetid://2851929490"
-colorPicker.ImageColor3 = Color3.new(0.203922, 0.207843, 0.219608)
+colorPicker.ImageColor3 = DROPDOWN_BG
 colorPicker.ScaleType = Enum.ScaleType.Slice
 colorPicker.SliceCenter = Rect.new(4, 4, 4, 4)
 
@@ -731,9 +742,9 @@ switchButton.Size = UDim2.new(0, 20, 0, 20)
 switchButton.ZIndex = 2
 switchButton.Font = Enum.Font.SourceSans
 switchButton.Text = ""
-switchButton.TextColor3 = Color3.new(1, 1, 1)
+switchButton.TextColor3 = TEXT_COLOR
 switchButton.TextSize = 18
-switchButton.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+switchButton.TextStrokeColor3 = TEXT_OUTLINE
 switchButton.TextStrokeTransparency = 0
 
 textButtonRoundify4px_4.Name = "TextButton_Roundify_4px"
@@ -742,7 +753,7 @@ textButtonRoundify4px_4.BackgroundColor3 = Color3.new(1, 1, 1)
 textButtonRoundify4px_4.BackgroundTransparency = 1
 textButtonRoundify4px_4.Size = UDim2.new(1, 0, 1, 0)
 textButtonRoundify4px_4.Image = "rbxassetid://2851929490"
-textButtonRoundify4px_4.ImageColor3 = Color3.new(0.160784, 0.290196, 0.478431)
+textButtonRoundify4px_4.ImageColor3 = BUTTON_COLOR
 textButtonRoundify4px_4.ImageTransparency = 0.5
 textButtonRoundify4px_4.ScaleType = Enum.ScaleType.Slice
 textButtonRoundify4px_4.SliceCenter = Rect.new(4, 4, 4, 4)
@@ -753,25 +764,25 @@ title3Label.BackgroundColor3 = Color3.new(1, 1, 1)
 title3Label.BackgroundTransparency = 1
 title3Label.Position = UDim2.new(1.20000005, 0, 0, 0)
 title3Label.Size = UDim2.new(0, 20, 0, 20)
-title3Label.Font = Enum.Font.GothamSemibold
+title3Label.Font = Enum.Font.GothamBold
 title3Label.Text = "Switch"
-title3Label.TextColor3 = Color3.new(0.784314, 0.784314, 0.784314)
+title3Label.TextColor3 = TEXT_COLOR
 title3Label.TextSize = 14
 title3Label.TextXAlignment = Enum.TextXAlignment.Left
-title3Label.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+title3Label.TextStrokeColor3 = TEXT_OUTLINE
 title3Label.TextStrokeTransparency = 0
 
 button2.Name = "Button"
 button2.Parent = prefabs
-button2.BackgroundColor3 = Color3.new(0.160784, 0.290196, 0.478431)
+button2.BackgroundColor3 = BUTTON_COLOR
 button2.BackgroundTransparency = 1
 button2.BorderSizePixel = 0
 button2.Size = UDim2.new(0, 91, 0, 20)
 button2.ZIndex = 2
-button2.Font = Enum.Font.GothamSemibold
-button2.TextColor3 = Color3.new(1, 1, 1)
+button2.Font = Enum.Font.GothamBold
+button2.TextColor3 = TEXT_COLOR
 button2.TextSize = 14
-button2.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+button2.TextStrokeColor3 = TEXT_OUTLINE
 button2.TextStrokeTransparency = 0
 
 textButtonRoundify4px_5.Name = "TextButton_Roundify_4px"
@@ -780,22 +791,22 @@ textButtonRoundify4px_5.BackgroundColor3 = Color3.new(1, 1, 1)
 textButtonRoundify4px_5.BackgroundTransparency = 1
 textButtonRoundify4px_5.Size = UDim2.new(1, 0, 1, 0)
 textButtonRoundify4px_5.Image = "rbxassetid://2851929490"
-textButtonRoundify4px_5.ImageColor3 = Color3.new(0.160784, 0.290196, 0.478431)
+textButtonRoundify4px_5.ImageColor3 = BUTTON_COLOR
 textButtonRoundify4px_5.ScaleType = Enum.ScaleType.Slice
 textButtonRoundify4px_5.SliceCenter = Rect.new(4, 4, 4, 4)
 
 dropdownButton.Name = "DropdownButton"
 dropdownButton.Parent = prefabs
-dropdownButton.BackgroundColor3 = Color3.new(0.129412, 0.133333, 0.141176)
+dropdownButton.BackgroundColor3 = DROPDOWN_BG
 dropdownButton.BorderSizePixel = 0
 dropdownButton.Size = UDim2.new(1, 0, 0, 20)
 dropdownButton.ZIndex = 3
 dropdownButton.Font = Enum.Font.GothamBold
 dropdownButton.Text = " Button"
-dropdownButton.TextColor3 = Color3.new(0.784314, 0.784314, 0.784314)
+dropdownButton.TextColor3 = TEXT_COLOR
 dropdownButton.TextSize = 14
 dropdownButton.TextXAlignment = Enum.TextXAlignment.Left
-dropdownButton.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+dropdownButton.TextStrokeColor3 = TEXT_OUTLINE
 dropdownButton.TextStrokeTransparency = 0
 
 keybind.Name = "Keybind"
@@ -804,7 +815,7 @@ keybind.BackgroundColor3 = Color3.new(1, 1, 1)
 keybind.BackgroundTransparency = 1
 keybind.Size = UDim2.new(0, 200, 0, 20)
 keybind.Image = "rbxassetid://2851929490"
-keybind.ImageColor3 = Color3.new(0.203922, 0.207843, 0.219608)
+keybind.ImageColor3 = DROPDOWN_BG
 keybind.ScaleType = Enum.ScaleType.Slice
 keybind.SliceCenter = Rect.new(4, 4, 4, 4)
 
@@ -815,10 +826,10 @@ title4Label.BackgroundTransparency = 1
 title4Label.Size = UDim2.new(0, 0, 1, 0)
 title4Label.Font = Enum.Font.GothamBold
 title4Label.Text = "Keybind"
-title4Label.TextColor3 = Color3.new(0.784314, 0.784314, 0.784314)
+title4Label.TextColor3 = TEXT_COLOR
 title4Label.TextSize = 14
 title4Label.TextXAlignment = Enum.TextXAlignment.Left
-title4Label.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+title4Label.TextStrokeColor3 = TEXT_OUTLINE
 title4Label.TextStrokeTransparency = 0
 
 inputButton.Name = "Input"
@@ -829,12 +840,12 @@ inputButton.BorderSizePixel = 0
 inputButton.Position = UDim2.new(1, -85, 0, 2)
 inputButton.Size = UDim2.new(0, 80, 1, -4)
 inputButton.ZIndex = 2
-inputButton.Font = Enum.Font.GothamSemibold
+inputButton.Font = Enum.Font.GothamBold
 inputButton.Text = "RShift"
-inputButton.TextColor3 = Color3.new(0.784314, 0.784314, 0.784314)
+inputButton.TextColor3 = TEXT_COLOR
 inputButton.TextSize = 12
 inputButton.TextWrapped = true
-inputButton.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+inputButton.TextStrokeColor3 = TEXT_OUTLINE
 inputButton.TextStrokeTransparency = 0
 
 inputRoundify4px.Name = "Input_Roundify_4px"
@@ -843,7 +854,7 @@ inputRoundify4px.BackgroundColor3 = Color3.new(1, 1, 1)
 inputRoundify4px.BackgroundTransparency = 1
 inputRoundify4px.Size = UDim2.new(1, 0, 1, 0)
 inputRoundify4px.Image = "rbxassetid://2851929490"
-inputRoundify4px.ImageColor3 = Color3.new(0.290196, 0.294118, 0.313726)
+inputRoundify4px.ImageColor3 = DROPDOWN_BG
 inputRoundify4px.ScaleType = Enum.ScaleType.Slice
 inputRoundify4px.SliceCenter = Rect.new(4, 4, 4, 4)
 
@@ -978,58 +989,62 @@ function library:FormatWindows()
     format_windows()
 end
 
--- Helper function to create panels with opaque design
-local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
+-- Helper function to create panels with the new color scheme
+local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent, isSidebar)
     local panel = {}
+    local mainColor = isSidebar and SIDEBAR_COLOR or PANEL_COLOR
     
-    -- Shadow
+    -- Shadow (very subtle)
     panel.Shadow = Instance.new("Frame")
     panel.Shadow.Name = name .. "Shadow"
     panel.Shadow.AnchorPoint = Vector2.new(0.5, 0.5)
-    panel.Shadow.Position = anchorPos + UDim2.new(0, 0, 0, 8)
+    panel.Shadow.Position = anchorPos + UDim2.new(0, 0, 0, 4)
     panel.Shadow.Size = size
     panel.Shadow.BackgroundColor3 = Color3.fromRGB(0,0,0)
-    panel.Shadow.BackgroundTransparency = 0.5
+    panel.Shadow.BackgroundTransparency = 0.3
     panel.Shadow.BorderSizePixel = 0
     panel.Shadow.ZIndex = zIndex or 0
     panel.Shadow.Parent = parent or windowsFrame
     Instance.new("UICorner", panel.Shadow).CornerRadius = UDim.new(0, cornerRadius or 20)
 
-    -- Main frame - fully opaque
+    -- Main frame - semi-transparent
     panel.Frame = Instance.new("Frame")
     panel.Frame.Name = name
     panel.Frame.AnchorPoint = Vector2.new(0.5, 0.5)
     panel.Frame.Position = anchorPos
     panel.Frame.Size = size
-    panel.Frame.BackgroundColor3 = Color3.fromRGB(255,255,255)
-    panel.Frame.BackgroundTransparency = 0
+    panel.Frame.BackgroundColor3 = mainColor
+    panel.Frame.BackgroundTransparency = 0.05
     panel.Frame.BorderSizePixel = 0
     panel.Frame.Parent = parent or windowsFrame
     Instance.new("UICorner", panel.Frame).CornerRadius = UDim.new(0, cornerRadius or 20)
 
+    -- Border
     local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(255,255,255)
-    stroke.Thickness = 2
-    stroke.Transparency = 0.3
+    stroke.Color = BORDER_COLOR
+    stroke.Thickness = 1.5
+    stroke.Transparency = 0.6
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     stroke.Parent = panel.Frame
 
+    -- Gradient
     local gradient = Instance.new("UIGradient")
     gradient.Rotation = 90
     gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0.00, Color3.fromRGB(110,45,220)),
-        ColorSequenceKeypoint.new(0.45, Color3.fromRGB(176,96,244)),
-        ColorSequenceKeypoint.new(1.00, Color3.fromRGB(236,198,255))
+        ColorSequenceKeypoint.new(0.00, Color3.fromRGB(154, 89, 255)),
+        ColorSequenceKeypoint.new(0.50, mainColor),
+        ColorSequenceKeypoint.new(1.00, Color3.fromRGB(108, 43, 217))
     }
     gradient.Parent = panel.Frame
 
+    -- Marble texture (subtle, 80% transparency)
     local marble = Instance.new("ImageLabel")
     marble.Name = "MarbleTexture"
     marble.Size = UDim2.fromScale(1,1)
     marble.BackgroundTransparency = 1
     marble.BorderSizePixel = 0
     marble.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=133709037992585&width=678&height=810&format=png"
-    marble.ImageTransparency = 0
+    marble.ImageTransparency = 0.8
     marble.ScaleType = Enum.ScaleType.Stretch
     marble.Parent = panel.Frame
     Instance.new("UICorner", marble).CornerRadius = UDim.new(0, cornerRadius or 20)
@@ -1051,16 +1066,16 @@ function library:AddWindow(title, options)
     local SideHeight = 0.75
     local Gap = 0.025
 
-    -- Main panel (perfectly centered)
+    -- Main panel (lighter)
     local MainSize = UDim2.fromScale(MainWidth, MainHeight)
     local MainPos = UDim2.fromScale(0.5, 0.5)
-    local MainPanel = CreatePanel("Main_" .. windows, MainPos, MainSize, 20, 1, windowsFrame)
+    local MainPanel = CreatePanel("Main_" .. windows, MainPos, MainSize, 20, 1, windowsFrame, false)
 
-    -- Side panel
+    -- Side panel (darker for visual hierarchy)
     local SideX = (0.5 - MainWidth/2) - Gap - SideWidth/2
     local SidePos = UDim2.new(SideX, 0, 0.5, 0)
     local SideSize = UDim2.fromScale(SideWidth, SideHeight)
-    local SidePanel = CreatePanel("Side_" .. windows, SidePos, SideSize, 20, 1, windowsFrame)
+    local SidePanel = CreatePanel("Side_" .. windows, SidePos, SideSize, 20, 1, windowsFrame, true)
 
     -- HEADER
     local HeaderShadow = Instance.new("Frame")
@@ -1069,7 +1084,7 @@ function library:AddWindow(title, options)
     HeaderShadow.Position = UDim2.new(0.5, 2, -0.04, 4)
     HeaderShadow.Size = UDim2.fromScale(0.5, 0.09)
     HeaderShadow.BackgroundColor3 = Color3.fromRGB(0,0,0)
-    HeaderShadow.BackgroundTransparency = 0.4
+    HeaderShadow.BackgroundTransparency = 0.3
     HeaderShadow.BorderSizePixel = 0
     HeaderShadow.ZIndex = 0
     HeaderShadow.Parent = MainPanel.Frame
@@ -1080,12 +1095,26 @@ function library:AddWindow(title, options)
     Header.AnchorPoint = Vector2.new(0.5,0)
     Header.Position = UDim2.new(0.5,0,-0.04,0)
     Header.Size = UDim2.fromScale(0.5,0.09)
-    Header.BackgroundColor3 = Color3.fromRGB(255,255,255)
+    Header.BackgroundColor3 = PANEL_COLOR
+    Header.BackgroundTransparency = 0.1
     Header.BorderSizePixel = 0
     Header.Parent = MainPanel.Frame
     Instance.new("UICorner", Header).CornerRadius = UDim.new(0,18)
 
-    local HeaderGradient = MainPanel.Frame:FindFirstChildWhichIsA("UIGradient"):Clone()
+    -- Header border
+    local headerStroke = Instance.new("UIStroke")
+    headerStroke.Color = BORDER_COLOR
+    headerStroke.Thickness = 1.5
+    headerStroke.Transparency = 0.5
+    headerStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    headerStroke.Parent = Header
+
+    local HeaderGradient = Instance.new("UIGradient")
+    HeaderGradient.Rotation = 90
+    HeaderGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0.00, Color3.fromRGB(154, 89, 255)),
+        ColorSequenceKeypoint.new(1.00, PANEL_COLOR)
+    }
     HeaderGradient.Parent = Header
 
     local HeaderMarble = Instance.new("ImageLabel")
@@ -1093,7 +1122,7 @@ function library:AddWindow(title, options)
     HeaderMarble.BackgroundTransparency = 1
     HeaderMarble.BorderSizePixel = 0
     HeaderMarble.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=133709037992585&width=678&height=810&format=png"
-    HeaderMarble.ImageTransparency = 0
+    HeaderMarble.ImageTransparency = 0.8
     HeaderMarble.ScaleType = Enum.ScaleType.Stretch
     HeaderMarble.Parent = Header
     Instance.new("UICorner", HeaderMarble).CornerRadius = UDim.new(0, 18)
@@ -1104,19 +1133,19 @@ function library:AddWindow(title, options)
     TitleLabel.Position = UDim2.fromScale(0.5,0.5)
     TitleLabel.Size = UDim2.fromScale(0.9,0.8)
     TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Font = Enum.Font.Bangers
+    TitleLabel.Font = Enum.Font.GothamBold
     TitleLabel.Text = title
     TitleLabel.TextScaled = true
-    TitleLabel.TextColor3 = Color3.fromRGB(255,255,255)
-    TitleLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+    TitleLabel.TextColor3 = TEXT_COLOR
+    TitleLabel.TextStrokeColor3 = TEXT_OUTLINE
     TitleLabel.TextStrokeTransparency = 0
     TitleLabel.Parent = Header
 
-    -- CLOSE/MINIMIZE BUTTON (original position - NOT moved)
+    -- CLOSE/MINIMIZE BUTTON (original position)
     local CloseButton = Instance.new("ImageButton")
     CloseButton.Name = "CloseButton"
     CloseButton.AnchorPoint = Vector2.new(0.5, 0.5)
-    CloseButton.Position = UDim2.new(1, 0, 0, 0)  -- original, no offset
+    CloseButton.Position = UDim2.new(1, 0, 0, 0)
     CloseButton.Size = UDim2.fromOffset(56, 56)
     CloseButton.BackgroundTransparency = 1
     CloseButton.BorderSizePixel = 0
@@ -1133,11 +1162,11 @@ function library:AddWindow(title, options)
         CloseButton:TweenSize(UDim2.fromOffset(56, 56), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
 
-    -- MINIMIZED STATE (restore/circle button) - moved LEFT to avoid being cut off
+    -- MINIMIZED STATE (restore/circle button) - moved to be fully visible
     local MinimizedFrame = Instance.new("ImageButton")
     MinimizedFrame.Name = "MinimizedFrame_" .. windows
     MinimizedFrame.AnchorPoint = Vector2.new(1, 0)
-    MinimizedFrame.Position = UDim2.new(1, -50, 0, 20)  -- moved left (was -20, now -50)
+    MinimizedFrame.Position = UDim2.new(1, -50, 0, 20)
     MinimizedFrame.Size = UDim2.fromOffset(60, 60)
     MinimizedFrame.BackgroundTransparency = 1
     MinimizedFrame.BorderSizePixel = 0
@@ -1149,7 +1178,7 @@ function library:AddWindow(title, options)
     Instance.new("UICorner", MinimizedFrame).CornerRadius = UDim.new(1, 0)
 
     local MinimizedStroke = Instance.new("UIStroke")
-    MinimizedStroke.Color = Color3.fromRGB(255,255,255)
+    MinimizedStroke.Color = BORDER_COLOR
     MinimizedStroke.Thickness = 2
     MinimizedStroke.Transparency = 0.3
     MinimizedStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
@@ -1163,9 +1192,9 @@ function library:AddWindow(title, options)
             local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
 
             TweenService:Create(MainPanel.Frame, tweenInfo, {Size = targetSize, Position = targetPos}):Play()
-            TweenService:Create(MainPanel.Shadow, tweenInfo, {Size = targetSize, Position = targetPos + UDim2.new(0,0,0,8)}):Play()
+            TweenService:Create(MainPanel.Shadow, tweenInfo, {Size = targetSize, Position = targetPos + UDim2.new(0,0,0,4)}):Play()
             TweenService:Create(SidePanel.Frame, tweenInfo, {Size = targetSize, Position = targetPos + UDim2.new(0,0,0,0)}):Play()
-            TweenService:Create(SidePanel.Shadow, tweenInfo, {Size = targetSize, Position = targetPos + UDim2.new(0,0,0,8)}):Play()
+            TweenService:Create(SidePanel.Shadow, tweenInfo, {Size = targetSize, Position = targetPos + UDim2.new(0,0,0,4)}):Play()
 
             task.wait(0.3)
             MainPanel.Frame.Visible = false
@@ -1189,9 +1218,9 @@ function library:AddWindow(title, options)
 
         local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
         TweenService:Create(MainPanel.Frame, tweenInfo, {Size = MainSize, Position = MainPos}):Play()
-        TweenService:Create(MainPanel.Shadow, tweenInfo, {Size = MainSize, Position = MainPos + UDim2.new(0,0,0,8)}):Play()
+        TweenService:Create(MainPanel.Shadow, tweenInfo, {Size = MainSize, Position = MainPos + UDim2.new(0,0,0,4)}):Play()
         TweenService:Create(SidePanel.Frame, tweenInfo, {Size = SideSize, Position = SidePos}):Play()
-        TweenService:Create(SidePanel.Shadow, tweenInfo, {Size = SideSize, Position = SidePos + UDim2.new(0,0,0,8)}):Play()
+        TweenService:Create(SidePanel.Shadow, tweenInfo, {Size = SideSize, Position = SidePos + UDim2.new(0,0,0,4)}):Play()
         isMinimized = false
     end)
 
@@ -1200,8 +1229,8 @@ function library:AddWindow(title, options)
     local Window = MainPanel.Frame
     local Tabs = Instance.new("Frame")
     Tabs.Name = "Tabs"
-    Tabs.Size = UDim2.new(1, -20, 1, -40)
-    Tabs.Position = UDim2.new(0, 10, 0, 30)
+    Tabs.Size = UDim2.new(1, -30, 1, -40)  -- Added padding
+    Tabs.Position = UDim2.new(0, 15, 0, 30) -- Left margin
     Tabs.BackgroundTransparency = 1
     Tabs.BorderSizePixel = 0
     Tabs.Parent = MainPanel.Frame
@@ -1218,42 +1247,42 @@ function library:AddWindow(title, options)
     
     local TabButtonsList = Instance.new("UIListLayout")
     TabButtonsList.SortOrder = Enum.SortOrder.LayoutOrder
-    TabButtonsList.Padding = UDim.new(0, 5)
+    TabButtonsList.Padding = UDim.new(0, 8)
     TabButtonsList.Parent = TabButtons
 
-    do -- Add Tab (improved version)
+    do -- Add Tab
         function window_data:AddTab(tab_name)
             local tab_data = {}
             tab_name = tostring(tab_name or "New Tab")
             
-            -- Create tab button with improved visibility
+            -- Create tab button
             local new_button = Instance.new("TextButton")
             new_button.Name = "TabButton_" .. tab_name
             new_button.Size = UDim2.new(1, 0, 0, 35)
-            new_button.BackgroundTransparency = 0.2
-            new_button.BackgroundColor3 = Color3.fromRGB(80, 40, 120)
+            new_button.BackgroundTransparency = 0.3
+            new_button.BackgroundColor3 = SIDEBAR_COLOR
             new_button.BorderSizePixel = 0
-            new_button.Font = Enum.Font.LuckiestGuy
+            new_button.Font = Enum.Font.GothamBold
             new_button.Text = tab_name
-            new_button.TextColor3 = Color3.fromRGB(255, 255, 255)
+            new_button.TextColor3 = TEXT_COLOR
             new_button.TextScaled = true
             new_button.TextSize = 14
-            new_button.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            new_button.TextStrokeColor3 = TEXT_OUTLINE
             new_button.TextStrokeTransparency = 0
             new_button.Parent = TabButtons
             Instance.new("UICorner", new_button).CornerRadius = UDim.new(0, 10)
             
-            -- Purple gradient on button
+            -- Gradient on button (subtle)
             local buttonGradient = Instance.new("UIGradient")
             buttonGradient.Rotation = 90
             buttonGradient.Color = ColorSequence.new{
-                ColorSequenceKeypoint.new(0.00, Color3.fromRGB(110,45,220)),
-                ColorSequenceKeypoint.new(1.00, Color3.fromRGB(176,96,244))
+                ColorSequenceKeypoint.new(0.00, Color3.fromRGB(154, 89, 255)),
+                ColorSequenceKeypoint.new(1.00, BUTTON_COLOR)
             }
             buttonGradient.Parent = new_button
             
             -- Update canvas size
-            TabButtons.CanvasSize = UDim2.new(0, 0, 0, (#TabButtons:GetChildren() - 1) * 40)
+            TabButtons.CanvasSize = UDim2.new(0, 0, 0, (#TabButtons:GetChildren() - 1) * 43)
             
             -- Create tab content
             local tabContainer = Instance.new("ScrollingFrame")
@@ -1268,14 +1297,14 @@ function library:AddWindow(title, options)
             
             local tabLayout = Instance.new("UIListLayout")
             tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-            tabLayout.Padding = UDim.new(0, 5)
+            tabLayout.Padding = UDim.new(0, 12)  -- Increased spacing
             tabLayout.Parent = tabContainer
             
             tabLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                tabContainer.CanvasSize = UDim2.new(0, 0, 0, tabLayout.AbsoluteContentSize.Y + 10)
+                tabContainer.CanvasSize = UDim2.new(0, 0, 0, tabLayout.AbsoluteContentSize.Y + 20)
             end)
             task.delay(0.1, function()
-                tabContainer.CanvasSize = UDim2.new(0, 0, 0, tabLayout.AbsoluteContentSize.Y + 10)
+                tabContainer.CanvasSize = UDim2.new(0, 0, 0, tabLayout.AbsoluteContentSize.Y + 20)
             end)
             
             -- Highlight indicator
@@ -1284,7 +1313,7 @@ function library:AddWindow(title, options)
             selectedIndicator.Size = UDim2.new(0, 4, 0, 4)
             selectedIndicator.Position = UDim2.new(0, 1, 0.5)
             selectedIndicator.AnchorPoint = Vector2.new(0, 0.5)
-            selectedIndicator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            selectedIndicator.BackgroundColor3 = SELECTED_COLOR
             selectedIndicator.BackgroundTransparency = 1
             selectedIndicator.BorderSizePixel = 0
             selectedIndicator.Parent = new_button
@@ -1295,8 +1324,8 @@ function library:AddWindow(title, options)
                 -- Reset all tabs
                 for i, v in pairs(TabButtons:GetChildren()) do
                     if v:IsA("TextButton") then
-                        v.BackgroundTransparency = 0.2
-                        v.BackgroundColor3 = Color3.fromRGB(80, 40, 120)
+                        v.BackgroundTransparency = 0.3
+                        v.BackgroundColor3 = SIDEBAR_COLOR
                         local ind = v:FindFirstChild("SelectedIndicator")
                         if ind then
                             ind.Size = UDim2.new(0, 4, 0, 4)
@@ -1311,14 +1340,14 @@ function library:AddWindow(title, options)
                 end
                 -- Activate current tab
                 new_button.BackgroundTransparency = 0.1
-                new_button.BackgroundColor3 = Color3.fromRGB(176, 96, 244)
+                new_button.BackgroundColor3 = SELECTED_COLOR
                 if selectedIndicator then
                     selectedIndicator.Size = UDim2.new(0, 4, 0, 16)
                     selectedIndicator.BackgroundTransparency = 0
                 end
                 tabContainer.Visible = true
                 task.delay(0.05, function()
-                    tabContainer.CanvasSize = UDim2.new(0, 0, 0, tabLayout.AbsoluteContentSize.Y + 10)
+                    tabContainer.CanvasSize = UDim2.new(0, 0, 0, tabLayout.AbsoluteContentSize.Y + 20)
                 end)
             end
             
@@ -1330,20 +1359,19 @@ function library:AddWindow(title, options)
                 show()
             end
             
-            -- All tab elements now parent to tabContainer (the ScrollingFrame)
-            -- Each element gets black outline
+            -- All tab elements with updated colors and spacing
             function tab_data:AddLabel(label_text)
                 label_text = tostring(label_text or "New Label")
                 local label = Instance.new("TextLabel")
                 label.BackgroundColor3 = Color3.new(1, 1, 1)
                 label.BackgroundTransparency = 1
-                label.Size = UDim2.new(1, 0, 0, 20)
-                label.Font = Enum.Font.GothamSemibold
+                label.Size = UDim2.new(1, 0, 0, 24)
+                label.Font = Enum.Font.GothamBold
                 label.Text = label_text
-                label.TextColor3 = Color3.new(1, 1, 1)
+                label.TextColor3 = TEXT_COLOR
                 label.TextSize = 14
                 label.TextXAlignment = Enum.TextXAlignment.Left
-                label.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                label.TextStrokeColor3 = TEXT_OUTLINE
                 label.TextStrokeTransparency = 0
                 label.Parent = tabContainer
                 return label
@@ -1354,14 +1382,15 @@ function library:AddWindow(title, options)
                 callback = typeof(callback) == "function" and callback or function()end
                 
                 local button = Instance.new("TextButton")
-                button.Size = UDim2.new(1, 0, 0, 35)
-                button.BackgroundColor3 = options.main_color or Color3.fromRGB(110,45,220)
+                button.Size = UDim2.new(1, 0, 0, 38)
+                button.BackgroundColor3 = BUTTON_COLOR
+                button.BackgroundTransparency = 0.1
                 button.BorderSizePixel = 0
                 button.Font = Enum.Font.GothamBold
                 button.Text = button_text
-                button.TextColor3 = Color3.fromRGB(255, 255, 255)
+                button.TextColor3 = TEXT_COLOR
                 button.TextSize = 14
-                button.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                button.TextStrokeColor3 = TEXT_OUTLINE
                 button.TextStrokeTransparency = 0
                 button.Parent = tabContainer
                 Instance.new("UICorner", button).CornerRadius = UDim.new(0, 10)
@@ -1369,10 +1398,18 @@ function library:AddWindow(title, options)
                 local btnGradient = Instance.new("UIGradient")
                 btnGradient.Rotation = 90
                 btnGradient.Color = ColorSequence.new{
-                    ColorSequenceKeypoint.new(0.00, options.main_color or Color3.fromRGB(110,45,220)),
-                    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(176,96,244))
+                    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(154, 89, 255)),
+                    ColorSequenceKeypoint.new(1.00, BUTTON_COLOR)
                 }
                 btnGradient.Parent = button
+                
+                -- Button border
+                local btnStroke = Instance.new("UIStroke")
+                btnStroke.Color = BORDER_COLOR
+                btnStroke.Thickness = 1
+                btnStroke.Transparency = 0.5
+                btnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                btnStroke.Parent = button
                 
                 button.MouseButton1Click:Connect(function()
                     ripple(button, mouse.X, mouse.Y)
@@ -1387,36 +1424,44 @@ function library:AddWindow(title, options)
                 callback = typeof(callback) == "function" and callback or function()end
                 
                 local switchFrame = Instance.new("Frame")
-                switchFrame.Size = UDim2.new(1, 0, 0, 35)
+                switchFrame.Size = UDim2.new(1, 0, 0, 38)
                 switchFrame.BackgroundTransparency = 1
                 switchFrame.BorderSizePixel = 0
                 switchFrame.Parent = tabContainer
                 
                 local switchButton = Instance.new("TextButton")
-                switchButton.Size = UDim2.new(0, 30, 0, 30)
-                switchButton.Position = UDim2.new(0, 5, 0, 2)
+                switchButton.Size = UDim2.new(0, 32, 0, 32)
+                switchButton.Position = UDim2.new(0, 2, 0, 3)
                 switchButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                 switchButton.BackgroundTransparency = 0.7
                 switchButton.BorderSizePixel = 0
                 switchButton.Font = Enum.Font.SourceSans
                 switchButton.Text = ""
-                switchButton.TextColor3 = Color3.new(1, 1, 1)
+                switchButton.TextColor3 = TEXT_COLOR
                 switchButton.TextSize = 18
-                switchButton.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                switchButton.TextStrokeColor3 = TEXT_OUTLINE
                 switchButton.TextStrokeTransparency = 0
                 switchButton.Parent = switchFrame
                 Instance.new("UICorner", switchButton).CornerRadius = UDim.new(0, 8)
+                
+                -- Switch border
+                local switchStroke = Instance.new("UIStroke")
+                switchStroke.Color = BORDER_COLOR
+                switchStroke.Thickness = 1
+                switchStroke.Transparency = 0.5
+                switchStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                switchStroke.Parent = switchButton
                 
                 local titleLabel = Instance.new("TextLabel")
                 titleLabel.Size = UDim2.new(1, -45, 1, 0)
                 titleLabel.Position = UDim2.new(0, 40, 0, 0)
                 titleLabel.BackgroundTransparency = 1
-                titleLabel.Font = Enum.Font.GothamSemibold
+                titleLabel.Font = Enum.Font.GothamBold
                 titleLabel.Text = switch_text
-                titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                titleLabel.TextColor3 = TEXT_COLOR
                 titleLabel.TextSize = 14
                 titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-                titleLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                titleLabel.TextStrokeColor3 = TEXT_OUTLINE
                 titleLabel.TextStrokeTransparency = 0
                 titleLabel.Parent = switchFrame
                 
@@ -1425,9 +1470,11 @@ function library:AddWindow(title, options)
                     toggled = not toggled
                     switchButton.Text = toggled and utf8.char(10003) or ""
                     if toggled then
-                        switchButton.BackgroundTransparency = 0.3
+                        switchButton.BackgroundTransparency = 0.2
+                        switchButton.BackgroundColor3 = SELECTED_COLOR
                     else
                         switchButton.BackgroundTransparency = 0.7
+                        switchButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                     end
                     pcall(callback, toggled)
                 end)
@@ -1436,9 +1483,11 @@ function library:AddWindow(title, options)
                     toggled = (typeof(bool) == "boolean") and bool or false
                     switchButton.Text = toggled and utf8.char(10003) or ""
                     if toggled then
-                        switchButton.BackgroundTransparency = 0.3
+                        switchButton.BackgroundTransparency = 0.2
+                        switchButton.BackgroundColor3 = SELECTED_COLOR
                     else
                         switchButton.BackgroundTransparency = 0.7
+                        switchButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                     end
                     pcall(callback, toggled)
                 end
@@ -1454,20 +1503,28 @@ function library:AddWindow(title, options)
                 }
                 
                 local textbox = Instance.new("TextBox")
-                textbox.Size = UDim2.new(1, 0, 0, 35)
-                textbox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                textbox.BackgroundTransparency = 0.8
+                textbox.Size = UDim2.new(1, 0, 0, 38)
+                textbox.BackgroundColor3 = DROPDOWN_BG
+                textbox.BackgroundTransparency = 0.3
                 textbox.BorderSizePixel = 0
-                textbox.Font = Enum.Font.GothamSemibold
-                textbox.PlaceholderColor3 = Color3.fromRGB(200, 200, 200)
+                textbox.Font = Enum.Font.GothamBold
+                textbox.PlaceholderColor3 = TEXT_COLOR
                 textbox.PlaceholderText = textbox_text
                 textbox.Text = ""
-                textbox.TextColor3 = Color3.fromRGB(255, 255, 255)
+                textbox.TextColor3 = TEXT_COLOR
                 textbox.TextSize = 14
-                textbox.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                textbox.TextStrokeColor3 = TEXT_OUTLINE
                 textbox.TextStrokeTransparency = 0
                 textbox.Parent = tabContainer
                 Instance.new("UICorner", textbox).CornerRadius = UDim.new(0, 10)
+                
+                -- TextBox border
+                local tbStroke = Instance.new("UIStroke")
+                tbStroke.Color = BORDER_COLOR
+                tbStroke.Thickness = 1
+                tbStroke.Transparency = 0.5
+                tbStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                tbStroke.Parent = textbox
                 
                 textbox.FocusLost:Connect(function(ep)
                     if ep then
@@ -1494,48 +1551,55 @@ function library:AddWindow(title, options)
                 }
                 
                 local slider = Instance.new("Frame")
-                slider.Size = UDim2.new(1, 0, 0, 40)
+                slider.Size = UDim2.new(1, 0, 0, 45)
                 slider.BackgroundTransparency = 1
                 slider.BorderSizePixel = 0
                 slider.Parent = tabContainer
                 
                 local title = Instance.new("TextLabel")
-                title.Size = UDim2.new(1, 0, 0, 15)
+                title.Size = UDim2.new(1, 0, 0, 16)
                 title.BackgroundTransparency = 1
                 title.Font = Enum.Font.GothamBold
                 title.Text = slider_text
-                title.TextColor3 = Color3.fromRGB(255, 255, 255)
-                title.TextSize = 12
+                title.TextColor3 = TEXT_COLOR
+                title.TextSize = 13
                 title.TextXAlignment = Enum.TextXAlignment.Left
-                title.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                title.TextStrokeColor3 = TEXT_OUTLINE
                 title.TextStrokeTransparency = 0
                 title.Parent = slider
                 
                 local sliderBg = Instance.new("Frame")
-                sliderBg.Size = UDim2.new(1, -50, 0, 15)
-                sliderBg.Position = UDim2.new(0, 0, 0, 20)
-                sliderBg.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                sliderBg.BackgroundTransparency = 0.8
+                sliderBg.Size = UDim2.new(1, -50, 0, 14)
+                sliderBg.Position = UDim2.new(0, 0, 0, 22)
+                sliderBg.BackgroundColor3 = DROPDOWN_BG
+                sliderBg.BackgroundTransparency = 0.3
                 sliderBg.BorderSizePixel = 0
                 sliderBg.Parent = slider
                 Instance.new("UICorner", sliderBg).CornerRadius = UDim.new(0, 7)
                 
+                local sliderStroke = Instance.new("UIStroke")
+                sliderStroke.Color = BORDER_COLOR
+                sliderStroke.Thickness = 1
+                sliderStroke.Transparency = 0.5
+                sliderStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                sliderStroke.Parent = sliderBg
+                
                 local indicator = Instance.new("Frame")
                 indicator.Size = UDim2.new(0, 0, 1, 0)
-                indicator.BackgroundColor3 = options.main_color or Color3.fromRGB(110,45,220)
+                indicator.BackgroundColor3 = SELECTED_COLOR
                 indicator.BorderSizePixel = 0
                 indicator.Parent = sliderBg
                 Instance.new("UICorner", indicator).CornerRadius = UDim.new(0, 7)
                 
                 local value = Instance.new("TextLabel")
-                value.Size = UDim2.new(0, 45, 0, 15)
-                value.Position = UDim2.new(1, -45, 0, 20)
+                value.Size = UDim2.new(0, 45, 0, 16)
+                value.Position = UDim2.new(1, -45, 0, 22)
                 value.BackgroundTransparency = 1
                 value.Font = Enum.Font.GothamBold
                 value.Text = "0"
-                value.TextColor3 = Color3.fromRGB(255, 255, 255)
+                value.TextColor3 = TEXT_COLOR
                 value.TextSize = 12
-                value.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                value.TextStrokeColor3 = TEXT_OUTLINE
                 value.TextStrokeTransparency = 0
                 value.Parent = slider
                 
@@ -1612,7 +1676,7 @@ function library:AddWindow(title, options)
                 }
                 
                 local keybindFrame = Instance.new("Frame")
-                keybindFrame.Size = UDim2.new(1, 0, 0, 35)
+                keybindFrame.Size = UDim2.new(1, 0, 0, 38)
                 keybindFrame.BackgroundTransparency = 1
                 keybindFrame.BorderSizePixel = 0
                 keybindFrame.Parent = tabContainer
@@ -1622,27 +1686,34 @@ function library:AddWindow(title, options)
                 title.BackgroundTransparency = 1
                 title.Font = Enum.Font.GothamBold
                 title.Text = keybind_name
-                title.TextColor3 = Color3.fromRGB(255, 255, 255)
+                title.TextColor3 = TEXT_COLOR
                 title.TextSize = 14
                 title.TextXAlignment = Enum.TextXAlignment.Left
-                title.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                title.TextStrokeColor3 = TEXT_OUTLINE
                 title.TextStrokeTransparency = 0
                 title.Parent = keybindFrame
                 
                 local input = Instance.new("TextButton")
                 input.Size = UDim2.new(0, 80, 1, -4)
                 input.Position = UDim2.new(1, -85, 0, 2)
-                input.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                input.BackgroundTransparency = 0.7
+                input.BackgroundColor3 = DROPDOWN_BG
+                input.BackgroundTransparency = 0.3
                 input.BorderSizePixel = 0
-                input.Font = Enum.Font.GothamSemibold
+                input.Font = Enum.Font.GothamBold
                 input.Text = "RShift"
-                input.TextColor3 = Color3.fromRGB(255, 255, 255)
+                input.TextColor3 = TEXT_COLOR
                 input.TextSize = 12
-                input.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                input.TextStrokeColor3 = TEXT_OUTLINE
                 input.TextStrokeTransparency = 0
                 input.Parent = keybindFrame
                 Instance.new("UICorner", input).CornerRadius = UDim.new(0, 8)
+                
+                local inputStroke = Instance.new("UIStroke")
+                inputStroke.Color = BORDER_COLOR
+                inputStroke.Thickness = 1
+                inputStroke.Transparency = 0.5
+                inputStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                inputStroke.Parent = input
                 
                 local shortkeys = {
                     RightControl = 'RightCtrl',
@@ -1692,19 +1763,27 @@ function library:AddWindow(title, options)
                 callback = typeof(callback) == "function" and callback or function()end
                 
                 local dropdown = Instance.new("TextButton")
-                dropdown.Size = UDim2.new(1, 0, 0, 35)
-                dropdown.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                dropdown.BackgroundTransparency = 0.8
+                dropdown.Size = UDim2.new(1, 0, 0, 38)
+                dropdown.BackgroundColor3 = DROPDOWN_BG
+                dropdown.BackgroundTransparency = 0.3
                 dropdown.BorderSizePixel = 0
                 dropdown.Font = Enum.Font.GothamBold
                 dropdown.Text = " " .. dropdown_name
-                dropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
+                dropdown.TextColor3 = TEXT_COLOR
                 dropdown.TextSize = 14
                 dropdown.TextXAlignment = Enum.TextXAlignment.Left
-                dropdown.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                dropdown.TextStrokeColor3 = TEXT_OUTLINE
                 dropdown.TextStrokeTransparency = 0
                 dropdown.Parent = tabContainer
                 Instance.new("UICorner", dropdown).CornerRadius = UDim.new(0, 10)
+                
+                -- Dropdown border
+                local ddStroke = Instance.new("UIStroke")
+                ddStroke.Color = BORDER_COLOR
+                ddStroke.Thickness = 1
+                ddStroke.Transparency = 0.5
+                ddStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                ddStroke.Parent = dropdown
                 
                 local indicator = Instance.new("TextLabel")
                 indicator.Size = UDim2.new(0, 20, 1, 0)
@@ -1712,21 +1791,29 @@ function library:AddWindow(title, options)
                 indicator.BackgroundTransparency = 1
                 indicator.Font = Enum.Font.GothamBold
                 indicator.Text = "▼"
-                indicator.TextColor3 = Color3.fromRGB(255, 255, 255)
+                indicator.TextColor3 = TEXT_COLOR
                 indicator.TextSize = 14
-                indicator.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                indicator.TextStrokeColor3 = TEXT_OUTLINE
                 indicator.TextStrokeTransparency = 0
                 indicator.Parent = dropdown
                 
                 local box = Instance.new("Frame")
                 box.Size = UDim2.new(1, 0, 0, 0)
                 box.Position = UDim2.new(0, 0, 1, 5)
-                box.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                box.BackgroundTransparency = 0.9
+                box.BackgroundColor3 = DROPDOWN_BG
+                box.BackgroundTransparency = 0.1
                 box.BorderSizePixel = 0
                 box.ClipsDescendants = true
                 box.Parent = dropdown
                 Instance.new("UICorner", box).CornerRadius = UDim.new(0, 10)
+                
+                -- Box border
+                local boxStroke = Instance.new("UIStroke")
+                boxStroke.Color = BORDER_COLOR
+                boxStroke.Thickness = 1
+                boxStroke.Transparency = 0.5
+                boxStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                boxStroke.Parent = box
                 
                 local objects = Instance.new("ScrollingFrame")
                 objects.Name = "Objects"
@@ -1744,10 +1831,10 @@ function library:AddWindow(title, options)
                 local open = false
                 dropdown.MouseButton1Click:Connect(function()
                     open = not open
-                    local len = (#objects:GetChildren() - 1) * 35
+                    local len = (#objects:GetChildren() - 1) * 38
                     if #objects:GetChildren() - 1 >= 10 then
-                        len = 10 * 35
-                        objects.CanvasSize = UDim2.new(0, 0, 0, (#objects:GetChildren() - 1) * 35)
+                        len = 10 * 38
+                        objects.CanvasSize = UDim2.new(0, 0, 0, (#objects:GetChildren() - 1) * 38)
                     end
                     if open then
                         if dropdown_open then return end
@@ -1766,31 +1853,33 @@ function library:AddWindow(title, options)
                     n = tostring(n or "New Object")
                     
                     local object = Instance.new("TextButton")
-                    object.Size = UDim2.new(1, 0, 0, 35)
-                    object.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                    object.BackgroundTransparency = 0.9
+                    object.Size = UDim2.new(1, 0, 0, 38)
+                    object.BackgroundColor3 = DROPDOWN_BG
+                    object.BackgroundTransparency = 0.3
                     object.BorderSizePixel = 0
                     object.Font = Enum.Font.GothamBold
                     object.Text = n
-                    object.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    object.TextColor3 = TEXT_COLOR
                     object.TextSize = 14
                     object.TextXAlignment = Enum.TextXAlignment.Left
-                    object.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                    object.TextStrokeColor3 = TEXT_OUTLINE
                     object.TextStrokeTransparency = 0
                     object.Parent = objects
                     
                     object.MouseEnter:Connect(function()
-                        object.BackgroundTransparency = 0.7
+                        object.BackgroundTransparency = 0.1
+                        object.BackgroundColor3 = SELECTED_COLOR
                     end)
                     object.MouseLeave:Connect(function()
-                        object.BackgroundTransparency = 0.9
+                        object.BackgroundTransparency = 0.3
+                        object.BackgroundColor3 = DROPDOWN_BG
                     end)
                     
                     if open then
-                        local len = (#objects:GetChildren() - 1) * 35
+                        local len = (#objects:GetChildren() - 1) * 38
                         if #objects:GetChildren() - 1 >= 10 then
-                            len = 10 * 35
-                            objects.CanvasSize = UDim2.new(0, 0, 0, (#objects:GetChildren() - 1) * 35)
+                            len = 10 * 38
+                            objects.CanvasSize = UDim2.new(0, 0, 0, (#objects:GetChildren() - 1) * 38)
                         end
                         Resize(box, {Size = UDim2.new(1, 0, 0, len)}, options.tween_time)
                     end
@@ -1819,12 +1908,19 @@ function library:AddWindow(title, options)
                 callback = typeof(callback) == "function" and callback or function()end
                 
                 local color_picker = Instance.new("Frame")
-                color_picker.Size = UDim2.new(1, 0, 0, 110)
-                color_picker.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                color_picker.BackgroundTransparency = 0.8
+                color_picker.Size = UDim2.new(1, 0, 0, 120)
+                color_picker.BackgroundColor3 = DROPDOWN_BG
+                color_picker.BackgroundTransparency = 0.3
                 color_picker.BorderSizePixel = 0
                 color_picker.Parent = tabContainer
                 Instance.new("UICorner", color_picker).CornerRadius = UDim.new(0, 10)
+                
+                local cpStroke = Instance.new("UIStroke")
+                cpStroke.Color = BORDER_COLOR
+                cpStroke.Thickness = 1
+                cpStroke.Transparency = 0.5
+                cpStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                cpStroke.Parent = color_picker
                 
                 local palette = Instance.new("ImageLabel")
                 palette.Name = "Palette"
@@ -1959,11 +2055,18 @@ function library:AddWindow(title, options)
                 
                 local console = Instance.new("Frame")
                 console.Size = UDim2.new(1, 0, console_options.full and 1 or 0, console_options.y)
-                console.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                console.BackgroundTransparency = 0.8
+                console.BackgroundColor3 = DROPDOWN_BG
+                console.BackgroundTransparency = 0.3
                 console.BorderSizePixel = 0
                 console.Parent = tabContainer
                 Instance.new("UICorner", console).CornerRadius = UDim.new(0, 10)
+                
+                local consoleStroke = Instance.new("UIStroke")
+                consoleStroke.Color = BORDER_COLOR
+                consoleStroke.Thickness = 1
+                consoleStroke.Transparency = 0.5
+                consoleStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                consoleStroke.Parent = console
                 
                 local sf = Instance.new("ScrollingFrame")
                 sf.Size = UDim2.new(1, 0, 1, 0)
@@ -1982,11 +2085,11 @@ function library:AddWindow(title, options)
                 Source.Font = Enum.Font.Code
                 Source.MultiLine = true
                 Source.Text = ""
-                Source.TextColor3 = Color3.new(1, 1, 1)
+                Source.TextColor3 = TEXT_COLOR
                 Source.TextSize = 15
                 Source.TextXAlignment = Enum.TextXAlignment.Left
                 Source.TextYAlignment = Enum.TextYAlignment.Top
-                Source.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                Source.TextStrokeColor3 = TEXT_OUTLINE
                 Source.TextStrokeTransparency = 0
                 Source.Parent = sf
                 
@@ -1997,10 +2100,10 @@ function library:AddWindow(title, options)
                 Lines.BorderSizePixel = 0
                 Lines.Font = Enum.Font.Code
                 Lines.Text = "1\n"
-                Lines.TextColor3 = Color3.new(1, 1, 1)
+                Lines.TextColor3 = TEXT_COLOR
                 Lines.TextSize = 15
                 Lines.TextYAlignment = Enum.TextYAlignment.Top
-                Lines.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                Lines.TextStrokeColor3 = TEXT_OUTLINE
                 Lines.TextStrokeTransparency = 0
                 Lines.Parent = sf
                 
@@ -2021,7 +2124,7 @@ function library:AddWindow(title, options)
             function tab_data:AddHorizontalAlignment()
                 local ha_data = {}
                 local ha = Instance.new("Frame")
-                ha.Size = UDim2.new(1, 0, 0, 20)
+                ha.Size = UDim2.new(1, 0, 0, 24)
                 ha.BackgroundTransparency = 1
                 ha.BorderSizePixel = 0
                 ha.Parent = tabContainer
@@ -2029,7 +2132,7 @@ function library:AddWindow(title, options)
                 local haLayout = Instance.new("UIListLayout")
                 haLayout.FillDirection = Enum.FillDirection.Horizontal
                 haLayout.SortOrder = Enum.SortOrder.LayoutOrder
-                haLayout.Padding = UDim.new(0, 5)
+                haLayout.Padding = UDim.new(0, 8)
                 haLayout.Parent = ha
                 
                 function ha_data:AddButton(...)
@@ -2054,30 +2157,37 @@ function library:AddWindow(title, options)
                 folder_name = tostring(folder_name or "New Folder")
                 
                 local folder = Instance.new("Frame")
-                folder.Size = UDim2.new(1, 0, 0, 35)
-                folder.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                folder.BackgroundTransparency = 0.8
+                folder.Size = UDim2.new(1, 0, 0, 38)
+                folder.BackgroundColor3 = DROPDOWN_BG
+                folder.BackgroundTransparency = 0.3
                 folder.BorderSizePixel = 0
                 folder.Parent = tabContainer
                 Instance.new("UICorner", folder).CornerRadius = UDim.new(0, 10)
                 
+                local folderStroke = Instance.new("UIStroke")
+                folderStroke.Color = BORDER_COLOR
+                folderStroke.Thickness = 1
+                folderStroke.Transparency = 0.5
+                folderStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                folderStroke.Parent = folder
+                
                 local button = Instance.new("TextButton")
-                button.Size = UDim2.new(1, 0, 0, 35)
+                button.Size = UDim2.new(1, 0, 0, 38)
                 button.BackgroundTransparency = 1
                 button.BorderSizePixel = 0
-                button.Font = Enum.Font.GothamSemibold
+                button.Font = Enum.Font.GothamBold
                 button.Text = "▼ " .. folder_name
-                button.TextColor3 = Color3.fromRGB(255, 255, 255)
+                button.TextColor3 = TEXT_COLOR
                 button.TextSize = 14
                 button.TextXAlignment = Enum.TextXAlignment.Left
-                button.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                button.TextStrokeColor3 = TEXT_OUTLINE
                 button.TextStrokeTransparency = 0
                 button.Parent = folder
                 
                 local objects = Instance.new("Frame")
                 objects.Name = "Objects"
-                objects.Size = UDim2.new(1, -10, 1, -35)
-                objects.Position = UDim2.new(0, 10, 0, 40)
+                objects.Size = UDim2.new(1, -10, 1, -38)
+                objects.Position = UDim2.new(0, 10, 0, 43)
                 objects.BackgroundTransparency = 1
                 objects.BorderSizePixel = 0
                 objects.Visible = false
@@ -2085,14 +2195,14 @@ function library:AddWindow(title, options)
                 
                 local objectsLayout = Instance.new("UIListLayout")
                 objectsLayout.SortOrder = Enum.SortOrder.LayoutOrder
-                objectsLayout.Padding = UDim.new(0, 5)
+                objectsLayout.Padding = UDim.new(0, 10)
                 objectsLayout.Parent = objects
                 
                 local function gFolderLen()
-                    local n = 40
+                    local n = 43
                     for i,v in pairs(objects:GetChildren()) do
                         if not (v:IsA("UIListLayout")) then
-                            n = n + v.AbsoluteSize.Y + 5
+                            n = n + v.AbsoluteSize.Y + 10
                         end
                     end
                     return n
@@ -2110,7 +2220,7 @@ function library:AddWindow(title, options)
                     open = not open
                     spawn(function()
                         while true do
-                            Resize(folder, {Size = UDim2.new(1, 0, 0, (open and gFolderLen() or 35))}, options.tween_time)
+                            Resize(folder, {Size = UDim2.new(1, 0, 0, (open and gFolderLen() or 38))}, options.tween_time)
                             wait()
                         end
                     end)
