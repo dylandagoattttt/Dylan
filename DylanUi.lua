@@ -995,9 +995,9 @@ function library:AddWindow(title, options)
     
     -- LAYOUT PARAMETERS
     local MainWidth = 0.40
-    local MainHeight = 0.1p0
-    local SideWidth = 0.5
-    local SideHeight = 0.100
+    local MainHeight = 0.90
+    local SideWidth = 0.10
+    local SideHeight = 0.90
     local Gap = 0.025
 
     -- Main panel
