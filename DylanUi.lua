@@ -993,12 +993,12 @@ function library:AddWindow(title, options)
     options = (typeof(options) == "table") and options or ui_options
     options.tween_time = 0.1
     
-    -- LAYOUT PARAMETERS
-    local MainWidth = 0.40
-    local MainHeight = 0.75
-    local SideWidth = 0.15
-    local SideHeight = 0.75
-    local Gap = 0.025
+    -- LAYOUT PARAMETERS - ORIGINAL SIZE
+    local MainWidth = 0.45  -- Slightly larger for content
+    local MainHeight = 0.80
+    local SideWidth = 0.18
+    local SideHeight = 0.80
+    local Gap = 0.02
 
     -- Main panel
     local MainSize = UDim2.fromScale(MainWidth, MainHeight)
@@ -1145,47 +1145,71 @@ function library:AddWindow(title, options)
     -- Store references for original logic
     local window_data = {}
     local Window = MainPanel.Frame
-    local Tabs = Instance.new("Frame")
-    Tabs.Name = "Tabs"
-    Tabs.Size = UDim2.new(1, -20, 1, -40)
-    Tabs.Position = UDim2.new(0, 10, 0, 30)
-    Tabs.BackgroundTransparency = 1
-    Tabs.BorderSizePixel = 0
-    Tabs.Parent = MainPanel.Frame
     
-    local TabButtons = Instance.new("ScrollingFrame")
-    TabButtons.Name = "TabButtons"
-    TabButtons.Size = UDim2.new(1, -10, 1, -20)
-    TabButtons.Position = UDim2.new(0, 5, 0, 10)
-    TabButtons.BackgroundTransparency = 1
-    TabButtons.BorderSizePixel = 0
-    TabButtons.CanvasSize = UDim2.new(0, 0, 0, 0)
-    TabButtons.ScrollBarThickness = 4
-    TabButtons.Parent = SidePanel.Frame
+    -- MAIN CONTENT WITH SCROLLING
+    local MainContentContainer = Instance.new("ScrollingFrame")
+    MainContentContainer.Name = "MainContent"
+    MainContentContainer.Size = UDim2.new(1, -20, 1, -40)
+    MainContentContainer.Position = UDim2.new(0, 10, 0, 30)
+    MainContentContainer.BackgroundTransparency = 1
+    MainContentContainer.BorderSizePixel = 0
+    MainContentContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+    MainContentContainer.ScrollBarThickness = 4
+    MainContentContainer.Parent = MainPanel.Frame
+    
+    local MainContent = Instance.new("Frame")
+    MainContent.Name = "MainContentFrame"
+    MainContent.Size = UDim2.new(1, 0, 1, 0)
+    MainContent.BackgroundTransparency = 1
+    MainContent.BorderSizePixel = 0
+    MainContent.Parent = MainContentContainer
+    
+    local MainLayout = Instance.new("UIListLayout")
+    MainLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    MainLayout.Padding = UDim.new(0, 5)
+    MainLayout.Parent = MainContent
+    
+    MainLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        MainContentContainer.CanvasSize = UDim2.new(0, 0, 0, MainLayout.AbsoluteContentSize.Y + 20)
+    end)
+    
+    -- TABS CONTAINER IN SIDE PANEL WITH SCROLLING
+    local TabButtonsContainer = Instance.new("ScrollingFrame")
+    TabButtonsContainer.Name = "TabButtons"
+    TabButtonsContainer.Size = UDim2.new(1, -10, 1, -20)
+    TabButtonsContainer.Position = UDim2.new(0, 5, 0, 10)
+    TabButtonsContainer.BackgroundTransparency = 1
+    TabButtonsContainer.BorderSizePixel = 0
+    TabButtonsContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+    TabButtonsContainer.ScrollBarThickness = 4
+    TabButtonsContainer.Parent = SidePanel.Frame
     
     local TabButtonsList = Instance.new("UIListLayout")
     TabButtonsList.SortOrder = Enum.SortOrder.LayoutOrder
     TabButtonsList.Padding = UDim.new(0, 5)
-    TabButtonsList.Parent = TabButtons
+    TabButtonsList.Parent = TabButtonsContainer
+    
+    TabButtonsList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        TabButtonsContainer.CanvasSize = UDim2.new(0, 0, 0, TabButtonsList.AbsoluteContentSize.Y + 20)
+    end)
 
     do -- Add Tab
         function window_data:AddTab(tab_name)
             local tab_data = {}
             tab_name = tostring(tab_name or "New Tab")
             
-            -- Create tab button
+            -- Create tab button with TheLuckiestGuy font and white text
             local new_button = Instance.new("TextButton")
             new_button.Name = "TabButton_" .. tab_name
-            new_button.Size = UDim2.new(1, 0, 0, 35)
+            new_button.Size = UDim2.new(1, 0, 0, 40)
             new_button.BackgroundTransparency = 0.7
             new_button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             new_button.BorderSizePixel = 0
-            new_button.Font = Enum.Font.GothamBold
+            new_button.Font = Enum.Font.TheLuckiestGuy
             new_button.Text = tab_name
             new_button.TextColor3 = Color3.fromRGB(255, 255, 255)
-            new_button.TextSize = 14
-            new_button.Parent = TabButtons
-            Instance.new("UICorner", new_button).CornerRadius = UDim.new(0, 10)
+            new_button.TextSize = 18
+            new_button.Parent = TabButtonsContainer
             
             local buttonGradient = Instance.new("UIGradient")
             buttonGradient.Rotation = 90
@@ -1195,8 +1219,6 @@ function library:AddWindow(title, options)
             }
             buttonGradient.Parent = new_button
             
-            TabButtons.CanvasSize = UDim2.new(0, 0, 0, (#TabButtons:GetChildren() - 1) * 40)
-            
             -- Create tab content
             local new_tab = Instance.new("Frame")
             new_tab.Name = "Tab_" .. tab_name
@@ -1204,27 +1226,37 @@ function library:AddWindow(title, options)
             new_tab.BackgroundTransparency = 1
             new_tab.BorderSizePixel = 0
             new_tab.Visible = false
-            new_tab.Parent = Tabs
+            new_tab.Parent = MainContent
             
             local tabLayout = Instance.new("UIListLayout")
             tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
             tabLayout.Padding = UDim.new(0, 5)
             tabLayout.Parent = new_tab
             
+            tabLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                new_tab.Size = UDim2.new(1, 0, 0, tabLayout.AbsoluteContentSize.Y + 10)
+                MainLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Wait()
+                MainContentContainer.CanvasSize = UDim2.new(0, 0, 0, MainLayout.AbsoluteContentSize.Y + 20)
+            end)
+            
             local function show()
                 if dropdown_open then return end
-                for i, v in pairs(TabButtons:GetChildren()) do
+                for i, v in pairs(TabButtonsContainer:GetChildren()) do
                     if v:IsA("TextButton") then
                         v.BackgroundTransparency = 0.7
                     end
                 end
-                for i, v in pairs(Tabs:GetChildren()) do
+                for i, v in pairs(MainContent:GetChildren()) do
                     if v:IsA("Frame") and v ~= new_tab then
                         v.Visible = false
                     end
                 end
                 new_button.BackgroundTransparency = 0.3
                 new_tab.Visible = true
+                -- Update canvas size
+                task.wait(0.1)
+                MainLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Wait()
+                MainContentContainer.CanvasSize = UDim2.new(0, 0, 0, MainLayout.AbsoluteContentSize.Y + 20)
             end
             
             new_button.MouseButton1Click:Connect(function()
