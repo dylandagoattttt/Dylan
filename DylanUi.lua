@@ -651,8 +651,7 @@ infoLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
 infoLabel.TextStrokeTransparency = 0
 
 linesLabel.Name = "Lines"
-linesLabel.Parent = scrollingFrame
-linesLabel.BackgroundColor3 = Color3.new(1, 1, 1)
+linesLabel.Parent = scrollingFramelinesLabel.BackgroundColor3 = Color3.new(1, 1, 1)
 linesLabel.BackgroundTransparency = 1
 linesLabel.BorderSizePixel = 0
 linesLabel.Size = UDim2.new(0, 40, 0, 10000)
@@ -1028,7 +1027,7 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     marble.Size = UDim2.fromScale(1,1)
     marble.BackgroundTransparency = 1
     marble.BorderSizePixel = 0
-    marble.Image = "rbxassetid://5601144901"  -- Updated background image
+    marble.Image = "rbxassetid://16736132788"
     marble.ImageTransparency = 0
     marble.ScaleType = Enum.ScaleType.Stretch
     marble.Parent = panel.Frame
@@ -1092,7 +1091,7 @@ function library:AddWindow(title, options)
     HeaderMarble.Size = UDim2.fromScale(1,1)
     HeaderMarble.BackgroundTransparency = 1
     HeaderMarble.BorderSizePixel = 0
-    HeaderMarble.Image = "rbxassetid://5601144901"  -- Updated header background
+    HeaderMarble.Image = "rbxassetid://16736132788"
     HeaderMarble.ImageTransparency = 0
     HeaderMarble.ScaleType = Enum.ScaleType.Stretch
     HeaderMarble.Parent = Header
@@ -1226,11 +1225,11 @@ function library:AddWindow(title, options)
             local tab_data = {}
             tab_name = tostring(tab_name or "New Tab")
             
-            -- Create tab button with improved visibility
+            -- Create tab button with gradient + image
             local new_button = Instance.new("TextButton")
             new_button.Name = "TabButton_" .. tab_name
             new_button.Size = UDim2.new(1, 0, 0, 35)
-            new_button.BackgroundTransparency = 0.2
+            new_button.BackgroundTransparency = 0
             new_button.BackgroundColor3 = Color3.fromRGB(80, 40, 120)
             new_button.BorderSizePixel = 0
             new_button.Font = Enum.Font.LuckiestGuy
@@ -1251,6 +1250,22 @@ function library:AddWindow(title, options)
                 ColorSequenceKeypoint.new(1.00, Color3.fromRGB(176,96,244))
             }
             buttonGradient.Parent = new_button
+            
+            -- Background image on button (same as main background)
+            local buttonImage = Instance.new("ImageLabel")
+            buttonImage.Name = "ButtonImage"
+            buttonImage.Size = UDim2.fromScale(1, 1)
+            buttonImage.BackgroundTransparency = 1
+            buttonImage.BorderSizePixel = 0
+            buttonImage.Image = "rbxassetid://16736132788"
+            buttonImage.ImageTransparency = 0.5
+            buttonImage.ScaleType = Enum.ScaleType.Stretch
+            buttonImage.Parent = new_button
+            buttonImage.ZIndex = 0
+            Instance.new("UICorner", buttonImage).CornerRadius = UDim.new(0, 10)
+            
+            -- Bring text to front
+            new_button.ZIndex = 2
             
             -- Update canvas size
             TabButtons.CanvasSize = UDim2.new(0, 0, 0, (#TabButtons:GetChildren() - 1) * 40)
@@ -1288,6 +1303,7 @@ function library:AddWindow(title, options)
             selectedIndicator.BackgroundTransparency = 1
             selectedIndicator.BorderSizePixel = 0
             selectedIndicator.Parent = new_button
+            selectedIndicator.ZIndex = 3
             Instance.new("UICorner", selectedIndicator).CornerRadius = UDim.new(0.5, 0)
             
             local function show()
@@ -1295,7 +1311,7 @@ function library:AddWindow(title, options)
                 -- Reset all tabs
                 for i, v in pairs(TabButtons:GetChildren()) do
                     if v:IsA("TextButton") then
-                        v.BackgroundTransparency = 0.2
+                        v.BackgroundTransparency = 0
                         v.BackgroundColor3 = Color3.fromRGB(80, 40, 120)
                         local ind = v:FindFirstChild("SelectedIndicator")
                         if ind then
@@ -1310,7 +1326,6 @@ function library:AddWindow(title, options)
                     end
                 end
                 -- Activate current tab
-                new_button.BackgroundTransparency = 0.1
                 new_button.BackgroundColor3 = Color3.fromRGB(176, 96, 244)
                 if selectedIndicator then
                     selectedIndicator.Size = UDim2.new(0, 4, 0, 16)
