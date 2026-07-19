@@ -524,7 +524,6 @@ source.PlaceholderColor3 = Color3.new(0.8, 0.8, 0.8)
 source.Text = ""
 source.TextColor3 = Color3.new(1, 1, 1)
 source.TextSize = 15
-source.TextStrokeColor3 = Color3.new(1, 1, 1)
 source.TextWrapped = true
 source.TextXAlignment = Enum.TextXAlignment.Left
 source.TextYAlignment = Enum.TextYAlignment.Top
@@ -1003,7 +1002,7 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     panel.Frame.Position = anchorPos
     panel.Frame.Size = size
     panel.Frame.BackgroundColor3 = Color3.fromRGB(255,255,255)
-    panel.Frame.BackgroundTransparency = 0       -- fully opaque
+    panel.Frame.BackgroundTransparency = 0
     panel.Frame.BorderSizePixel = 0
     panel.Frame.Parent = parent or windowsFrame
     Instance.new("UICorner", panel.Frame).CornerRadius = UDim.new(0, cornerRadius or 20)
@@ -1030,7 +1029,7 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     marble.BackgroundTransparency = 1
     marble.BorderSizePixel = 0
     marble.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=133709037992585&width=678&height=810&format=png"
-    marble.ImageTransparency = 0               -- fully opaque
+    marble.ImageTransparency = 0
     marble.ScaleType = Enum.ScaleType.Stretch
     marble.Parent = panel.Frame
     Instance.new("UICorner", marble).CornerRadius = UDim.new(0, cornerRadius or 20)
@@ -1113,11 +1112,11 @@ function library:AddWindow(title, options)
     TitleLabel.TextStrokeTransparency = 0
     TitleLabel.Parent = Header
 
-    -- CLOSE/MINIMIZE BUTTON (moved left)
+    -- CLOSE/MINIMIZE BUTTON (original position - NOT moved)
     local CloseButton = Instance.new("ImageButton")
     CloseButton.Name = "CloseButton"
     CloseButton.AnchorPoint = Vector2.new(0.5, 0.5)
-    CloseButton.Position = UDim2.new(1, -30, 0, 0)
+    CloseButton.Position = UDim2.new(1, 0, 0, 0)  -- original, no offset
     CloseButton.Size = UDim2.fromOffset(56, 56)
     CloseButton.BackgroundTransparency = 1
     CloseButton.BorderSizePixel = 0
@@ -1134,11 +1133,11 @@ function library:AddWindow(title, options)
         CloseButton:TweenSize(UDim2.fromOffset(56, 56), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
 
-    -- MINIMIZED STATE
+    -- MINIMIZED STATE (restore/circle button) - moved LEFT to avoid being cut off
     local MinimizedFrame = Instance.new("ImageButton")
     MinimizedFrame.Name = "MinimizedFrame_" .. windows
     MinimizedFrame.AnchorPoint = Vector2.new(1, 0)
-    MinimizedFrame.Position = UDim2.new(1, -20, 0, 20)
+    MinimizedFrame.Position = UDim2.new(1, -50, 0, 20)  -- moved left (was -20, now -50)
     MinimizedFrame.Size = UDim2.fromOffset(60, 60)
     MinimizedFrame.BackgroundTransparency = 1
     MinimizedFrame.BorderSizePixel = 0
