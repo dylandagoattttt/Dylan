@@ -1,12 +1,3 @@
--- ================================================================
---  Antora‑style UI Library (exact API from your second script)
---  Usage:
---    local ui = loadstring(game:HttpGet("..."))()
---    local win = ui:AddWindow("My Window", { min_size = Vector2.new(400,300) })
---    local tab = win:AddTab("Main")
---    tab:AddButton("Click", function() print("hi") end)
--- ================================================================
-
 local Library = {}
 
 local UserInputService = game:GetService("UserInputService")
@@ -21,9 +12,6 @@ local function GetMouseLocation()
     return UserInputService:GetMouseLocation()
 end
 
--- ------------------------------------------------------------------
---  Helper: create a styled option frame (matches your second script)
--- ------------------------------------------------------------------
 local function CreateOptionFrame(parent, title, desc)
     local frame = Instance.new("TextButton")
     frame.Name = "Option"
@@ -48,34 +36,42 @@ local function CreateOptionFrame(parent, title, desc)
     grad.Rotation = 90
     grad.Parent = frame
 
+    local labelContainer = Instance.new("Frame")
+    labelContainer.Size = UDim2.new(1, -180, 1, 0)
+    labelContainer.BackgroundTransparency = 1
+    labelContainer.Parent = frame
+
+    local labelLayout = Instance.new("UIListLayout")
+    labelLayout.FillDirection = Enum.FillDirection.Vertical
+    labelLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+    labelLayout.Padding = UDim.new(0, 2)
+    labelLayout.Parent = labelContainer
+
     local titleLabel = Instance.new("TextLabel")
     titleLabel.Font = Enum.Font.GothamMedium
     titleLabel.TextColor3 = Color3.fromRGB(243, 243, 243)
     titleLabel.Size = UDim2.new(1, -20, 0, 12)
     titleLabel.AutomaticSize = Enum.AutomaticSize.Y
-    titleLabel.Position = UDim2.new(0, 10, 0.5)
-    titleLabel.AnchorPoint = Vector2.new(0, 0.5)
     titleLabel.BackgroundTransparency = 1
     titleLabel.TextTruncate = Enum.TextTruncate.AtEnd
     titleLabel.TextSize = 10
     titleLabel.TextXAlignment = Enum.TextXAlignment.Left
     titleLabel.Text = title or ""
     titleLabel.RichText = true
-    titleLabel.Parent = frame
+    titleLabel.Parent = labelContainer
 
     local descLabel = Instance.new("TextLabel")
     descLabel.Font = Enum.Font.Gotham
     descLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
     descLabel.Size = UDim2.new(1, -20, 0, 8)
     descLabel.AutomaticSize = Enum.AutomaticSize.Y
-    descLabel.Position = UDim2.new(0, 12, 0, 15)
     descLabel.BackgroundTransparency = 1
     descLabel.TextWrapped = true
     descLabel.TextSize = 8
     descLabel.TextXAlignment = Enum.TextXAlignment.Left
     descLabel.Text = desc or ""
     descLabel.RichText = true
-    descLabel.Parent = frame
+    descLabel.Parent = labelContainer
 
     frame.MouseEnter:Connect(function() frame.BackgroundTransparency = 0.4 end)
     frame.MouseLeave:Connect(function() frame.BackgroundTransparency = 0 end)
@@ -83,10 +79,7 @@ local function CreateOptionFrame(parent, title, desc)
     return frame, titleLabel, descLabel
 end
 
--- ------------------------------------------------------------------
---  Main AddWindow function
--- ------------------------------------------------------------------
-local windows = {}   -- keep track of created windows for toggle
+local windows = {}
 
 function Library:AddWindow(title, config)
     config = config or {}
@@ -104,7 +97,6 @@ function Library:AddWindow(title, config)
     scaleObj.Scale = uiScale
     scaleObj.Parent = screenGui
 
-    -- Main window frame
     local main = Instance.new("ImageButton")
     main.Name = "Window"
     main.Size = UDim2.new(0, minSize.X, 0, minSize.Y)
@@ -137,7 +129,6 @@ function Library:AddWindow(title, config)
     innerCorner.CornerRadius = UDim.new(0, 20)
     innerCorner.Parent = inner
 
-    -- Background watermark
     local bg = Instance.new("ImageLabel")
     bg.Size = UDim2.new(1, 0, 1, 0)
     bg.BackgroundTransparency = 1
@@ -160,7 +151,6 @@ function Library:AddWindow(title, config)
     ovCorner.CornerRadius = UDim.new(0, 20)
     ovCorner.Parent = overlay
 
-    -- Top bar
     local topBar = Instance.new("Frame")
     topBar.Name = "TopBar"
     topBar.Size = UDim2.new(1, 0, 0, 28)
@@ -201,7 +191,6 @@ function Library:AddWindow(title, config)
     sub.Font = Enum.Font.Creepster
     sub.Parent = titleLabel
 
-    -- Close button (minimize)
     local closeBtn = Instance.new("ImageButton")
     closeBtn.Name = "Close"
     closeBtn.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -224,7 +213,6 @@ function Library:AddWindow(title, config)
         closeBtn:TweenSize(UDim2.fromOffset(48, 48), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
 
-    -- Minimized frame (floating icon)
     local minimized = Instance.new("ImageButton")
     minimized.Name = "Minimized"
     minimized.AnchorPoint = Vector2.new(1, 0)
@@ -274,7 +262,6 @@ function Library:AddWindow(title, config)
     closeBtn.MouseButton1Click:Connect(Minimize)
     minimized.MouseButton1Click:Connect(Restore)
 
-    -- Drag
     local function MakeDrag(obj)
         task.spawn(function()
             obj.Active = true
@@ -303,7 +290,6 @@ function Library:AddWindow(title, config)
     end
     MakeDrag(main)
 
-    -- Resizer (same as your second script)
     local resizer = Instance.new("Frame")
     resizer.Name = "Resizer"
     resizer.Parent = main
@@ -332,7 +318,6 @@ function Library:AddWindow(title, config)
         end)
     end
 
-    -- Sidebar
     local sidebar = Instance.new("Frame")
     sidebar.Name = "Sidebar"
     sidebar.Size = UDim2.new(0, 150, 1, -28)
@@ -363,7 +348,6 @@ function Library:AddWindow(title, config)
     tabList.Padding = UDim.new(0, 5)
     tabList.Parent = tabScroll
 
-    -- Content area
     local contentArea = Instance.new("Frame")
     contentArea.Name = "ContentArea"
     contentArea.Size = UDim2.new(1, -150, 1, -28)
@@ -372,7 +356,6 @@ function Library:AddWindow(title, config)
     contentArea.ClipsDescendants = true
     contentArea.Parent = inner
 
-    -- Tab management
     local tabs = {}
     local activeTab = nil
 
@@ -397,14 +380,11 @@ function Library:AddWindow(title, config)
         end
     end
 
-    -- Window object (bo)
     local window = {}
 
-    -- AddTab
     function window:AddTab(name)
         if tabs[name] then return tabs[name].object end
 
-        -- Tab button
         local btn = Instance.new("TextButton")
         btn.Name = "Tab_" .. name
         btn.Size = UDim2.new(1, 0, 0, 24)
@@ -462,7 +442,6 @@ function Library:AddWindow(title, config)
         btn.MouseEnter:Connect(function() btn.BackgroundTransparency = 0.4 end)
         btn.MouseLeave:Connect(function() btn.BackgroundTransparency = 0 end)
 
-        -- Tab container (ScrollingFrame)
         local container = Instance.new("ScrollingFrame")
         container.Name = "Container"
         container.Size = UDim2.new(1, 0, 1, 0)
@@ -488,10 +467,8 @@ function Library:AddWindow(title, config)
         layout.Padding = UDim.new(0, 5)
         layout.Parent = container
 
-        -- Tab object (bF)
         local tab = {}
 
-        -- Methods that add elements to this container
         function tab:AddLabel(text)
             local label = Instance.new("TextLabel")
             label.Parent = container
@@ -775,13 +752,19 @@ function Library:AddWindow(title, config)
 
             local drop = Instance.new("Frame")
             drop.Size = UDim2.new(0, 152, 0, 0)
-            drop.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            drop.BackgroundTransparency = 0.1
+            drop.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            drop.BackgroundTransparency = 0
             drop.ClipsDescendants = true
             drop.Parent = frame
             local dCorner = Instance.new("UICorner")
             dCorner.CornerRadius = UDim.new(0, 6)
             dCorner.Parent = drop
+
+            local dropStroke = Instance.new("UIStroke")
+            dropStroke.Color = Color3.fromRGB(60, 60, 60)
+            dropStroke.Thickness = 1
+            dropStroke.Transparency = 0.5
+            dropStroke.Parent = drop
 
             local scroll = Instance.new("ScrollingFrame")
             scroll.Size = UDim2.new(1, 0, 1, 0)
@@ -817,6 +800,8 @@ function Library:AddWindow(title, config)
                 end
             end)
 
+            close()
+
             local dd = {}
             function dd:Add(opt)
                 local btn = Instance.new("TextButton")
@@ -843,16 +828,13 @@ function Library:AddWindow(title, config)
         end
 
         function tab:AddColorPicker(callback)
-            -- Minimal implementation (you can expand from your original)
             local frame = CreateOptionFrame(container, "Color Picker")
-            -- For simplicity, we just return a dummy object and the frame
             local obj = {}
             function obj:Set(color) end
             return obj, frame
         end
 
         function tab:AddConsole(options)
-            -- Minimal implementation
             local frame = CreateOptionFrame(container, "Console")
             local obj = {}
             function obj:Set(text) end
@@ -873,9 +855,7 @@ function Library:AddWindow(title, config)
 
             local haObj = {}
             function haObj:AddButton(text, callback)
-                -- Use the tab's AddButton but parent to containerHA
                 local frame = CreateOptionFrame(containerHA, text)
-                -- We need to adjust size because it's horizontal
                 frame.Size = UDim2.new(0, 100, 0, 20)
                 frame.AutomaticSize = Enum.AutomaticSize.None
                 local icon = Instance.new("ImageLabel")
@@ -931,56 +911,23 @@ function Library:AddWindow(title, config)
                 TweenService:Create(toggleIcon, TweenInfo.new(0.2), {Rotation = open and 90 or 0}):Play()
             end)
 
-            -- Folder object that has the same methods as the tab
             local folderTab = {}
-            -- We'll copy the methods from the tab, but parent to 'content' instead of 'container'
             for k, v in pairs(tab) do
                 if type(v) == "function" and k ~= "AddFolder" then
                     folderTab[k] = function(...)
-                        -- Temporarily change the parent for the element creation
-                        -- We need to override the container for each method
-                        -- Simplest: we create a new tab object with content as container
-                        -- But we can also just use a wrapper
-                        -- We'll create a new tab object with content as container
-                        local newTab = {}
-                        -- We'll just use the same functions but with container swapped
-                        -- This is a bit hacky; we'll create a new tab object that uses content as parent
-                        local function wrapMethod(method)
-                            return function(...)
-                                -- We need to call the method with content as the parent
-                                -- We'll temporarily set container to content, but that would affect the original tab
-                                -- Better: we create a new tab object with content as the container
-                                -- We'll just create a new tab object using a helper
-                                return method(...)
-                            end
-                        end
-                        -- Not clean, but for brevity we'll implement a simpler approach:
-                        -- We'll just use a new tab object created with content
-                        local subTab = {}
-                        for key, func in pairs(tab) do
-                            if type(func) == "function" then
-                                subTab[key] = function(...)
-                                    -- We need to call the function with content as parent
-                                    -- We'll use a trick: we'll temporarily set the container variable
-                                    local oldContainer = container
-                                    container = content
-                                    local result = func(...)
-                                    container = oldContainer
-                                    return result
-                                end
-                            end
-                        end
-                        return subTab
+                        local oldContainer = container
+                        container = content
+                        local result = v(...)
+                        container = oldContainer
+                        return result
                     end
                 end
             end
-            -- Override AddFolder to allow nesting
             folderTab.AddFolder = tab.AddFolder
 
             return folderTab, folderFrame
         end
 
-        -- Store tab info
         tabs[name] = {
             button = btn,
             container = container,
@@ -999,7 +946,6 @@ function Library:AddWindow(title, config)
         return tab
     end
 
-    -- Other window methods (from your second script)
     function window:Close()
         screenGui:Destroy()
     end
@@ -1016,7 +962,6 @@ function Library:AddWindow(title, config)
         SelectTab(name)
     end
 
-    -- Toggle visibility with the key
     local function ToggleVisibility()
         screenGui.Enabled = not screenGui.Enabled
     end
@@ -1027,11 +972,9 @@ function Library:AddWindow(title, config)
         end
     end)
 
-    -- Keep reference for cleanup
     table.insert(windows, screenGui)
 
     return window
 end
 
--- Return the library
 return Library
