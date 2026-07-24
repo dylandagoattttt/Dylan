@@ -41,9 +41,17 @@ local function CreateOptionFrame(parent, title, desc)
     labelContainer.BackgroundTransparency = 1
     labelContainer.Parent = frame
 
+    local pad = Instance.new("UIPadding")
+    pad.PaddingLeft = UDim.new(0, 10)
+    pad.PaddingRight = UDim.new(0, 0)
+    pad.PaddingTop = UDim.new(0, 2)
+    pad.PaddingBottom = UDim.new(0, 2)
+    pad.Parent = labelContainer
+
     local labelLayout = Instance.new("UIListLayout")
     labelLayout.FillDirection = Enum.FillDirection.Vertical
     labelLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+    labelLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
     labelLayout.Padding = UDim.new(0, 2)
     labelLayout.Parent = labelContainer
 
@@ -800,6 +808,7 @@ function Library:AddWindow(title, config)
                 end
             end)
 
+            -- Ensure dropdown starts fully closed
             close()
 
             local dd = {}
