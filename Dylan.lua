@@ -1,12 +1,3 @@
--- ================================================================
---  Antora‑styled UI Library with the exact API from your second script
---  Usage:
---    local ui = loadstring(game:HttpGet("..."))()
---    local win = ui:AddWindow("My Window", { min_size = Vector2.new(400,300) })
---    local tab = win:AddTab("Main")
---    tab:AddButton("Click", function() print("hi") end)
--- ================================================================
-
 local Library = {}
 
 local UserInputService = game:GetService("UserInputService")
@@ -21,7 +12,6 @@ local function GetMouseLocation()
     return UserInputService:GetMouseLocation()
 end
 
--- Helper functions from your second script
 local function rgbtohsv(r, g, b)
     r, g, b = r / 255, g / 255, b / 255
     local max, min = math.max(r, g, b), math.min(r, g, b)
@@ -495,10 +485,17 @@ function Library:AddWindow(title, config)
 
         local layout = Instance.new("UIListLayout")
         layout.Padding = UDim.new(0, 5)
+        layout.SortOrder = Enum.SortOrder.LayoutOrder  -- ensure sorting by LayoutOrder
         layout.Parent = container
 
         -- Tab object (exact API from second script)
         local tab = {}
+        local elementCounter = 0  -- counter to assign LayoutOrder
+
+        local function assignLayoutOrder(obj)
+            elementCounter = elementCounter + 1
+            obj.LayoutOrder = elementCounter
+        end
 
         function tab:AddLabel(text)
             local label = Instance.new("TextLabel")
@@ -512,13 +509,14 @@ function Library:AddWindow(title, config)
             label.TextXAlignment = Enum.TextXAlignment.Left
             label.TextStrokeColor3 = Color3.fromRGB(0,0,0)
             label.TextStrokeTransparency = 0
+            assignLayoutOrder(label)
             return label
         end
 
         function tab:AddButton(text, callback)
             local btn = Instance.new("TextButton")
             btn.Size = UDim2.new(1, 0, 0, 35)
-            btn.BackgroundColor3 = Color3.fromRGB(110, 45, 220) -- main_color from your options
+            btn.BackgroundColor3 = Color3.fromRGB(110, 45, 220)
             btn.BorderSizePixel = 0
             btn.Font = Enum.Font.GothamBold
             btn.Text = text or "Button"
@@ -541,6 +539,7 @@ function Library:AddWindow(title, config)
                 ripple(btn, Mouse.X, Mouse.Y)
                 if callback then callback() end
             end)
+            assignLayoutOrder(btn)
             return btn
         end
 
@@ -593,6 +592,7 @@ function Library:AddWindow(title, config)
                 btn.BackgroundTransparency = state and 0.3 or 0.7
                 if callback then callback(state) end
             end
+            assignLayoutOrder(frame)
             return data, frame
         end
 
@@ -623,6 +623,7 @@ function Library:AddWindow(title, config)
                     end
                 end
             end)
+            assignLayoutOrder(tb)
             return tb
         end
 
@@ -716,6 +717,7 @@ function Library:AddWindow(title, config)
                 if callback then callback(realVal) end
             end
             data:Set(min)
+            assignLayoutOrder(frame)
             return data, frame
         end
 
@@ -789,6 +791,7 @@ function Library:AddWindow(title, config)
 
             setKey(defaultKey or Enum.KeyCode.RightShift)
             function data:SetKeybind(newKey) setKey(newKey) end
+            assignLayoutOrder(frame)
             return data, frame
         end
 
@@ -891,6 +894,7 @@ function Library:AddWindow(title, config)
                 end
                 return data
             end
+            assignLayoutOrder(dropdown)
             return data, dropdown
         end
 
@@ -1007,6 +1011,7 @@ function Library:AddWindow(title, config)
                 saturation.ImageColor3 = Color3.fromHSV(h, 1, 1)
                 if callback then callback(color) end
             end
+            assignLayoutOrder(frame)
             return data, frame
         end
 
@@ -1075,6 +1080,7 @@ function Library:AddWindow(title, config)
             function data:Log(msg)
                 source.Text = source.Text .. "[*] " .. tostring(msg) .. "\n"
             end
+            assignLayoutOrder(console)
             return data, console
         end
 
@@ -1109,6 +1115,7 @@ function Library:AddWindow(title, config)
                 end)
                 return btn
             end
+            assignLayoutOrder(frame)
             return data, frame
         end
 
@@ -1152,7 +1159,6 @@ function Library:AddWindow(title, config)
                 open = not open
                 objects.Visible = open
                 btn.Text = (open and "▲ " or "▼ ") .. (name or "Folder")
-                -- Adjust folder height dynamically
                 local function updateHeight()
                     local count = #objects:GetChildren()
                     local height = 35
@@ -1176,21 +1182,19 @@ function Library:AddWindow(title, config)
                     data[method] = function(...)
                         local result = func(...)
                         if typeof(result) == "table" then
-                            -- Return the object and the element; we need to reparent the element
                             local obj, elem = result[1], result[2]
                             if elem then elem.Parent = objects end
                             return obj, elem
                         else
-                            -- Single element
                             result.Parent = objects
                             return result
                         end
                     end
                 end
             end
-            -- Allow nested folders
             data.AddFolder = tab.AddFolder
 
+            assignLayoutOrder(folder)
             return data, folder
         end
 
