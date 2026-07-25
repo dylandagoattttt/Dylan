@@ -140,7 +140,7 @@ function Library:AddWindow(title, config)
     local bgImage = Instance.new("ImageLabel")
     bgImage.Size = UDim2.new(1, 0, 1, 0)
     bgImage.BackgroundTransparency = 1
-    bgImage.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=84595542654454&width=678&height=810&format=png"
+    bgImage.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=114929713504311&width=678&height=810&format=png"
     bgImage.ScaleType = Enum.ScaleType.Crop
     bgImage.ImageColor3 = Color3.fromRGB(255, 255, 255)
     bgImage.ImageTransparency = 0.05
@@ -171,7 +171,7 @@ function Library:AddWindow(title, config)
     icon.Position = UDim2.new(0, 10, 0.5, 0)
     icon.AnchorPoint = Vector2.new(0, 0.5)
     icon.BackgroundTransparency = 1
-    icon.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=84595542654454&width=678&height=810&format=png"
+    icon.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=114929713504311&width=678&height=810&format=png"
     icon.Parent = topBar
 
     local titleLabel = Instance.new("TextLabel")
@@ -233,7 +233,7 @@ function Library:AddWindow(title, config)
     minimized.BorderSizePixel = 0
     minimized.Visible = false
     minimized.ZIndex = 100
-    minimized.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=84595542654454&width=300&height=300&format=png"
+    minimized.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=114929713504311&width=300&height=300&format=png"
     minimized.ScaleType = Enum.ScaleType.Fit
     minimized.Parent = screenGui
     local minCorner = Instance.new("UICorner")
