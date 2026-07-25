@@ -1,3 +1,8 @@
+-- ================================================================
+--  Antora‑styled UI Library (FIXED)
+--  Dropdown popup appears OUTSIDE the main scrolling frame.
+-- ================================================================
+
 local Library = {}
 
 local UserInputService = game:GetService("UserInputService")
@@ -10,7 +15,7 @@ local Mouse = Player:GetMouse()
 
 local function GetMouseLocation()
     return UserInputService:GetMouseLocation()
-}
+end  -- FIXED: was "}" instead of "end"
 
 local function rgbtohsv(r, g, b)
     r, g, b = r / 255, g / 255, b / 255
@@ -140,7 +145,7 @@ function Library:AddWindow(title, config)
     local bgImage = Instance.new("ImageLabel")
     bgImage.Size = UDim2.new(1, 0, 1, 0)
     bgImage.BackgroundTransparency = 1
-    bgImage.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=114929713504311&width=678&height=810&format=png"
+    bgImage.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=84595542654454&width=678&height=810&format=png"
     bgImage.ScaleType = Enum.ScaleType.Crop
     bgImage.ImageColor3 = Color3.fromRGB(255, 255, 255)
     bgImage.ImageTransparency = 0.05
@@ -171,7 +176,7 @@ function Library:AddWindow(title, config)
     icon.Position = UDim2.new(0, 10, 0.5, 0)
     icon.AnchorPoint = Vector2.new(0, 0.5)
     icon.BackgroundTransparency = 1
-    icon.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=114929713504311&width=678&height=810&format=png"
+    icon.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=84595542654454&width=678&height=810&format=png"
     icon.Parent = topBar
 
     local titleLabel = Instance.new("TextLabel")
@@ -233,7 +238,7 @@ function Library:AddWindow(title, config)
     minimized.BorderSizePixel = 0
     minimized.Visible = false
     minimized.ZIndex = 100
-    minimized.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=114929713504311&width=300&height=300&format=png"
+    minimized.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=84595542654454&width=300&height=300&format=png"
     minimized.ScaleType = Enum.ScaleType.Fit
     minimized.Parent = screenGui
     local minCorner = Instance.new("UICorner")
@@ -497,20 +502,20 @@ function Library:AddWindow(title, config)
             obj.LayoutOrder = elementCounter
         end
 
-        -- Helper to create a floating dropdown popup
+        -- Helper to create a floating dropdown popup (outside main frame)
         local function createFloatingDropdown(button, options, callback)
-            -- Button is the dropdown button itself (the main button)
+            -- button is the dropdown button itself
             -- options is a table of strings
             -- callback is called when an option is selected
             local popup = Instance.new("Frame")
             popup.Name = "DropdownPopup"
-            popup.Size = UDim2.new(0, 200, 0, 0)
+            popup.Size = UDim2.new(0, 220, 0, 0)
             popup.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
             popup.BackgroundTransparency = 0
             popup.BorderSizePixel = 0
             popup.ClipsDescendants = true
             popup.ZIndex = 1000
-            popup.Parent = screenGui  -- top-level
+            popup.Parent = screenGui  -- top-level, outside main frame
 
             local corner = Instance.new("UICorner")
             corner.CornerRadius = UDim.new(0, 8)
@@ -571,46 +576,42 @@ function Library:AddWindow(title, config)
             local function updateSize()
                 local count = #scroll:GetChildren() - 1
                 local height = math.clamp(count, 0, 10) * 32 + 5
-                popup.Size = UDim2.new(0, 200, 0, height)
+                popup.Size = UDim2.new(0, 220, 0, height)
                 scroll.CanvasSize = UDim2.new(0, 0, 0, count * 32 + 5)
             end
             updateSize()
 
-            -- Position popup near the button
+            -- Position popup relative to button (outside main frame)
             local buttonPos = button.AbsolutePosition
             local buttonSize = button.AbsoluteSize
-            local popupPos = UDim2.new(0, buttonPos.X, 0, buttonPos.Y + buttonSize.Y)
-            -- Check if it fits below, else place above
+            -- We want to place it just below the button, but if it would go off screen, place above
             local screenSize = screenGui.AbsoluteSize
-            if buttonPos.Y + buttonSize.Y + popup.Size.Y.Offset > screenSize.Y then
-                popupPos = UDim2.new(0, buttonPos.X, 0, buttonPos.Y - popup.Size.Y.Offset)
+            local posX = buttonPos.X
+            local posY = buttonPos.Y + buttonSize.Y
+            if posY + popup.Size.Y.Offset > screenSize.Y then
+                posY = buttonPos.Y - popup.Size.Y.Offset
             end
-            popup.Position = popupPos
+            popup.Position = UDim2.new(0, posX, 0, posY)
 
             -- Close popup when clicking outside
-            local function closePopup()
-                popup:Destroy()
-            end
-            -- We'll use a temporary connection on UserInputService
             local mouseDownConnection
             mouseDownConnection = UserInputService.InputBegan:Connect(function(input, processed)
                 if processed then return end
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    -- Check if click is inside popup or button
                     local mousePos = input.Position
                     if popup and popup.Parent then
                         local popupAbs = popup.AbsolutePosition
                         local popupSize = popup.AbsoluteSize
                         if mousePos.X >= popupAbs.X and mousePos.X <= popupAbs.X + popupSize.X and
                            mousePos.Y >= popupAbs.Y and mousePos.Y <= popupAbs.Y + popupSize.Y then
-                            return -- click inside popup, ignore
+                            return -- click inside popup
                         end
-                        -- Also check if click is on the button itself (to prevent closing when clicking the button again)
+                        -- Also check if click is on the button itself (to avoid closing when re‑opening)
                         local btnAbs = button.AbsolutePosition
                         local btnSize = button.AbsoluteSize
                         if mousePos.X >= btnAbs.X and mousePos.X <= btnAbs.X + btnSize.X and
                            mousePos.Y >= btnAbs.Y and mousePos.Y <= btnAbs.Y + btnSize.Y then
-                            return -- click on the button, ignore (the button will handle toggling)
+                            return -- click on the button, ignore
                         end
                         -- Otherwise close
                         if popup then popup:Destroy() end
@@ -619,15 +620,13 @@ function Library:AddWindow(title, config)
                 end
             end)
 
-            -- Also close when parent window is minimized or closed
-            local cleanupConnections = {}
-            table.insert(cleanupConnections, mainFrame:GetPropertyChangedSignal("Visible"):Connect(function()
+            -- Also close when main window is hidden or minimized
+            mainFrame:GetPropertyChangedSignal("Visible"):Connect(function()
                 if not mainFrame.Visible then
                     if popup then popup:Destroy() end
                 end
-            end))
+            end)
 
-            -- Return a function to manually destroy
             return popup
         end
 
