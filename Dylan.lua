@@ -77,11 +77,7 @@ local function ripple(button, x, y)
     end)
 end
 
--- ------------------------------------------------------------------
---  Create a new window (Antora visual style)
--- ------------------------------------------------------------------
 local windows = 0
-local library = {}
 
 function Library:AddWindow(title, config)
     config = config or {}
@@ -102,7 +98,6 @@ function Library:AddWindow(title, config)
     scaleObj.Scale = uiScale
     scaleObj.Parent = screenGui
 
-    -- Main window frame (Antora style)
     local mainFrame = Instance.new("ImageButton")
     mainFrame.Name = "Window"
     mainFrame.Size = UDim2.new(0, minSize.X, 0, minSize.Y)
@@ -123,7 +118,6 @@ function Library:AddWindow(title, config)
     glow.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     glow.Parent = mainFrame
 
-    -- Inner frame (dark background)
     local inner = Instance.new("Frame")
     inner.Name = "Inner"
     inner.Size = UDim2.new(1, 0, 1, 0)
@@ -136,11 +130,10 @@ function Library:AddWindow(title, config)
     innerCorner.CornerRadius = UDim.new(0, 20)
     innerCorner.Parent = inner
 
-    -- Background image (watermark)
     local bgImage = Instance.new("ImageLabel")
     bgImage.Size = UDim2.new(1, 0, 1, 0)
     bgImage.BackgroundTransparency = 1
-    bgImage.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=114929713504311&width=678&height=810&format=png"
+    bgImage.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=84595542654454&width=678&height=810&format=png"
     bgImage.ScaleType = Enum.ScaleType.Crop
     bgImage.ImageColor3 = Color3.fromRGB(255, 255, 255)
     bgImage.ImageTransparency = 0.05
@@ -159,7 +152,6 @@ function Library:AddWindow(title, config)
     ovCorner.CornerRadius = UDim.new(0, 20)
     ovCorner.Parent = overlay
 
-    -- Top bar
     local topBar = Instance.new("Frame")
     topBar.Name = "TopBar"
     topBar.Size = UDim2.new(1, 0, 0, 28)
@@ -200,7 +192,6 @@ function Library:AddWindow(title, config)
     subTitle.Font = Enum.Font.Creepster
     subTitle.Parent = titleLabel
 
-    -- Close button (minimize)
     local closeBtn = Instance.new("ImageButton")
     closeBtn.Name = "Close"
     closeBtn.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -223,7 +214,6 @@ function Library:AddWindow(title, config)
         closeBtn:TweenSize(UDim2.fromOffset(48, 48), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
 
-    -- Minimized frame (floating icon)
     local minimized = Instance.new("ImageButton")
     minimized.Name = "Minimized"
     minimized.AnchorPoint = Vector2.new(1, 0)
@@ -273,7 +263,6 @@ function Library:AddWindow(title, config)
     closeBtn.MouseButton1Click:Connect(Minimize)
     minimized.MouseButton1Click:Connect(Restore)
 
-    -- Drag
     local function MakeDrag(obj)
         task.spawn(function()
             obj.Active = true
@@ -302,7 +291,6 @@ function Library:AddWindow(title, config)
     end
     MakeDrag(mainFrame)
 
-    -- Resizer (optional)
     local resizer = Instance.new("Frame")
     resizer.Name = "Resizer"
     resizer.Parent = mainFrame
@@ -331,7 +319,6 @@ function Library:AddWindow(title, config)
         end)
     end
 
-    -- Sidebar (tabs)
     local sidebar = Instance.new("Frame")
     sidebar.Name = "Sidebar"
     sidebar.Size = UDim2.new(0, 150, 1, -28)
@@ -362,7 +349,6 @@ function Library:AddWindow(title, config)
     tabList.Padding = UDim.new(0, 5)
     tabList.Parent = tabScroll
 
-    -- Content area
     local contentArea = Instance.new("Frame")
     contentArea.Name = "ContentArea"
     contentArea.Size = UDim2.new(1, -150, 1, -28)
@@ -371,7 +357,6 @@ function Library:AddWindow(title, config)
     contentArea.ClipsDescendants = true
     contentArea.Parent = inner
 
-    -- Tab management
     local tabs = {}
     local activeTab = nil
 
@@ -396,14 +381,11 @@ function Library:AddWindow(title, config)
         end
     end
 
-    -- Window object
     local window = {}
 
-    -- AddTab (creates a tab button and a container)
     function window:AddTab(name)
         if tabs[name] then return tabs[name].object end
 
-        -- Tab button (styled like Antora)
         local btn = Instance.new("TextButton")
         btn.Name = "Tab_" .. name
         btn.Size = UDim2.new(1, 0, 0, 24)
@@ -461,7 +443,6 @@ function Library:AddWindow(title, config)
         btn.MouseEnter:Connect(function() btn.BackgroundTransparency = 0.4 end)
         btn.MouseLeave:Connect(function() btn.BackgroundTransparency = 0 end)
 
-        -- Content container (scrolling)
         local container = Instance.new("ScrollingFrame")
         container.Name = "Container"
         container.Size = UDim2.new(1, 0, 1, 0)
@@ -485,12 +466,11 @@ function Library:AddWindow(title, config)
 
         local layout = Instance.new("UIListLayout")
         layout.Padding = UDim.new(0, 5)
-        layout.SortOrder = Enum.SortOrder.LayoutOrder  -- ensure sorting by LayoutOrder
+        layout.SortOrder = Enum.SortOrder.LayoutOrder
         layout.Parent = container
 
-        -- Tab object (exact API from second script)
         local tab = {}
-        local elementCounter = 0  -- counter to assign LayoutOrder
+        local elementCounter = 0
 
         local function assignLayoutOrder(obj)
             elementCounter = elementCounter + 1
@@ -813,6 +793,7 @@ function Library:AddWindow(title, config)
             local corner = Instance.new("UICorner")
             corner.CornerRadius = UDim.new(0, 10)
             corner.Parent = dropdown
+            dropdown.ZIndex = 5
 
             local indicator = Instance.new("TextLabel")
             indicator.Size = UDim2.new(0, 20, 1, 0)
@@ -829,10 +810,13 @@ function Library:AddWindow(title, config)
             local box = Instance.new("Frame")
             box.Size = UDim2.new(1, 0, 0, 0)
             box.Position = UDim2.new(0, 0, 1, 5)
-            box.BackgroundColor3 = Color3.fromRGB(255,255,255)
-            box.BackgroundTransparency = 0.9
+            box.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            box.BackgroundTransparency = 0.2
             box.BorderSizePixel = 0
             box.ClipsDescendants = true
+            box.Active = true
+            box.Selectable = true
+            box.ZIndex = 10
             box.Parent = dropdown
             local boxCorner = Instance.new("UICorner")
             boxCorner.CornerRadius = UDim.new(0, 10)
@@ -886,7 +870,6 @@ function Library:AddWindow(title, config)
                     open = false
                     if callback then callback(option) end
                 end)
-                -- Update box size if open
                 if open then
                     local count = #objects:GetChildren() - 1
                     local height = math.clamp(count, 0, 10) * 35 + 5
@@ -1176,7 +1159,6 @@ function Library:AddWindow(title, config)
                 objects.ChildRemoved:Connect(updateHeight)
             end)
 
-            -- Expose all tab methods for the folder
             for method, func in pairs(tab) do
                 if type(func) == "function" and method ~= "AddFolder" then
                     data[method] = function(...)
@@ -1198,7 +1180,6 @@ function Library:AddWindow(title, config)
             return data, folder
         end
 
-        -- Store tab data
         tabs[name] = {
             button = btn,
             container = container,
@@ -1217,7 +1198,6 @@ function Library:AddWindow(title, config)
         return tab
     end
 
-    -- Additional window methods
     function window:Close()
         screenGui:Destroy()
     end
@@ -1234,7 +1214,6 @@ function Library:AddWindow(title, config)
         SelectTab(name)
     end
 
-    -- Toggle visibility with key
     local function ToggleVisibility()
         screenGui.Enabled = not screenGui.Enabled
     end
