@@ -10,7 +10,7 @@ local Mouse = Player:GetMouse()
 
 local function GetMouseLocation()
     return UserInputService:GetMouseLocation()
-end
+}
 
 local function rgbtohsv(r, g, b)
     r, g, b = r / 255, g / 255, b / 255
@@ -77,7 +77,11 @@ local function ripple(button, x, y)
     end)
 end
 
+-- ------------------------------------------------------------------
+--  Create a new window (Antora visual style)
+-- ------------------------------------------------------------------
 local windows = 0
+local library = {}
 
 function Library:AddWindow(title, config)
     config = config or {}
@@ -98,6 +102,7 @@ function Library:AddWindow(title, config)
     scaleObj.Scale = uiScale
     scaleObj.Parent = screenGui
 
+    -- Main window frame (Antora style)
     local mainFrame = Instance.new("ImageButton")
     mainFrame.Name = "Window"
     mainFrame.Size = UDim2.new(0, minSize.X, 0, minSize.Y)
@@ -118,6 +123,7 @@ function Library:AddWindow(title, config)
     glow.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     glow.Parent = mainFrame
 
+    -- Inner frame (dark background)
     local inner = Instance.new("Frame")
     inner.Name = "Inner"
     inner.Size = UDim2.new(1, 0, 1, 0)
@@ -130,10 +136,11 @@ function Library:AddWindow(title, config)
     innerCorner.CornerRadius = UDim.new(0, 20)
     innerCorner.Parent = inner
 
+    -- Background image (watermark)
     local bgImage = Instance.new("ImageLabel")
     bgImage.Size = UDim2.new(1, 0, 1, 0)
     bgImage.BackgroundTransparency = 1
-    bgImage.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=84595542654454&width=678&height=810&format=png"
+    bgImage.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=114929713504311&width=678&height=810&format=png"
     bgImage.ScaleType = Enum.ScaleType.Crop
     bgImage.ImageColor3 = Color3.fromRGB(255, 255, 255)
     bgImage.ImageTransparency = 0.05
@@ -152,6 +159,7 @@ function Library:AddWindow(title, config)
     ovCorner.CornerRadius = UDim.new(0, 20)
     ovCorner.Parent = overlay
 
+    -- Top bar
     local topBar = Instance.new("Frame")
     topBar.Name = "TopBar"
     topBar.Size = UDim2.new(1, 0, 0, 28)
@@ -192,6 +200,7 @@ function Library:AddWindow(title, config)
     subTitle.Font = Enum.Font.Creepster
     subTitle.Parent = titleLabel
 
+    -- Close button (minimize)
     local closeBtn = Instance.new("ImageButton")
     closeBtn.Name = "Close"
     closeBtn.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -214,6 +223,7 @@ function Library:AddWindow(title, config)
         closeBtn:TweenSize(UDim2.fromOffset(48, 48), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
 
+    -- Minimized frame (floating icon)
     local minimized = Instance.new("ImageButton")
     minimized.Name = "Minimized"
     minimized.AnchorPoint = Vector2.new(1, 0)
@@ -263,6 +273,7 @@ function Library:AddWindow(title, config)
     closeBtn.MouseButton1Click:Connect(Minimize)
     minimized.MouseButton1Click:Connect(Restore)
 
+    -- Drag
     local function MakeDrag(obj)
         task.spawn(function()
             obj.Active = true
@@ -291,6 +302,7 @@ function Library:AddWindow(title, config)
     end
     MakeDrag(mainFrame)
 
+    -- Resizer (optional)
     local resizer = Instance.new("Frame")
     resizer.Name = "Resizer"
     resizer.Parent = mainFrame
@@ -319,6 +331,7 @@ function Library:AddWindow(title, config)
         end)
     end
 
+    -- Sidebar (tabs)
     local sidebar = Instance.new("Frame")
     sidebar.Name = "Sidebar"
     sidebar.Size = UDim2.new(0, 150, 1, -28)
@@ -349,6 +362,7 @@ function Library:AddWindow(title, config)
     tabList.Padding = UDim.new(0, 5)
     tabList.Parent = tabScroll
 
+    -- Content area
     local contentArea = Instance.new("Frame")
     contentArea.Name = "ContentArea"
     contentArea.Size = UDim2.new(1, -150, 1, -28)
@@ -357,6 +371,7 @@ function Library:AddWindow(title, config)
     contentArea.ClipsDescendants = true
     contentArea.Parent = inner
 
+    -- Tab management
     local tabs = {}
     local activeTab = nil
 
@@ -381,11 +396,14 @@ function Library:AddWindow(title, config)
         end
     end
 
+    -- Window object
     local window = {}
 
+    -- AddTab (creates a tab button and a container)
     function window:AddTab(name)
         if tabs[name] then return tabs[name].object end
 
+        -- Tab button (styled like Antora)
         local btn = Instance.new("TextButton")
         btn.Name = "Tab_" .. name
         btn.Size = UDim2.new(1, 0, 0, 24)
@@ -443,6 +461,7 @@ function Library:AddWindow(title, config)
         btn.MouseEnter:Connect(function() btn.BackgroundTransparency = 0.4 end)
         btn.MouseLeave:Connect(function() btn.BackgroundTransparency = 0 end)
 
+        -- Content container (scrolling)
         local container = Instance.new("ScrollingFrame")
         container.Name = "Container"
         container.Size = UDim2.new(1, 0, 1, 0)
@@ -469,6 +488,7 @@ function Library:AddWindow(title, config)
         layout.SortOrder = Enum.SortOrder.LayoutOrder
         layout.Parent = container
 
+        -- Tab object
         local tab = {}
         local elementCounter = 0
 
@@ -476,6 +496,142 @@ function Library:AddWindow(title, config)
             elementCounter = elementCounter + 1
             obj.LayoutOrder = elementCounter
         end
+
+        -- Helper to create a floating dropdown popup
+        local function createFloatingDropdown(button, options, callback)
+            -- Button is the dropdown button itself (the main button)
+            -- options is a table of strings
+            -- callback is called when an option is selected
+            local popup = Instance.new("Frame")
+            popup.Name = "DropdownPopup"
+            popup.Size = UDim2.new(0, 200, 0, 0)
+            popup.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            popup.BackgroundTransparency = 0
+            popup.BorderSizePixel = 0
+            popup.ClipsDescendants = true
+            popup.ZIndex = 1000
+            popup.Parent = screenGui  -- top-level
+
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 8)
+            corner.Parent = popup
+
+            local stroke = Instance.new("UIStroke")
+            stroke.Color = Color3.fromRGB(60, 60, 60)
+            stroke.Thickness = 1
+            stroke.Transparency = 0.5
+            stroke.Parent = popup
+
+            local scroll = Instance.new("ScrollingFrame")
+            scroll.Size = UDim2.new(1, 0, 1, 0)
+            scroll.BackgroundTransparency = 1
+            scroll.BorderSizePixel = 0
+            scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+            scroll.ScrollBarThickness = 4
+            scroll.ZIndex = 1001
+            scroll.Parent = popup
+
+            local list = Instance.new("UIListLayout")
+            list.SortOrder = Enum.SortOrder.LayoutOrder
+            list.Padding = UDim.new(0, 2)
+            list.Parent = scroll
+
+            -- Add options
+            local optionButtons = {}
+            for _, opt in ipairs(options) do
+                local optBtn = Instance.new("TextButton")
+                optBtn.Size = UDim2.new(1, 0, 0, 30)
+                optBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+                optBtn.BackgroundTransparency = 0
+                optBtn.BorderSizePixel = 0
+                optBtn.Font = Enum.Font.GothamSemibold
+                optBtn.Text = opt
+                optBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+                optBtn.TextSize = 14
+                optBtn.TextXAlignment = Enum.TextXAlignment.Left
+                optBtn.ZIndex = 1002
+                optBtn.Parent = scroll
+                local optCorner = Instance.new("UICorner")
+                optCorner.CornerRadius = UDim.new(0, 4)
+                optCorner.Parent = optBtn
+                optBtn.MouseEnter:Connect(function()
+                    optBtn.BackgroundTransparency = 0.5
+                end)
+                optBtn.MouseLeave:Connect(function()
+                    optBtn.BackgroundTransparency = 0
+                end)
+                optBtn.MouseButton1Click:Connect(function()
+                    if callback then callback(opt) end
+                    popup:Destroy()
+                end)
+                table.insert(optionButtons, optBtn)
+            end
+
+            -- Update canvas and height
+            local function updateSize()
+                local count = #scroll:GetChildren() - 1
+                local height = math.clamp(count, 0, 10) * 32 + 5
+                popup.Size = UDim2.new(0, 200, 0, height)
+                scroll.CanvasSize = UDim2.new(0, 0, 0, count * 32 + 5)
+            end
+            updateSize()
+
+            -- Position popup near the button
+            local buttonPos = button.AbsolutePosition
+            local buttonSize = button.AbsoluteSize
+            local popupPos = UDim2.new(0, buttonPos.X, 0, buttonPos.Y + buttonSize.Y)
+            -- Check if it fits below, else place above
+            local screenSize = screenGui.AbsoluteSize
+            if buttonPos.Y + buttonSize.Y + popup.Size.Y.Offset > screenSize.Y then
+                popupPos = UDim2.new(0, buttonPos.X, 0, buttonPos.Y - popup.Size.Y.Offset)
+            end
+            popup.Position = popupPos
+
+            -- Close popup when clicking outside
+            local function closePopup()
+                popup:Destroy()
+            end
+            -- We'll use a temporary connection on UserInputService
+            local mouseDownConnection
+            mouseDownConnection = UserInputService.InputBegan:Connect(function(input, processed)
+                if processed then return end
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    -- Check if click is inside popup or button
+                    local mousePos = input.Position
+                    if popup and popup.Parent then
+                        local popupAbs = popup.AbsolutePosition
+                        local popupSize = popup.AbsoluteSize
+                        if mousePos.X >= popupAbs.X and mousePos.X <= popupAbs.X + popupSize.X and
+                           mousePos.Y >= popupAbs.Y and mousePos.Y <= popupAbs.Y + popupSize.Y then
+                            return -- click inside popup, ignore
+                        end
+                        -- Also check if click is on the button itself (to prevent closing when clicking the button again)
+                        local btnAbs = button.AbsolutePosition
+                        local btnSize = button.AbsoluteSize
+                        if mousePos.X >= btnAbs.X and mousePos.X <= btnAbs.X + btnSize.X and
+                           mousePos.Y >= btnAbs.Y and mousePos.Y <= btnAbs.Y + btnSize.Y then
+                            return -- click on the button, ignore (the button will handle toggling)
+                        end
+                        -- Otherwise close
+                        if popup then popup:Destroy() end
+                        if mouseDownConnection then mouseDownConnection:Disconnect() end
+                    end
+                end
+            end)
+
+            -- Also close when parent window is minimized or closed
+            local cleanupConnections = {}
+            table.insert(cleanupConnections, mainFrame:GetPropertyChangedSignal("Visible"):Connect(function()
+                if not mainFrame.Visible then
+                    if popup then popup:Destroy() end
+                end
+            end))
+
+            -- Return a function to manually destroy
+            return popup
+        end
+
+        -- === TAB METHODS ===
 
         function tab:AddLabel(text)
             local label = Instance.new("TextLabel")
@@ -793,90 +949,28 @@ function Library:AddWindow(title, config)
             local corner = Instance.new("UICorner")
             corner.CornerRadius = UDim.new(0, 10)
             corner.Parent = dropdown
-            dropdown.ZIndex = 5
 
-            local indicator = Instance.new("TextLabel")
-            indicator.Size = UDim2.new(0, 20, 1, 0)
-            indicator.Position = UDim2.new(1, -25, 0, 0)
-            indicator.BackgroundTransparency = 1
-            indicator.Font = Enum.Font.GothamBold
-            indicator.Text = "▼"
-            indicator.TextColor3 = Color3.fromRGB(255,255,255)
-            indicator.TextSize = 14
-            indicator.TextStrokeColor3 = Color3.fromRGB(0,0,0)
-            indicator.TextStrokeTransparency = 0
-            indicator.Parent = dropdown
+            local currentOptions = {}
+            local popup = nil
 
-            local box = Instance.new("Frame")
-            box.Size = UDim2.new(1, 0, 0, 0)
-            box.Position = UDim2.new(0, 0, 1, 5)
-            box.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-            box.BackgroundTransparency = 0.2
-            box.BorderSizePixel = 0
-            box.ClipsDescendants = true
-            box.Active = true
-            box.Selectable = true
-            box.ZIndex = 10
-            box.Parent = dropdown
-            local boxCorner = Instance.new("UICorner")
-            boxCorner.CornerRadius = UDim.new(0, 10)
-            boxCorner.Parent = box
+            local function openPopup()
+                if popup then popup:Destroy() end
+                if #currentOptions == 0 then return end
+                popup = createFloatingDropdown(dropdown, currentOptions, function(selected)
+                    dropdown.Text = " [ " .. selected .. " ]"
+                    if callback then callback(selected) end
+                end)
+            end
 
-            local objects = Instance.new("ScrollingFrame")
-            objects.Size = UDim2.new(1, 0, 1, 0)
-            objects.BackgroundTransparency = 1
-            objects.BorderSizePixel = 0
-            objects.CanvasSize = UDim2.new(0, 0, 0, 0)
-            objects.ScrollBarThickness = 4
-            objects.Parent = box
-            local objLayout = Instance.new("UIListLayout")
-            objLayout.SortOrder = Enum.SortOrder.LayoutOrder
-            objLayout.Parent = objects
-
-            local open = false
             dropdown.MouseButton1Click:Connect(function()
-                open = not open
-                local count = #objects:GetChildren() - 1
-                local height = math.clamp(count, 0, 10) * 35 + 5
-                if open then
-                    TweenService:Create(box, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, height)}):Play()
-                    indicator.Text = "▲"
-                else
-                    TweenService:Create(box, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, 0)}):Play()
-                    indicator.Text = "▼"
-                end
+                openPopup()
             end)
 
             function data:Add(option)
-                local btn = Instance.new("TextButton")
-                btn.Size = UDim2.new(1, 0, 0, 35)
-                btn.BackgroundColor3 = Color3.fromRGB(255,255,255)
-                btn.BackgroundTransparency = 0.9
-                btn.BorderSizePixel = 0
-                btn.Font = Enum.Font.GothamBold
-                btn.Text = option
-                btn.TextColor3 = Color3.fromRGB(255,255,255)
-                btn.TextSize = 14
-                btn.TextXAlignment = Enum.TextXAlignment.Left
-                btn.TextStrokeColor3 = Color3.fromRGB(0,0,0)
-                btn.TextStrokeTransparency = 0
-                btn.Parent = objects
-                btn.MouseEnter:Connect(function() btn.BackgroundTransparency = 0.7 end)
-                btn.MouseLeave:Connect(function() btn.BackgroundTransparency = 0.9 end)
-                btn.MouseButton1Click:Connect(function()
-                    dropdown.Text = " [ " .. option .. " ]"
-                    TweenService:Create(box, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, 0)}):Play()
-                    indicator.Text = "▼"
-                    open = false
-                    if callback then callback(option) end
-                end)
-                if open then
-                    local count = #objects:GetChildren() - 1
-                    local height = math.clamp(count, 0, 10) * 35 + 5
-                    TweenService:Create(box, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, height)}):Play()
-                end
+                table.insert(currentOptions, option)
                 return data
             end
+
             assignLayoutOrder(dropdown)
             return data, dropdown
         end
@@ -1180,6 +1274,7 @@ function Library:AddWindow(title, config)
             return data, folder
         end
 
+        -- Store tab data
         tabs[name] = {
             button = btn,
             container = container,
@@ -1198,6 +1293,7 @@ function Library:AddWindow(title, config)
         return tab
     end
 
+    -- Additional window methods
     function window:Close()
         screenGui:Destroy()
     end
@@ -1214,6 +1310,7 @@ function Library:AddWindow(title, config)
         SelectTab(name)
     end
 
+    -- Toggle visibility with key
     local function ToggleVisibility()
         screenGui.Enabled = not screenGui.Enabled
     end
