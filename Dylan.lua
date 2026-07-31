@@ -1023,6 +1023,7 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     }
     gradient.Parent = panel.Frame
 
+    -- New background image on panels
     local bgImage = Instance.new("ImageLabel")
     bgImage.Name = "BackgroundImage"
     bgImage.Size = UDim2.fromScale(1,1)
@@ -1039,7 +1040,7 @@ end
 
 function library:AddWindow(title, options)
     windows = windows + 1
-    local dropdown_open = false   -- shared across all dropdowns in this window
+    local dropdown_open = false
     title = tostring(title or "New Window")
     options = (typeof(options) == "table") and options or ui_options
     options.tween_time = 0.1
@@ -1113,7 +1114,7 @@ function library:AddWindow(title, options)
     TitleLabel.TextStrokeTransparency = 0
     TitleLabel.Parent = Header
 
-    -- CLOSE/MINIMIZE BUTTON (original position)
+    -- CLOSE/MINIMIZE BUTTON (original position - NOT moved)
     local CloseButton = Instance.new("ImageButton")
     CloseButton.Name = "CloseButton"
     CloseButton.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -1222,7 +1223,7 @@ function library:AddWindow(title, options)
     TabButtonsList.Padding = UDim.new(0, 5)
     TabButtonsList.Parent = TabButtons
 
-    do -- Add Tab
+    do -- Add Tab (improved version)
         function window_data:AddTab(tab_name)
             local tab_data = {}
             tab_name = tostring(tab_name or "New Tab")
@@ -1239,6 +1240,7 @@ function library:AddWindow(title, options)
             new_button.Parent = TabButtons
             Instance.new("UICorner", new_button).CornerRadius = UDim.new(0, 10)
             
+            -- Text label on top of the image button
             local buttonLabel = Instance.new("TextLabel")
             buttonLabel.Name = "ButtonLabel"
             buttonLabel.Size = UDim2.new(1, 0, 1, 0)
@@ -1252,8 +1254,10 @@ function library:AddWindow(title, options)
             buttonLabel.TextStrokeTransparency = 0
             buttonLabel.Parent = new_button
             
+            -- Update canvas size
             TabButtons.CanvasSize = UDim2.new(0, 0, 0, (#TabButtons:GetChildren() - 1) * 40)
             
+            -- Create tab content (transparent background)
             local tabContainer = Instance.new("ScrollingFrame")
             tabContainer.Name = "TabContainer_" .. tab_name
             tabContainer.Size = UDim2.new(1, 0, 1, 0)
@@ -1276,6 +1280,7 @@ function library:AddWindow(title, options)
                 tabContainer.CanvasSize = UDim2.new(0, 0, 0, tabLayout.AbsoluteContentSize.Y + 10)
             end)
             
+            -- Highlight indicator
             local selectedIndicator = Instance.new("Frame")
             selectedIndicator.Name = "SelectedIndicator"
             selectedIndicator.Size = UDim2.new(0, 4, 0, 4)
@@ -1289,6 +1294,7 @@ function library:AddWindow(title, options)
             
             local function show()
                 if dropdown_open then return end
+                -- Reset all tabs
                 for i, v in pairs(TabButtons:GetChildren()) do
                     if v:IsA("ImageButton") then
                         v.ImageTransparency = 0.3
@@ -1304,6 +1310,7 @@ function library:AddWindow(title, options)
                         v.Visible = false
                     end
                 end
+                -- Activate current tab
                 new_button.ImageTransparency = 0
                 if selectedIndicator then
                     selectedIndicator.Size = UDim2.new(0, 4, 0, 16)
@@ -1323,7 +1330,7 @@ function library:AddWindow(title, options)
                 show()
             end
             
-            -- All tab elements
+            -- All tab elements now parent to tabContainer (the ScrollingFrame)
             function tab_data:AddLabel(label_text)
                 label_text = tostring(label_text or "New Label")
                 local label = Instance.new("TextLabel")
@@ -1677,192 +1684,134 @@ function library:AddWindow(title, options)
                 
                 return keybind_data, keybindFrame
             end
-
-            -- ========== NEW DROPDOWN (external floating frame) ==========
+            
+            --- NEW DROPDOWN (accordion style)
             function tab_data:AddDropdown(dropdown_name, callback)
                 local dropdown_data = {}
                 dropdown_name = tostring(dropdown_name or "New Dropdown")
                 callback = typeof(callback) == "function" and callback or function()end
-
-                -- The dropdown button (always visible)
-                local dropdown = Instance.new("TextButton")
-                dropdown.Size = UDim2.new(1, 0, 0, 35)
-                dropdown.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                dropdown.BackgroundTransparency = 0.8
-                dropdown.BorderSizePixel = 0
-                dropdown.Font = Enum.Font.GothamBold
-                dropdown.Text = " " .. dropdown_name
-                dropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
-                dropdown.TextSize = 14
-                dropdown.TextXAlignment = Enum.TextXAlignment.Left
-                dropdown.TextStrokeColor3 = Color3.fromRGB(0,0,0)
-                dropdown.TextStrokeTransparency = 0
-                dropdown.Parent = tabContainer
-                Instance.new("UICorner", dropdown).CornerRadius = UDim.new(0, 10)
-
+                
+                -- Container frame (will be resized)
+                local container = Instance.new("Frame")
+                container.Size = UDim2.new(1, 0, 0, 35)  -- initial height = header height
+                container.BackgroundTransparency = 1
+                container.BorderSizePixel = 0
+                container.ClipsDescendants = true
+                container.Parent = tabContainer
+                
+                -- Header button (the dropdown button)
+                local header = Instance.new("TextButton")
+                header.Size = UDim2.new(1, 0, 0, 35)
+                header.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                header.BackgroundTransparency = 0.8
+                header.BorderSizePixel = 0
+                header.Font = Enum.Font.GothamBold
+                header.Text = " " .. dropdown_name
+                header.TextColor3 = Color3.fromRGB(255, 255, 255)
+                header.TextSize = 14
+                header.TextXAlignment = Enum.TextXAlignment.Left
+                header.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                header.TextStrokeTransparency = 0
+                header.Parent = container
+                Instance.new("UICorner", header).CornerRadius = UDim.new(0, 10)
+                
                 -- Arrow indicator
-                local indicator = Instance.new("TextLabel")
-                indicator.Size = UDim2.new(0, 20, 1, 0)
-                indicator.Position = UDim2.new(1, -25, 0, 0)
-                indicator.BackgroundTransparency = 1
-                indicator.Font = Enum.Font.GothamBold
-                indicator.Text = "▼"
-                indicator.TextColor3 = Color3.fromRGB(255, 255, 255)
-                indicator.TextSize = 14
-                indicator.TextStrokeColor3 = Color3.fromRGB(0,0,0)
-                indicator.TextStrokeTransparency = 0
-                indicator.Parent = dropdown
-
-                -- Internal storage for options (as buttons)
-                local options = {}
-
-                -- Function to create the external dropdown frame (with smart positioning)
-                local function openDropdown()
-                    -- If another dropdown is already open, close it first
-                    if dropdown_open then
-                        -- Find and destroy the existing external frame
-                        for _, child in ipairs(imgui:GetChildren()) do
-                            if child.Name == "DropdownExternal" then
-                                child:Destroy()
-                                break
-                            end
-                        end
-                        dropdown_open = false
-                    end
-
-                    dropdown_open = true
-                    indicator.Text = "▲"
-
-                    -- Get main window's absolute position and size
-                    local winPos = Window.AbsolutePosition
-                    local winSize = Window.AbsoluteSize
-                    local gap = 10
-                    local dropdownWidth = 200
-
-                    -- Determine X position: prefer right, fallback to left
-                    -- FIXED: use workspace.CurrentCamera
-                    local viewportSize = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920, 1080)
-                    local rightSpace = viewportSize.X - (winPos.X + winSize.X) - gap - dropdownWidth
-                    local leftSpace = winPos.X - gap - dropdownWidth
-
-                    local xPos
-                    if rightSpace >= 0 then
-                        xPos = winPos.X + winSize.X + gap
-                    elseif leftSpace >= 0 then
-                        xPos = winPos.X - gap - dropdownWidth
+                local arrow = Instance.new("TextLabel")
+                arrow.Size = UDim2.new(0, 20, 1, 0)
+                arrow.Position = UDim2.new(1, -25, 0, 0)
+                arrow.BackgroundTransparency = 1
+                arrow.Font = Enum.Font.GothamBold
+                arrow.Text = "▼"
+                arrow.TextColor3 = Color3.fromRGB(255, 255, 255)
+                arrow.TextSize = 14
+                arrow.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+                arrow.TextStrokeTransparency = 0
+                arrow.Parent = header
+                
+                -- Options frame (will be expanded/collapsed)
+                local optionsFrame = Instance.new("Frame")
+                optionsFrame.Name = "OptionsFrame"
+                optionsFrame.Size = UDim2.new(1, 0, 0, 0)  -- initially collapsed
+                optionsFrame.Position = UDim2.new(0, 0, 1, 5)  -- below header
+                optionsFrame.BackgroundTransparency = 0.9
+                optionsFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                optionsFrame.BorderSizePixel = 0
+                optionsFrame.ClipsDescendants = true
+                optionsFrame.Parent = container
+                Instance.new("UICorner", optionsFrame).CornerRadius = UDim.new(0, 10)
+                
+                -- ScrollingFrame for options
+                local objects = Instance.new("ScrollingFrame")
+                objects.Name = "Objects"
+                objects.Size = UDim2.new(1, 0, 1, 0)
+                objects.BackgroundTransparency = 1
+                objects.BorderSizePixel = 0
+                objects.CanvasSize = UDim2.new(0, 0, 0, 0)
+                objects.ScrollBarThickness = 4
+                objects.Parent = optionsFrame
+                
+                local objectsLayout = Instance.new("UIListLayout")
+                objectsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                objectsLayout.Padding = UDim.new(0, 2)
+                objectsLayout.Parent = objects
+                
+                -- Track open state
+                local open = false
+                local itemHeight = 35
+                local maxVisible = 10
+                local optionsHeight = 0
+                
+                -- Function to recalculate options height
+                local function updateHeight()
+                    local count = #objects:GetChildren() - 1  -- exclude layout
+                    if count > 0 then
+                        local visible = math.min(count, maxVisible)
+                        optionsHeight = visible * itemHeight + 5  -- padding
                     else
-                        xPos = winPos.X + winSize.X + gap  -- fallback
+                        optionsHeight = 0
                     end
-
-                    -- Y position: align with the dropdown button
-                    local yPos = dropdown.AbsolutePosition.Y
-
-                    -- Create external frame
-                    local externalFrame = Instance.new("Frame")
-                    externalFrame.Name = "DropdownExternal"
-                    externalFrame.BackgroundColor3 = Color3.fromRGB(255,255,255)
-                    externalFrame.BackgroundTransparency = 0
-                    externalFrame.BorderSizePixel = 0
-                    externalFrame.ZIndex = 100
-                    externalFrame.Position = UDim2.new(0, xPos, 0, yPos)
-                    externalFrame.Size = UDim2.new(0, dropdownWidth, 0, 50)
-                    externalFrame.Parent = imgui
-
-                    -- Apply same gradient + background image + white stroke
-                    local stroke = Instance.new("UIStroke")
-                    stroke.Color = Color3.fromRGB(255,255,255)
-                    stroke.Thickness = 2
-                    stroke.Transparency = 0.3
-                    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-                    stroke.Parent = externalFrame
-
-                    local gradient = Instance.new("UIGradient")
-                    gradient.Rotation = 90
-                    gradient.Color = ColorSequence.new{
-                        ColorSequenceKeypoint.new(0.00, Color3.fromRGB(110,45,220)),
-                        ColorSequenceKeypoint.new(0.45, Color3.fromRGB(176,96,244)),
-                        ColorSequenceKeypoint.new(1.00, Color3.fromRGB(236,198,255))
-                    }
-                    gradient.Parent = externalFrame
-
-                    local bgImage = Instance.new("ImageLabel")
-                    bgImage.Size = UDim2.fromScale(1,1)
-                    bgImage.BackgroundTransparency = 1
-                    bgImage.BorderSizePixel = 0
-                    bgImage.Image = "rbxassetid://16736132788"
-                    bgImage.ImageTransparency = 0
-                    bgImage.ScaleType = Enum.ScaleType.Stretch
-                    bgImage.Parent = externalFrame
-                    Instance.new("UICorner", bgImage).CornerRadius = UDim.new(0, 10)
-                    Instance.new("UICorner", externalFrame).CornerRadius = UDim.new(0, 10)
-
-                    -- ScrollingFrame for options
-                    local scroll = Instance.new("ScrollingFrame")
-                    scroll.Size = UDim2.new(1, 0, 1, 0)
-                    scroll.BackgroundTransparency = 1
-                    scroll.BorderSizePixel = 0
-                    scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-                    scroll.ScrollBarThickness = 4
-                    scroll.Parent = externalFrame
-
-                    local layout = Instance.new("UIListLayout")
-                    layout.SortOrder = Enum.SortOrder.LayoutOrder
-                    layout.Padding = UDim.new(0, 2)
-                    layout.Parent = scroll
-
-                    -- Clone each option button from the stored options
-                    for _, optButton in ipairs(options) do
-                        local newBtn = optButton:Clone()
-                        newBtn.Parent = scroll
-                        newBtn.Size = UDim2.new(1, 0, 0, 30)
-                        newBtn.TextStrokeColor3 = Color3.fromRGB(0,0,0)
-                        newBtn.TextStrokeTransparency = 0
-                        newBtn.MouseButton1Click:Connect(function()
-                            local selectedText = newBtn.Text
-                            dropdown.Text = " [ " .. selectedText .. " ]"
-                            pcall(callback, selectedText)
-                            if externalFrame then externalFrame:Destroy() end
-                            dropdown_open = false
-                            indicator.Text = "▼"
-                        end)
-                    end
-
-                    -- Adjust frame height to content (max 200px)
-                    local function updateSize()
-                        local contentHeight = layout.AbsoluteContentSize.Y + 10
-                        local newHeight = math.min(contentHeight, 200)
-                        externalFrame.Size = UDim2.new(0, dropdownWidth, 0, newHeight)
-                        scroll.CanvasSize = UDim2.new(0, 0, 0, contentHeight)
-                    end
-
-                    layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSize)
-                    task.delay(0.05, updateSize)
-
-                    -- Store external frame reference on the dropdown button
-                    dropdown._externalFrame = externalFrame
                 end
-
-                -- Toggle dropdown on button click
-                dropdown.MouseButton1Click:Connect(function()
-                    if dropdown_open then
-                        if dropdown._externalFrame then
-                            dropdown._externalFrame:Destroy()
-                            dropdown._externalFrame = nil
-                        end
+                
+                -- Function to toggle dropdown
+                local function toggle()
+                    if open then
+                        -- Close
+                        open = false
                         dropdown_open = false
-                        indicator.Text = "▼"
+                        arrow.Text = "▼"
+                        -- Animate options frame height to 0
+                        Resize(optionsFrame, {Size = UDim2.new(1, 0, 0, 0)}, 0.15)
+                        -- Animate container height back to header only
+                        Resize(container, {Size = UDim2.new(1, 0, 0, 35)}, 0.15)
                     else
-                        openDropdown()
+                        -- Open
+                        if dropdown_open then return end
+                        open = true
+                        dropdown_open = true
+                        arrow.Text = "▲"
+                        -- Calculate height based on number of items
+                        updateHeight()
+                        if optionsHeight > 0 then
+                            -- Expand options frame
+                            Resize(optionsFrame, {Size = UDim2.new(1, 0, 0, optionsHeight)}, 0.15)
+                            -- Expand container
+                            Resize(container, {Size = UDim2.new(1, 0, 0, 35 + optionsHeight + 5)}, 0.15)
+                        end
                     end
+                end
+                
+                -- Header click
+                header.MouseButton1Click:Connect(function()
+                    toggle()
                 end)
-
-                -- Function to add an option
+                
+                -- Add items
                 function dropdown_data:Add(n)
                     local object_data = {}
                     n = tostring(n or "New Object")
-
+                    
                     local object = Instance.new("TextButton")
-                    object.Size = UDim2.new(1, 0, 0, 35)
+                    object.Size = UDim2.new(1, 0, 0, itemHeight)
                     object.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                     object.BackgroundTransparency = 0.9
                     object.BorderSizePixel = 0
@@ -1873,32 +1822,67 @@ function library:AddWindow(title, options)
                     object.TextXAlignment = Enum.TextXAlignment.Left
                     object.TextStrokeColor3 = Color3.fromRGB(0,0,0)
                     object.TextStrokeTransparency = 0
-                    table.insert(options, object)
-
+                    object.Parent = objects
+                    
                     object.MouseEnter:Connect(function()
                         object.BackgroundTransparency = 0.7
                     end)
                     object.MouseLeave:Connect(function()
                         object.BackgroundTransparency = 0.9
                     end)
-
+                    
+                    -- Update canvas size
+                    local function updateCanvas()
+                        objects.CanvasSize = UDim2.new(0, 0, 0, (#objects:GetChildren() - 1) * itemHeight)
+                    end
+                    updateCanvas()
+                    
+                    -- If dropdown is open, refresh height
+                    if open then
+                        updateHeight()
+                        Resize(optionsFrame, {Size = UDim2.new(1, 0, 0, optionsHeight)}, 0.15)
+                        Resize(container, {Size = UDim2.new(1, 0, 0, 35 + optionsHeight + 5)}, 0.15)
+                    end
+                    
+                    object.MouseButton1Click:Connect(function()
+                        if open then
+                            -- Set header text to selected
+                            header.Text = " [ " .. n .. " ]"
+                            -- Close dropdown
+                            toggle()
+                            pcall(callback, n)
+                        end
+                    end)
+                    
                     function object_data:Remove()
-                        for i, v in ipairs(options) do
-                            if v == object then
-                                table.remove(options, i)
-                                break
+                        object:Destroy()
+                        updateCanvas()
+                        if open then
+                            updateHeight()
+                            if optionsHeight > 0 then
+                                Resize(optionsFrame, {Size = UDim2.new(1, 0, 0, optionsHeight)}, 0.15)
+                                Resize(container, {Size = UDim2.new(1, 0, 0, 35 + optionsHeight + 5)}, 0.15)
+                            else
+                                -- No items, close dropdown automatically
+                                toggle()
                             end
                         end
-                        object:Destroy()
                     end
-
+                    
                     return object, object_data
                 end
-
-                return dropdown_data, dropdown
+                
+                -- Close dropdown if tab switches
+                local original_show = tab_data.Show
+                tab_data.Show = function()
+                    if open then toggle() end
+                    original_show()
+                end
+                
+                return dropdown_data, container
             end
-            -- ========== END NEW DROPDOWN ==========
-
+            --- End dropdown
+            
             function tab_data:AddColorPicker(callback)
                 local color_picker_data = {}
                 callback = typeof(callback) == "function" and callback or function()end
