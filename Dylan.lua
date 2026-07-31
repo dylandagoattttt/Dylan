@@ -1740,7 +1740,8 @@ function library:AddWindow(title, options)
                     local dropdownWidth = 200
 
                     -- Determine X position: prefer right, fallback to left
-                    local viewportSize = game:GetService("Camera").ViewportSize
+                    -- FIXED: use workspace.CurrentCamera
+                    local viewportSize = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920, 1080)
                     local rightSpace = viewportSize.X - (winPos.X + winSize.X) - gap - dropdownWidth
                     local leftSpace = winPos.X - gap - dropdownWidth
 
