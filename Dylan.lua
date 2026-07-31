@@ -1686,7 +1686,7 @@ function library:AddWindow(title, options)
                 return keybind_data, keybindFrame
             end
             
-            -- UPDATED DROPDOWN with opaque background
+            -- UPDATED DROPDOWN with opaque black background (no strokes)
             function tab_data:AddDropdown(dropdown_name, callback)
                 local dropdown_data = {}
                 dropdown_name = tostring(dropdown_name or "New Dropdown")
@@ -1719,31 +1719,18 @@ function library:AddWindow(title, options)
                 indicator.TextStrokeTransparency = 0
                 indicator.Parent = dropdown
                 
-                -- DROPDOWN BOX - fully opaque with gradient + stroke
+                -- DROPDOWN BOX - BLACK background (opaque) - NO STROKE
                 local box = Instance.new("Frame")
                 box.Size = UDim2.new(1, 0, 0, 0)
                 box.Position = UDim2.new(0, 0, 1, 5)
-                box.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                box.BackgroundTransparency = 0
+                box.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- BLACK
+                box.BackgroundTransparency = 0                  -- fully opaque
                 box.BorderSizePixel = 0
                 box.ClipsDescendants = true
                 box.Parent = dropdown
                 Instance.new("UICorner", box).CornerRadius = UDim.new(0, 10)
                 
-                local boxGradient = Instance.new("UIGradient")
-                boxGradient.Rotation = 90
-                boxGradient.Color = ColorSequence.new{
-                    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(60, 30, 100)),
-                    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(110, 60, 180))
-                }
-                boxGradient.Parent = box
-                
-                local boxStroke = Instance.new("UIStroke")
-                boxStroke.Color = Color3.fromRGB(255, 255, 255)
-                boxStroke.Thickness = 2
-                boxStroke.Transparency = 0.3
-                boxStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-                boxStroke.Parent = box
+                -- NO STROKE on the box
                 
                 local objects = Instance.new("ScrollingFrame")
                 objects.Name = "Objects"
@@ -1784,8 +1771,8 @@ function library:AddWindow(title, options)
                     
                     local object = Instance.new("TextButton")
                     object.Size = UDim2.new(1, 0, 0, 35)
-                    object.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                    object.BackgroundTransparency = 0.85
+                    object.BackgroundColor3 = Color3.fromRGB(20, 20, 20)  -- dark gray (almost black)
+                    object.BackgroundTransparency = 0                     -- FULLY OPAQUE
                     object.BorderSizePixel = 0
                     object.Font = Enum.Font.GothamBold
                     object.Text = n
@@ -1796,11 +1783,13 @@ function library:AddWindow(title, options)
                     object.TextStrokeTransparency = 0
                     object.Parent = objects
                     
+                    -- NO STROKE on items
+                    
                     object.MouseEnter:Connect(function()
-                        object.BackgroundTransparency = 0.5
+                        object.BackgroundColor3 = Color3.fromRGB(60, 60, 80)  -- lighter on hover
                     end)
                     object.MouseLeave:Connect(function()
-                        object.BackgroundTransparency = 0.85
+                        object.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
                     end)
                     
                     if open then
