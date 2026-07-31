@@ -1685,25 +1685,27 @@ function library:AddWindow(title, options)
                 return keybind_data, keybindFrame
             end
             
-            --- NEW DROPDOWN (accordion style)
+            -- ============================================================
+            -- UPDATED DROPDOWN (accordion style with visible items)
+            -- ============================================================
             function tab_data:AddDropdown(dropdown_name, callback)
                 local dropdown_data = {}
                 dropdown_name = tostring(dropdown_name or "New Dropdown")
                 callback = typeof(callback) == "function" and callback or function()end
-                
+
                 -- Container frame (will be resized)
                 local container = Instance.new("Frame")
-                container.Size = UDim2.new(1, 0, 0, 35)  -- initial height = header height
+                container.Size = UDim2.new(1, 0, 0, 35)
                 container.BackgroundTransparency = 1
                 container.BorderSizePixel = 0
                 container.ClipsDescendants = true
                 container.Parent = tabContainer
-                
-                -- Header button (the dropdown button)
+
+                -- Header button
                 local header = Instance.new("TextButton")
                 header.Size = UDim2.new(1, 0, 0, 35)
-                header.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                header.BackgroundTransparency = 0.8
+                header.BackgroundColor3 = Color3.fromRGB(60, 40, 90)
+                header.BackgroundTransparency = 0.2
                 header.BorderSizePixel = 0
                 header.Font = Enum.Font.GothamBold
                 header.Text = " " .. dropdown_name
@@ -1714,7 +1716,7 @@ function library:AddWindow(title, options)
                 header.TextStrokeTransparency = 0
                 header.Parent = container
                 Instance.new("UICorner", header).CornerRadius = UDim.new(0, 10)
-                
+
                 -- Arrow indicator
                 local arrow = Instance.new("TextLabel")
                 arrow.Size = UDim2.new(0, 20, 1, 0)
@@ -1727,19 +1729,19 @@ function library:AddWindow(title, options)
                 arrow.TextStrokeColor3 = Color3.fromRGB(0,0,0)
                 arrow.TextStrokeTransparency = 0
                 arrow.Parent = header
-                
-                -- Options frame (will be expanded/collapsed)
+
+                -- Options frame (collapsible) – with a visible background
                 local optionsFrame = Instance.new("Frame")
                 optionsFrame.Name = "OptionsFrame"
-                optionsFrame.Size = UDim2.new(1, 0, 0, 0)  -- initially collapsed
-                optionsFrame.Position = UDim2.new(0, 0, 1, 5)  -- below header
-                optionsFrame.BackgroundTransparency = 0.9
-                optionsFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                optionsFrame.Size = UDim2.new(1, 0, 0, 0)
+                optionsFrame.Position = UDim2.new(0, 0, 1, 5)
+                optionsFrame.BackgroundColor3 = Color3.fromRGB(40, 30, 60)   -- dark purple background
+                optionsFrame.BackgroundTransparency = 0.15                   -- mostly opaque
                 optionsFrame.BorderSizePixel = 0
                 optionsFrame.ClipsDescendants = true
                 optionsFrame.Parent = container
                 Instance.new("UICorner", optionsFrame).CornerRadius = UDim.new(0, 10)
-                
+
                 -- ScrollingFrame for options
                 local objects = Instance.new("ScrollingFrame")
                 objects.Name = "Objects"
@@ -1749,71 +1751,59 @@ function library:AddWindow(title, options)
                 objects.CanvasSize = UDim2.new(0, 0, 0, 0)
                 objects.ScrollBarThickness = 4
                 objects.Parent = optionsFrame
-                
+
                 local objectsLayout = Instance.new("UIListLayout")
                 objectsLayout.SortOrder = Enum.SortOrder.LayoutOrder
                 objectsLayout.Padding = UDim.new(0, 2)
                 objectsLayout.Parent = objects
-                
-                -- Track open state
+
                 local open = false
                 local itemHeight = 35
                 local maxVisible = 10
                 local optionsHeight = 0
-                
-                -- Function to recalculate options height
+
                 local function updateHeight()
-                    local count = #objects:GetChildren() - 1  -- exclude layout
+                    local count = #objects:GetChildren() - 1
                     if count > 0 then
                         local visible = math.min(count, maxVisible)
-                        optionsHeight = visible * itemHeight + 5  -- padding
+                        optionsHeight = visible * itemHeight + 5
                     else
                         optionsHeight = 0
                     end
                 end
-                
-                -- Function to toggle dropdown
+
                 local function toggle()
                     if open then
-                        -- Close
                         open = false
                         dropdown_open = false
                         arrow.Text = "▼"
-                        -- Animate options frame height to 0
                         Resize(optionsFrame, {Size = UDim2.new(1, 0, 0, 0)}, 0.15)
-                        -- Animate container height back to header only
                         Resize(container, {Size = UDim2.new(1, 0, 0, 35)}, 0.15)
                     else
-                        -- Open
                         if dropdown_open then return end
                         open = true
                         dropdown_open = true
                         arrow.Text = "▲"
-                        -- Calculate height based on number of items
                         updateHeight()
                         if optionsHeight > 0 then
-                            -- Expand options frame
                             Resize(optionsFrame, {Size = UDim2.new(1, 0, 0, optionsHeight)}, 0.15)
-                            -- Expand container
                             Resize(container, {Size = UDim2.new(1, 0, 0, 35 + optionsHeight + 5)}, 0.15)
                         end
                     end
                 end
-                
-                -- Header click
+
                 header.MouseButton1Click:Connect(function()
                     toggle()
                 end)
-                
-                -- Add items
+
                 function dropdown_data:Add(n)
                     local object_data = {}
                     n = tostring(n or "New Object")
-                    
+
                     local object = Instance.new("TextButton")
                     object.Size = UDim2.new(1, 0, 0, itemHeight)
-                    object.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                    object.BackgroundTransparency = 0.9
+                    object.BackgroundColor3 = Color3.fromRGB(80, 60, 110)   -- slightly lighter purple
+                    object.BackgroundTransparency = 0.3                    -- visible
                     object.BorderSizePixel = 0
                     object.Font = Enum.Font.GothamBold
                     object.Text = n
@@ -1823,37 +1813,33 @@ function library:AddWindow(title, options)
                     object.TextStrokeColor3 = Color3.fromRGB(0,0,0)
                     object.TextStrokeTransparency = 0
                     object.Parent = objects
-                    
+
                     object.MouseEnter:Connect(function()
-                        object.BackgroundTransparency = 0.7
+                        object.BackgroundTransparency = 0.1
                     end)
                     object.MouseLeave:Connect(function()
-                        object.BackgroundTransparency = 0.9
+                        object.BackgroundTransparency = 0.3
                     end)
-                    
-                    -- Update canvas size
+
                     local function updateCanvas()
                         objects.CanvasSize = UDim2.new(0, 0, 0, (#objects:GetChildren() - 1) * itemHeight)
                     end
                     updateCanvas()
-                    
-                    -- If dropdown is open, refresh height
+
                     if open then
                         updateHeight()
                         Resize(optionsFrame, {Size = UDim2.new(1, 0, 0, optionsHeight)}, 0.15)
                         Resize(container, {Size = UDim2.new(1, 0, 0, 35 + optionsHeight + 5)}, 0.15)
                     end
-                    
+
                     object.MouseButton1Click:Connect(function()
                         if open then
-                            -- Set header text to selected
                             header.Text = " [ " .. n .. " ]"
-                            -- Close dropdown
                             toggle()
                             pcall(callback, n)
                         end
                     end)
-                    
+
                     function object_data:Remove()
                         object:Destroy()
                         updateCanvas()
@@ -1863,25 +1849,26 @@ function library:AddWindow(title, options)
                                 Resize(optionsFrame, {Size = UDim2.new(1, 0, 0, optionsHeight)}, 0.15)
                                 Resize(container, {Size = UDim2.new(1, 0, 0, 35 + optionsHeight + 5)}, 0.15)
                             else
-                                -- No items, close dropdown automatically
                                 toggle()
                             end
                         end
                     end
-                    
+
                     return object, object_data
                 end
-                
-                -- Close dropdown if tab switches
+
+                -- Close dropdown when tab switches
                 local original_show = tab_data.Show
                 tab_data.Show = function()
                     if open then toggle() end
                     original_show()
                 end
-                
+
                 return dropdown_data, container
             end
-            --- End dropdown
+            -- ============================================================
+            -- END DROPDOWN
+            -- ============================================================
             
             function tab_data:AddColorPicker(callback)
                 local color_picker_data = {}
