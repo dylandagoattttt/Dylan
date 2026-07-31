@@ -1685,9 +1685,7 @@ function library:AddWindow(title, options)
                 return keybind_data, keybindFrame
             end
             
-            -- ============================================================
-            -- UPDATED DROPDOWN (accordion style with visible items)
-            -- ============================================================
+            -- ACCORDION-STYLE DROPDOWN
             function tab_data:AddDropdown(dropdown_name, callback)
                 local dropdown_data = {}
                 dropdown_name = tostring(dropdown_name or "New Dropdown")
@@ -1704,8 +1702,8 @@ function library:AddWindow(title, options)
                 -- Header button
                 local header = Instance.new("TextButton")
                 header.Size = UDim2.new(1, 0, 0, 35)
-                header.BackgroundColor3 = Color3.fromRGB(60, 40, 90)
-                header.BackgroundTransparency = 0.2
+                header.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                header.BackgroundTransparency = 0.8
                 header.BorderSizePixel = 0
                 header.Font = Enum.Font.GothamBold
                 header.Text = " " .. dropdown_name
@@ -1717,7 +1715,7 @@ function library:AddWindow(title, options)
                 header.Parent = container
                 Instance.new("UICorner", header).CornerRadius = UDim.new(0, 10)
 
-                -- Arrow indicator
+                -- Arrow
                 local arrow = Instance.new("TextLabel")
                 arrow.Size = UDim2.new(0, 20, 1, 0)
                 arrow.Position = UDim2.new(1, -25, 0, 0)
@@ -1730,13 +1728,13 @@ function library:AddWindow(title, options)
                 arrow.TextStrokeTransparency = 0
                 arrow.Parent = header
 
-                -- Options frame (collapsible) – with a visible background
+                -- Options frame (expanded/collapsed)
                 local optionsFrame = Instance.new("Frame")
                 optionsFrame.Name = "OptionsFrame"
                 optionsFrame.Size = UDim2.new(1, 0, 0, 0)
                 optionsFrame.Position = UDim2.new(0, 0, 1, 5)
-                optionsFrame.BackgroundColor3 = Color3.fromRGB(40, 30, 60)   -- dark purple background
-                optionsFrame.BackgroundTransparency = 0.15                   -- mostly opaque
+                optionsFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+                optionsFrame.BackgroundTransparency = 0.3
                 optionsFrame.BorderSizePixel = 0
                 optionsFrame.ClipsDescendants = true
                 optionsFrame.Parent = container
@@ -1749,7 +1747,7 @@ function library:AddWindow(title, options)
                 objects.BackgroundTransparency = 1
                 objects.BorderSizePixel = 0
                 objects.CanvasSize = UDim2.new(0, 0, 0, 0)
-                objects.ScrollBarThickness = 4
+                objects.ScrollBarThickness = 6
                 objects.Parent = optionsFrame
 
                 local objectsLayout = Instance.new("UIListLayout")
@@ -1761,14 +1759,16 @@ function library:AddWindow(title, options)
                 local itemHeight = 35
                 local maxVisible = 10
                 local optionsHeight = 0
+                local hasItems = false
 
                 local function updateHeight()
                     local count = #objects:GetChildren() - 1
-                    if count > 0 then
+                    hasItems = count > 0
+                    if hasItems then
                         local visible = math.min(count, maxVisible)
                         optionsHeight = visible * itemHeight + 5
                     else
-                        optionsHeight = 0
+                        optionsHeight = 35
                     end
                 end
 
@@ -1796,14 +1796,15 @@ function library:AddWindow(title, options)
                     toggle()
                 end)
 
+                -- Add items
                 function dropdown_data:Add(n)
                     local object_data = {}
                     n = tostring(n or "New Object")
 
                     local object = Instance.new("TextButton")
                     object.Size = UDim2.new(1, 0, 0, itemHeight)
-                    object.BackgroundColor3 = Color3.fromRGB(80, 60, 110)   -- slightly lighter purple
-                    object.BackgroundTransparency = 0.3                    -- visible
+                    object.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                    object.BackgroundTransparency = 0.5
                     object.BorderSizePixel = 0
                     object.Font = Enum.Font.GothamBold
                     object.Text = n
@@ -1815,10 +1816,10 @@ function library:AddWindow(title, options)
                     object.Parent = objects
 
                     object.MouseEnter:Connect(function()
-                        object.BackgroundTransparency = 0.1
+                        object.BackgroundTransparency = 0.2
                     end)
                     object.MouseLeave:Connect(function()
-                        object.BackgroundTransparency = 0.3
+                        object.BackgroundTransparency = 0.5
                     end)
 
                     local function updateCanvas()
@@ -1845,7 +1846,7 @@ function library:AddWindow(title, options)
                         updateCanvas()
                         if open then
                             updateHeight()
-                            if optionsHeight > 0 then
+                            if hasItems then
                                 Resize(optionsFrame, {Size = UDim2.new(1, 0, 0, optionsHeight)}, 0.15)
                                 Resize(container, {Size = UDim2.new(1, 0, 0, 35 + optionsHeight + 5)}, 0.15)
                             else
@@ -1866,9 +1867,6 @@ function library:AddWindow(title, options)
 
                 return dropdown_data, container
             end
-            -- ============================================================
-            -- END DROPDOWN
-            -- ============================================================
             
             function tab_data:AddColorPicker(callback)
                 local color_picker_data = {}
