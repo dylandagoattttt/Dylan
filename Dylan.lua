@@ -1,5 +1,5 @@
 local ui_options = {
-    main_color = Color3.fromRGB(110, 45, 220),
+    main_color = Color3.fromRGB(150, 80, 255),
     min_size = Vector2.new(400, 300),
     toggle_key = Enum.KeyCode.RightShift,
     can_resize = true,
@@ -197,8 +197,8 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     local gradient = Instance.new("UIGradient")
     gradient.Rotation = 90
     gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0.00, Color3.fromRGB(110, 45, 220)),
-        ColorSequenceKeypoint.new(0.45, Color3.fromRGB(176, 96, 244)),
+        ColorSequenceKeypoint.new(0.00, Color3.fromRGB(150, 80, 255)),
+        ColorSequenceKeypoint.new(0.45, Color3.fromRGB(200, 130, 255)),
         ColorSequenceKeypoint.new(1.00, Color3.fromRGB(236, 198, 255))
     }
     gradient.Parent = panel.Frame
@@ -326,43 +326,43 @@ function library:AddWindow(title, options)
     MinimizedFrame.BorderSizePixel = 0
     MinimizedFrame.Visible = false
     MinimizedFrame.ZIndex = 100
-    -- Portal image (Rick and Morty style)
+    -- Portal image (Rick and Morty style) - full URL
     MinimizedFrame.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=108067574147759&width=678&height=810&format=png"
     MinimizedFrame.ScaleType = Enum.ScaleType.Fit
     MinimizedFrame.Parent = windowsFrame
     Instance.new("UICorner", MinimizedFrame).CornerRadius = UDim.new(1, 0)
 
+    -- Portal stroke - GREEN to match theme
     local MinimizedStroke = Instance.new("UIStroke")
-MinimizedStroke.Color = Color3.fromRGB(0, 255, 100) -- Portal Green (was white)
-MinimizedStroke.Thickness = 2
-MinimizedStroke.Transparency = 0.3
-MinimizedStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-MinimizedStroke.Parent = MinimizedFrame
+    MinimizedStroke.Color = Color3.fromRGB(0, 200, 80)
+    MinimizedStroke.Thickness = 2
+    MinimizedStroke.Transparency = 0.3
+    MinimizedStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    MinimizedStroke.Parent = MinimizedFrame
 
     -- Portal animation variables
     local portalConnection = nil
     local portalAngle = 0
 
-    
     local function startPortalAnimation()
-    if portalConnection then return end
-    portalAngle = 0
-    portalConnection = RS.Heartbeat:Connect(function(dt)
-        -- Rotate continuously (slower)
-        portalAngle = portalAngle + dt * 45 -- degrees per second (was 120)
-        MinimizedFrame.Rotation = portalAngle
+        if portalConnection then return end
+        portalAngle = 0
+        portalConnection = RS.Heartbeat:Connect(function(dt)
+            -- Rotate continuously (slower - 45 degrees per second)
+            portalAngle = portalAngle + dt * 45
+            MinimizedFrame.Rotation = portalAngle
 
-        -- Pulse scale (subtle breathing, slower)
-        local pulse = 1 + 0.05 * math.sin(tick() * 1.0) -- was 2.5
-        MinimizedFrame.Size = UDim2.fromOffset(60 * pulse, 60 * pulse)
-    end)
+            -- Pulse scale (subtle breathing, slower)
+            local pulse = 1 + 0.05 * math.sin(tick() * 1.0)
+            MinimizedFrame.Size = UDim2.fromOffset(60 * pulse, 60 * pulse)
+        end)
     end
+
     local function stopPortalAnimation()
         if portalConnection then
             portalConnection:Disconnect()
             portalConnection = nil
         end
-        -- Reset rotation and size
         MinimizedFrame.Rotation = 0
         MinimizedFrame.Size = UDim2.fromOffset(60, 60)
     end
@@ -386,10 +386,8 @@ MinimizedStroke.Parent = MinimizedFrame
             SidePanel.Shadow.Visible = false
 
             MinimizedFrame.Visible = true
-            -- Start with small size then tween to full (portal pop)
             MinimizedFrame.Size = UDim2.fromOffset(0, 0)
             MinimizedFrame:TweenSize(UDim2.fromOffset(60, 60), Enum.EasingDirection.Out, Enum.EasingStyle.Back, 0.3, true)
-            -- Start the portal animation after the pop
             task.wait(0.35)
             startPortalAnimation()
             isMinimized = true
@@ -397,11 +395,8 @@ MinimizedStroke.Parent = MinimizedFrame
     end)
 
     MinimizedFrame.MouseButton1Click:Connect(function()
-        -- Stop portal animation
         stopPortalAnimation()
-        -- Hide minimized frame
         MinimizedFrame.Visible = false
-        -- Restore main & side panels
         MainPanel.Frame.Visible = true
         MainPanel.Shadow.Visible = true
         SidePanel.Frame.Visible = true
@@ -563,7 +558,7 @@ MinimizedStroke.Parent = MinimizedFrame
                 return label
             end
 
-            -- UPDATED: AddButton with drop shadow, rounded corners, gradient, bold stroked text
+            -- UPDATED: AddButton with drop shadow, rounded corners, gradient, bold stroked text (brighter purple)
             function tab_data:AddButton(button_text, callback)
                 button_text = tostring(button_text or "New Button")
                 callback = typeof(callback) == "function" and callback or function() end
@@ -586,7 +581,7 @@ MinimizedStroke.Parent = MinimizedFrame
 
                 local button = Instance.new("TextButton")
                 button.Size = UDim2.new(1, 0, 1, 0)
-                button.BackgroundColor3 = options.main_color or Color3.fromRGB(110, 45, 220)
+                button.BackgroundColor3 = Color3.fromRGB(150, 80, 255)
                 button.BorderSizePixel = 0
                 button.Font = Enum.Font.GothamBold
                 button.Text = button_text
@@ -600,8 +595,8 @@ MinimizedStroke.Parent = MinimizedFrame
                 local btnGradient = Instance.new("UIGradient")
                 btnGradient.Rotation = 90
                 btnGradient.Color = ColorSequence.new{
-                    ColorSequenceKeypoint.new(0.00, options.main_color or Color3.fromRGB(110, 45, 220)),
-                    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(176, 96, 244))
+                    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(150, 80, 255)),
+                    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(200, 130, 255))
                 }
                 btnGradient.Parent = button
 
@@ -612,7 +607,7 @@ MinimizedStroke.Parent = MinimizedFrame
                 return button
             end
 
-            -- UPDATED: AddSwitch with red pill toggle, label left, toggle right, ON/OFF text
+            -- UPDATED: AddSwitch with red OFF / green ON, ON/OFF text
             function tab_data:AddSwitch(switch_text, callback)
                 local switch_data = {}
                 switch_text = tostring(switch_text or "New Switch")
@@ -673,7 +668,8 @@ MinimizedStroke.Parent = MinimizedFrame
 
                 local function updateToggle(state)
                     toggled = state
-                    local targetColor = toggled and (options.main_color or Color3.fromRGB(110, 45, 220)) or Color3.fromRGB(200, 50, 50)
+                    -- ON = green, OFF = red
+                    local targetColor = toggled and Color3.fromRGB(0, 200, 80) or Color3.fromRGB(200, 50, 50)
                     toggleButton.Text = toggled and "ON" or "OFF"
                     TweenService:Create(toggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = targetColor}):Play()
                     pcall(callback, toggled)
@@ -768,7 +764,7 @@ MinimizedStroke.Parent = MinimizedFrame
 
                 local indicator = Instance.new("Frame")
                 indicator.Size = UDim2.new(0, 0, 1, 0)
-                indicator.BackgroundColor3 = options.main_color or Color3.fromRGB(110, 45, 220)
+                indicator.BackgroundColor3 = options.main_color or Color3.fromRGB(150, 80, 255)
                 indicator.BorderSizePixel = 0
                 indicator.Parent = sliderBg
                 Instance.new("UICorner", indicator).CornerRadius = UDim.new(0, 7)
@@ -791,7 +787,7 @@ MinimizedStroke.Parent = MinimizedFrame
 
                 local value = Instance.new("TextLabel")
                 value.Size = UDim2.new(1, 0, 1, 0)
-                value.BackgroundColor3 = options.main_color or Color3.fromRGB(110, 45, 220)
+                value.BackgroundColor3 = options.main_color or Color3.fromRGB(150, 80, 255)
                 value.BorderSizePixel = 0
                 value.Font = Enum.Font.GothamBold
                 value.Text = "0"
