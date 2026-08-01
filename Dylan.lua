@@ -1686,7 +1686,7 @@ function library:AddWindow(title, options)
                 return keybind_data, keybindFrame
             end
             
-            -- UPDATED DROPDOWN with opaque black background (no strokes)
+            -- UPDATED DROPDOWN with GRADIENT overlay (covers everything behind)
             function tab_data:AddDropdown(dropdown_name, callback)
                 local dropdown_data = {}
                 dropdown_name = tostring(dropdown_name or "New Dropdown")
@@ -1705,6 +1705,7 @@ function library:AddWindow(title, options)
                 dropdown.TextStrokeColor3 = Color3.fromRGB(0,0,0)
                 dropdown.TextStrokeTransparency = 0
                 dropdown.Parent = tabContainer
+                dropdown.ZIndex = 10
                 Instance.new("UICorner", dropdown).CornerRadius = UDim.new(0, 10)
                 
                 local indicator = Instance.new("TextLabel")
@@ -1719,18 +1720,28 @@ function library:AddWindow(title, options)
                 indicator.TextStrokeTransparency = 0
                 indicator.Parent = dropdown
                 
-                -- DROPDOWN BOX - BLACK background (opaque) - NO STROKE
+                -- DROPDOWN BOX - GRADIENT overlay (covers everything behind it)
                 local box = Instance.new("Frame")
                 box.Size = UDim2.new(1, 0, 0, 0)
                 box.Position = UDim2.new(0, 0, 1, 5)
-                box.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- BLACK
-                box.BackgroundTransparency = 0                  -- fully opaque
+                box.BackgroundColor3 = Color3.fromRGB(255,255,255) -- placeholder
+                box.BackgroundTransparency = 0                     -- fully opaque
                 box.BorderSizePixel = 0
                 box.ClipsDescendants = true
+                box.ZIndex = 50                                     -- HIGH ZINDEX to overlay everything
                 box.Parent = dropdown
-                Instance.new("UICorner", box).CornerRadius = UDim.new(0, 10)
                 
-                -- NO STROKE on the box
+                -- Add the same 3-color gradient as the panels
+                local boxGradient = Instance.new("UIGradient")
+                boxGradient.Rotation = 90
+                boxGradient.Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(110,45,220)),
+                    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(176,96,244)),
+                    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(236,198,255))
+                }
+                boxGradient.Parent = box
+                
+                -- NO STROKE on the box - just the gradient
                 
                 local objects = Instance.new("ScrollingFrame")
                 objects.Name = "Objects"
@@ -1739,6 +1750,7 @@ function library:AddWindow(title, options)
                 objects.BorderSizePixel = 0
                 objects.CanvasSize = UDim2.new(0, 0, 0, 0)
                 objects.ScrollBarThickness = 4
+                objects.ZIndex = 51                              -- above the box
                 objects.Parent = box
                 
                 local objectsLayout = Instance.new("UIListLayout")
@@ -1771,7 +1783,7 @@ function library:AddWindow(title, options)
                     
                     local object = Instance.new("TextButton")
                     object.Size = UDim2.new(1, 0, 0, 35)
-                    object.BackgroundColor3 = Color3.fromRGB(20, 20, 20)  -- dark gray (almost black)
+                    object.BackgroundColor3 = Color3.fromRGB(20, 20, 20)  -- dark gray
                     object.BackgroundTransparency = 0                     -- FULLY OPAQUE
                     object.BorderSizePixel = 0
                     object.Font = Enum.Font.GothamBold
@@ -1781,6 +1793,7 @@ function library:AddWindow(title, options)
                     object.TextXAlignment = Enum.TextXAlignment.Left
                     object.TextStrokeColor3 = Color3.fromRGB(0,0,0)
                     object.TextStrokeTransparency = 0
+                    object.ZIndex = 52                                    -- above everything
                     object.Parent = objects
                     
                     -- NO STROKE on items
