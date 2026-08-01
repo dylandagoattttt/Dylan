@@ -1107,7 +1107,7 @@ function library:AddWindow(title, options)
     TitleLabel.Position = UDim2.fromScale(0.5,0.5)
     TitleLabel.Size = UDim2.fromScale(0.9,0.8)
     TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Font = Enum.Font.GothamBold   -- professional font
+    TitleLabel.Font = Enum.Font.GothamBold
     TitleLabel.Text = title
     TitleLabel.TextScaled = true
     TitleLabel.TextColor3 = Color3.fromRGB(255,255,255)
@@ -1246,7 +1246,7 @@ function library:AddWindow(title, options)
             buttonLabel.Name = "ButtonLabel"
             buttonLabel.Size = UDim2.new(1, 0, 1, 0)
             buttonLabel.BackgroundTransparency = 1
-            buttonLabel.Font = Enum.Font.GothamSemibold   -- professional
+            buttonLabel.Font = Enum.Font.GothamSemibold
             buttonLabel.Text = tab_name
             buttonLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
             buttonLabel.TextScaled = true
@@ -1686,7 +1686,7 @@ function library:AddWindow(title, options)
                 return keybind_data, keybindFrame
             end
             
-            -- UPDATED DROPDOWN with GRADIENT overlay (covers everything behind)
+            -- UPDATED DROPDOWN with themed purple overlay (matches the theme)
             function tab_data:AddDropdown(dropdown_name, callback)
                 local dropdown_data = {}
                 dropdown_name = tostring(dropdown_name or "New Dropdown")
@@ -1720,28 +1720,27 @@ function library:AddWindow(title, options)
                 indicator.TextStrokeTransparency = 0
                 indicator.Parent = dropdown
                 
-                -- DROPDOWN BOX - GRADIENT overlay (covers everything behind it)
+                -- DROPDOWN BOX - Dark purple overlay (matches theme)
                 local box = Instance.new("Frame")
                 box.Size = UDim2.new(1, 0, 0, 0)
                 box.Position = UDim2.new(0, 0, 1, 5)
-                box.BackgroundColor3 = Color3.fromRGB(255,255,255) -- placeholder
-                box.BackgroundTransparency = 0                     -- fully opaque
+                box.BackgroundColor3 = Color3.fromRGB(40, 15, 80)  -- Dark purple
+                box.BackgroundTransparency = 0                      -- fully opaque
                 box.BorderSizePixel = 0
                 box.ClipsDescendants = true
-                box.ZIndex = 50                                     -- HIGH ZINDEX to overlay everything
+                box.ZIndex = 50
                 box.Parent = dropdown
                 
-                -- Add the same 3-color gradient as the panels
+                -- Add a subtle gradient to the box to match theme
                 local boxGradient = Instance.new("UIGradient")
                 boxGradient.Rotation = 90
                 boxGradient.Color = ColorSequence.new{
-                    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(110,45,220)),
-                    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(176,96,244)),
-                    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(236,198,255))
+                    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(40, 15, 80)),
+                    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(80, 40, 150))
                 }
                 boxGradient.Parent = box
                 
-                -- NO STROKE on the box - just the gradient
+                -- No stroke
                 
                 local objects = Instance.new("ScrollingFrame")
                 objects.Name = "Objects"
@@ -1750,7 +1749,7 @@ function library:AddWindow(title, options)
                 objects.BorderSizePixel = 0
                 objects.CanvasSize = UDim2.new(0, 0, 0, 0)
                 objects.ScrollBarThickness = 4
-                objects.ZIndex = 51                              -- above the box
+                objects.ZIndex = 51
                 objects.Parent = box
                 
                 local objectsLayout = Instance.new("UIListLayout")
@@ -1783,8 +1782,8 @@ function library:AddWindow(title, options)
                     
                     local object = Instance.new("TextButton")
                     object.Size = UDim2.new(1, 0, 0, 35)
-                    object.BackgroundColor3 = Color3.fromRGB(20, 20, 20)  -- dark gray
-                    object.BackgroundTransparency = 0                     -- FULLY OPAQUE
+                    object.BackgroundColor3 = Color3.fromRGB(60, 30, 110)  -- Medium dark purple
+                    object.BackgroundTransparency = 0
                     object.BorderSizePixel = 0
                     object.Font = Enum.Font.GothamBold
                     object.Text = n
@@ -1793,16 +1792,16 @@ function library:AddWindow(title, options)
                     object.TextXAlignment = Enum.TextXAlignment.Left
                     object.TextStrokeColor3 = Color3.fromRGB(0,0,0)
                     object.TextStrokeTransparency = 0
-                    object.ZIndex = 52                                    -- above everything
+                    object.ZIndex = 52
                     object.Parent = objects
                     
-                    -- NO STROKE on items
+                    -- No stroke
                     
                     object.MouseEnter:Connect(function()
-                        object.BackgroundColor3 = Color3.fromRGB(60, 60, 80)  -- lighter on hover
+                        object.BackgroundColor3 = Color3.fromRGB(90, 50, 160)  -- Brighter on hover
                     end)
                     object.MouseLeave:Connect(function()
-                        object.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+                        object.BackgroundColor3 = Color3.fromRGB(60, 30, 110)
                     end)
                     
                     if open then
