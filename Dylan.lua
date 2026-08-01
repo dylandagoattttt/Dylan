@@ -997,7 +997,7 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     panel.Shadow.Parent = parent or windowsFrame
     Instance.new("UICorner", panel.Shadow).CornerRadius = UDim.new(0, cornerRadius or 20)
 
-    -- Main frame - fully opaque
+    -- Main frame - fully opaque, with clipping
     panel.Frame = Instance.new("Frame")
     panel.Frame.Name = name
     panel.Frame.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -1006,6 +1006,7 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     panel.Frame.BackgroundColor3 = Color3.fromRGB(255,255,255)
     panel.Frame.BackgroundTransparency = 0
     panel.Frame.BorderSizePixel = 0
+    panel.Frame.ClipsDescendants = true   -- <-- added for proper corner clipping
     panel.Frame.Parent = parent or windowsFrame
     Instance.new("UICorner", panel.Frame).CornerRadius = UDim.new(0, cornerRadius or 20)
 
@@ -1058,39 +1059,40 @@ function library:AddWindow(title, options)
     local MainPos = UDim2.fromScale(0.5, 0.5)
     local MainPanel = CreatePanel("Main_" .. windows, MainPos, MainSize, 20, 1, windowsFrame)
 
-    -- Side panel
+    -- Side panel (now with ClipsDescendants = true)
     local SideX = (0.5 - MainWidth/2) - Gap - SideWidth/2
     local SidePos = UDim2.new(SideX, 0, 0.5, 0)
     local SideSize = UDim2.fromScale(SideWidth, SideHeight)
     local SidePanel = CreatePanel("Side_" .. windows, SidePos, SideSize, 20, 1, windowsFrame)
 
-    -- ===== BANNER SECTION (top of side panel) =====
-    local BannerFrame = Instance.new("ImageLabel")
-    BannerFrame.Name = "Banner"
-    BannerFrame.Size = UDim2.new(1, 0, 0, 80)
-    BannerFrame.Position = UDim2.new(0, 0, 0, 0)
-    BannerFrame.BackgroundTransparency = 1
-    BannerFrame.BorderSizePixel = 0
-    BannerFrame.Image = "rbxassetid://94165866231069"
-    BannerFrame.ImageTransparency = 0
-    BannerFrame.ScaleType = Enum.ScaleType.Stretch
-    BannerFrame.ZIndex = 2
-    BannerFrame.Parent = SidePanel.Frame
-    Instance.new("UICorner", BannerFrame).CornerRadius = UDim.new(0, 12)
+    -- ===== BANNER SECTION (fills top of side panel, no gaps) =====
+    local Banner = Instance.new("ImageLabel")
+    Banner.Name = "Banner"
+    Banner.Size = UDim2.new(1, 0, 0, 80)          -- full width
+    Banner.Position = UDim2.new(0, 0, 0, 0)       -- top-left corner
+    Banner.BackgroundTransparency = 1
+    Banner.BorderSizePixel = 0
+    -- Correct image URL with parameters
+    Banner.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=94165866231069&width=420&height=420&format=png"
+    Banner.ImageTransparency = 0
+    Banner.ScaleType = Enum.ScaleType.Stretch
+    Banner.ZIndex = 2
+    Banner.Parent = SidePanel.Frame
+    -- No corner radius needed – side panel clips it
 
-    -- Subtle border around banner
+    -- Subtle border around banner (optional)
     local bannerStroke = Instance.new("UIStroke")
     bannerStroke.Color = Color3.fromRGB(255, 255, 255)
     bannerStroke.Thickness = 1.5
     bannerStroke.Transparency = 0.2
     bannerStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    bannerStroke.Parent = BannerFrame
+    bannerStroke.Parent = Banner
 
     -- ===== TAB BUTTONS (positioned below banner) =====
     local TabButtons = Instance.new("ScrollingFrame")
     TabButtons.Name = "TabButtons"
-    TabButtons.Size = UDim2.new(1, -10, 1, -95) -- leave space for banner
-    TabButtons.Position = UDim2.new(0, 5, 0, 85) -- below banner
+    TabButtons.Size = UDim2.new(1, -10, 1, -95)   -- leave space for banner
+    TabButtons.Position = UDim2.new(0, 5, 0, 85)  -- below banner
     TabButtons.BackgroundTransparency = 1
     TabButtons.BorderSizePixel = 0
     TabButtons.CanvasSize = UDim2.new(0, 0, 0, 0)
