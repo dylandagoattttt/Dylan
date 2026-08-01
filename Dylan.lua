@@ -327,7 +327,7 @@ function library:AddWindow(title, options)
     MinimizedFrame.Visible = false
     MinimizedFrame.ZIndex = 100
     -- Portal image (Rick and Morty style)
-    MinimizedFrame.Image = "rbxassetid://108067574147759"
+    MinimizedFrame.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=108067574147759&width=420&height=420&format=png"
     MinimizedFrame.ScaleType = Enum.ScaleType.Fit
     MinimizedFrame.Parent = windowsFrame
     Instance.new("UICorner", MinimizedFrame).CornerRadius = UDim.new(1, 0)
