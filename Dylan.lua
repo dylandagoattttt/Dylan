@@ -1064,7 +1064,7 @@ function library:AddWindow(title, options)
     local SideSize = UDim2.fromScale(SideWidth, SideHeight)
     local SidePanel = CreatePanel("Side_" .. windows, SidePos, SideSize, 20, 1, windowsFrame)
 
-    -- ===== PROFILE SECTION (improved) =====
+    -- ===== PROFILE SECTION =====
     local ProfileFrame = Instance.new("Frame")
     ProfileFrame.Name = "ProfileFrame"
     ProfileFrame.Size = UDim2.new(1, 0, 0, 70)
@@ -1077,7 +1077,6 @@ function library:AddWindow(title, options)
     ProfileFrame.Parent = SidePanel.Frame
     Instance.new("UICorner", ProfileFrame).CornerRadius = UDim.new(0, 12)
 
-    -- Gradient overlay for profile
     local profileGrad = Instance.new("UIGradient")
     profileGrad.Rotation = 90
     profileGrad.Color = ColorSequence.new{
@@ -1086,7 +1085,6 @@ function library:AddWindow(title, options)
     }
     profileGrad.Parent = ProfileFrame
 
-    -- Border stroke for profile
     local profileStroke = Instance.new("UIStroke")
     profileStroke.Color = Color3.fromRGB(255, 255, 255)
     profileStroke.Thickness = 1.5
@@ -1094,7 +1092,7 @@ function library:AddWindow(title, options)
     profileStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     profileStroke.Parent = ProfileFrame
 
-    -- Avatar (with white border)
+    -- Avatar
     local avatar = Instance.new("ImageLabel")
     avatar.Name = "Avatar"
     avatar.Size = UDim2.new(0, 44, 0, 44)
@@ -1107,7 +1105,7 @@ function library:AddWindow(title, options)
     avatar.Parent = ProfileFrame
     Instance.new("UICorner", avatar).CornerRadius = UDim.new(0.5, 0)
 
-    -- Username (auto-scaled)
+    -- Username (auto-scaled, no MaxTextSize)
     local username = Instance.new("TextLabel")
     username.Name = "Username"
     username.Size = UDim2.new(1, -70, 0, 24)
@@ -1117,8 +1115,7 @@ function library:AddWindow(title, options)
     username.Text = p.Name
     username.TextColor3 = Color3.fromRGB(255, 255, 255)
     username.TextScaled = true
-    username.TextSize = 18
-    username.MaxTextSize = 18
+    username.TextSize = 18    -- will be ignored when TextScaled is true
     username.TextXAlignment = Enum.TextXAlignment.Left
     username.TextStrokeColor3 = Color3.fromRGB(0,0,0)
     username.TextStrokeTransparency = 0
@@ -1149,11 +1146,11 @@ function library:AddWindow(title, options)
     statusText.TextStrokeTransparency = 0
     statusText.Parent = ProfileFrame
 
-    -- ===== TAB BUTTONS (now placed below profile) =====
+    -- ===== TAB BUTTONS =====
     local TabButtons = Instance.new("ScrollingFrame")
     TabButtons.Name = "TabButtons"
-    TabButtons.Size = UDim2.new(1, -10, 1, -90) -- leave space for profile
-    TabButtons.Position = UDim2.new(0, 5, 0, 75) -- below profile
+    TabButtons.Size = UDim2.new(1, -10, 1, -90)
+    TabButtons.Position = UDim2.new(0, 5, 0, 75)
     TabButtons.BackgroundTransparency = 1
     TabButtons.BorderSizePixel = 0
     TabButtons.CanvasSize = UDim2.new(0, 0, 0, 0)
