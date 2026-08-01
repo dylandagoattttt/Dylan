@@ -5,7 +5,7 @@ local ui_options = {
     can_resize = true,
 }
 
-print("DylanUI v1.0 - Loaded")
+print("DylanUI v1.1- Loaded")
 
 do
     local imgui = game:GetService("CoreGui"):FindFirstChild("imgui")
@@ -1064,33 +1064,38 @@ function library:AddWindow(title, options)
     local SideSize = UDim2.fromScale(SideWidth, SideHeight)
     local SidePanel = CreatePanel("Side_" .. windows, SidePos, SideSize, 20, 1, windowsFrame)
 
-    -- ===== PROFILE SECTION =====
+    -- ===== PROFILE SECTION WITH BANNER =====
     local ProfileFrame = Instance.new("Frame")
     ProfileFrame.Name = "ProfileFrame"
-    ProfileFrame.Size = UDim2.new(1, 0, 0, 70)
+    ProfileFrame.Size = UDim2.new(1, 0, 0, 80)
     ProfileFrame.Position = UDim2.new(0, 0, 0, 0)
-    ProfileFrame.BackgroundTransparency = 0
-    ProfileFrame.BackgroundColor3 = Color3.fromRGB(30, 10, 60)
+    ProfileFrame.BackgroundTransparency = 1
     ProfileFrame.BorderSizePixel = 0
     ProfileFrame.ClipsDescendants = true
     ProfileFrame.ZIndex = 2
     ProfileFrame.Parent = SidePanel.Frame
     Instance.new("UICorner", ProfileFrame).CornerRadius = UDim.new(0, 12)
 
-    local profileGrad = Instance.new("UIGradient")
-    profileGrad.Rotation = 90
-    profileGrad.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0.00, Color3.fromRGB(60, 30, 120)),
-        ColorSequenceKeypoint.new(1.00, Color3.fromRGB(30, 10, 60))
-    }
-    profileGrad.Parent = ProfileFrame
+    -- Banner image
+    local banner = Instance.new("ImageLabel")
+    banner.Name = "Banner"
+    banner.Size = UDim2.fromScale(1,1)
+    banner.BackgroundTransparency = 1
+    banner.BorderSizePixel = 0
+    banner.Image = "rbxassetid://94165866231069"
+    banner.ScaleType = Enum.ScaleType.Stretch
+    banner.Parent = ProfileFrame
+    Instance.new("UICorner", banner).CornerRadius = UDim.new(0, 12)
 
-    local profileStroke = Instance.new("UIStroke")
-    profileStroke.Color = Color3.fromRGB(255, 255, 255)
-    profileStroke.Thickness = 1.5
-    profileStroke.Transparency = 0.2
-    profileStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    profileStroke.Parent = ProfileFrame
+    -- Semi-transparent overlay for better text readability
+    local overlay = Instance.new("Frame")
+    overlay.Name = "Overlay"
+    overlay.Size = UDim2.fromScale(1,1)
+    overlay.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    overlay.BackgroundTransparency = 0.4
+    overlay.BorderSizePixel = 0
+    overlay.Parent = ProfileFrame
+    Instance.new("UICorner", overlay).CornerRadius = UDim.new(0, 12)
 
     -- Avatar
     local avatar = Instance.new("ImageLabel")
@@ -1105,7 +1110,7 @@ function library:AddWindow(title, options)
     avatar.Parent = ProfileFrame
     Instance.new("UICorner", avatar).CornerRadius = UDim.new(0.5, 0)
 
-    -- Username (auto-scaled, no MaxTextSize)
+    -- Username
     local username = Instance.new("TextLabel")
     username.Name = "Username"
     username.Size = UDim2.new(1, -70, 0, 24)
@@ -1115,7 +1120,7 @@ function library:AddWindow(title, options)
     username.Text = p.Name
     username.TextColor3 = Color3.fromRGB(255, 255, 255)
     username.TextScaled = true
-    username.TextSize = 18    -- will be ignored when TextScaled is true
+    username.TextSize = 18
     username.TextXAlignment = Enum.TextXAlignment.Left
     username.TextStrokeColor3 = Color3.fromRGB(0,0,0)
     username.TextStrokeTransparency = 0
@@ -1149,8 +1154,8 @@ function library:AddWindow(title, options)
     -- ===== TAB BUTTONS =====
     local TabButtons = Instance.new("ScrollingFrame")
     TabButtons.Name = "TabButtons"
-    TabButtons.Size = UDim2.new(1, -10, 1, -90)
-    TabButtons.Position = UDim2.new(0, 5, 0, 75)
+    TabButtons.Size = UDim2.new(1, -10, 1, -100) -- make room for taller profile
+    TabButtons.Position = UDim2.new(0, 5, 0, 85)
     TabButtons.BackgroundTransparency = 1
     TabButtons.BorderSizePixel = 0
     TabButtons.CanvasSize = UDim2.new(0, 0, 0, 0)
