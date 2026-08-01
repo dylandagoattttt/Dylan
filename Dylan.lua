@@ -1026,6 +1026,7 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     }
     gradient.Parent = panel.Frame
 
+    -- Background image (ZIndex = 0 so it stays behind other children)
     local bgImage = Instance.new("ImageLabel")
     bgImage.Name = "BackgroundImage"
     bgImage.Size = UDim2.fromScale(1,1)
@@ -1034,6 +1035,7 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     bgImage.Image = "rbxassetid://16736132788"
     bgImage.ImageTransparency = 0
     bgImage.ScaleType = Enum.ScaleType.Stretch
+    bgImage.ZIndex = 0
     bgImage.Parent = panel.Frame
     Instance.new("UICorner", bgImage).CornerRadius = UDim.new(0, cornerRadius or 20)
 
@@ -1065,24 +1067,33 @@ function library:AddWindow(title, options)
     local SideSize = UDim2.fromScale(SideWidth, SideHeight)
     local SidePanel = CreatePanel("Side_" .. windows, SidePos, SideSize, 20, 1, windowsFrame)
 
-    -- ===== BANNER (semi-transparent, no stroke – side panel's stroke handles the border) =====
+    -- ===== BANNER SECTION (child of side panel, higher ZIndex, slightly transparent) =====
     local Banner = Instance.new("ImageLabel")
     Banner.Name = "Banner"
-    Banner.Size = UDim2.new(1, 0, 0, 80)          -- full width
-    Banner.Position = UDim2.new(0, 0, 0, 0)       -- top-left
+    Banner.Size = UDim2.new(1, 0, 0, 80)
+    Banner.Position = UDim2.new(0, 0, 0, 0)
     Banner.BackgroundTransparency = 1
     Banner.BorderSizePixel = 0
     Banner.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=94165866231069&width=420&height=420&format=png"
-    Banner.ImageTransparency = 0.35               -- semi-transparent to show gradient
+    Banner.ImageTransparency = 0.3   -- slight transparency
     Banner.ScaleType = Enum.ScaleType.Stretch
-    Banner.ZIndex = 2
+    Banner.ZIndex = 2                -- above background (ZIndex = 0)
     Banner.Parent = SidePanel.Frame
+    -- No corner radius needed – side panel clips it
+
+    -- Optional stroke (keep it if you like)
+    local bannerStroke = Instance.new("UIStroke")
+    bannerStroke.Color = Color3.fromRGB(255, 255, 255)
+    bannerStroke.Thickness = 1.5
+    bannerStroke.Transparency = 0.2
+    bannerStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    bannerStroke.Parent = Banner
 
     -- ===== TAB BUTTONS (positioned below banner) =====
     local TabButtons = Instance.new("ScrollingFrame")
     TabButtons.Name = "TabButtons"
-    TabButtons.Size = UDim2.new(1, -10, 1, -95)   -- leave space for banner
-    TabButtons.Position = UDim2.new(0, 5, 0, 85)  -- below banner
+    TabButtons.Size = UDim2.new(1, -10, 1, -95)
+    TabButtons.Position = UDim2.new(0, 5, 0, 85)
     TabButtons.BackgroundTransparency = 1
     TabButtons.BorderSizePixel = 0
     TabButtons.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -1095,7 +1106,7 @@ function library:AddWindow(title, options)
     TabButtonsList.Padding = UDim.new(0, 5)
     TabButtonsList.Parent = TabButtons
 
-    -- HEADER
+    -- HEADER (unchanged)
     local HeaderShadow = Instance.new("Frame")
     HeaderShadow.Name = "HeaderShadow"
     HeaderShadow.AnchorPoint = Vector2.new(0.5, 0)
