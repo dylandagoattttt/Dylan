@@ -1064,96 +1064,33 @@ function library:AddWindow(title, options)
     local SideSize = UDim2.fromScale(SideWidth, SideHeight)
     local SidePanel = CreatePanel("Side_" .. windows, SidePos, SideSize, 20, 1, windowsFrame)
 
-    -- ===== PROFILE SECTION (new banner) =====
-    local ProfileFrame = Instance.new("Frame")
-    ProfileFrame.Name = "ProfileFrame"
-    ProfileFrame.Size = UDim2.new(1, 0, 0, 70)
-    ProfileFrame.Position = UDim2.new(0, 0, 0, 0)
-    ProfileFrame.BackgroundTransparency = 0
-    ProfileFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- black background
-    ProfileFrame.BorderSizePixel = 0
-    ProfileFrame.ClipsDescendants = true
-    ProfileFrame.ZIndex = 2
-    ProfileFrame.Parent = SidePanel.Frame
-    Instance.new("UICorner", ProfileFrame).CornerRadius = UDim.new(0, 12)
+    -- ===== BANNER SECTION (top of side panel) =====
+    local BannerFrame = Instance.new("ImageLabel")
+    BannerFrame.Name = "Banner"
+    BannerFrame.Size = UDim2.new(1, 0, 0, 80)
+    BannerFrame.Position = UDim2.new(0, 0, 0, 0)
+    BannerFrame.BackgroundTransparency = 1
+    BannerFrame.BorderSizePixel = 0
+    BannerFrame.Image = "rbxassetid://94165866231069"
+    BannerFrame.ImageTransparency = 0
+    BannerFrame.ScaleType = Enum.ScaleType.Stretch
+    BannerFrame.ZIndex = 2
+    BannerFrame.Parent = SidePanel.Frame
+    Instance.new("UICorner", BannerFrame).CornerRadius = UDim.new(0, 12)
 
-    -- Banner image (on top of black background)
-    local bannerImage = Instance.new("ImageLabel")
-    bannerImage.Name = "BannerImage"
-    bannerImage.Size = UDim2.fromScale(1, 1)
-    bannerImage.BackgroundTransparency = 1
-    bannerImage.BorderSizePixel = 0
-    bannerImage.Image = "rbxassetid://94165866231069"
-    bannerImage.ImageTransparency = 0
-    bannerImage.ScaleType = Enum.ScaleType.Stretch
-    bannerImage.ZIndex = 1
-    bannerImage.Parent = ProfileFrame
-    -- Optional: add corner radius to match the frame
-    Instance.new("UICorner", bannerImage).CornerRadius = UDim.new(0, 12)
+    -- Subtle border around banner
+    local bannerStroke = Instance.new("UIStroke")
+    bannerStroke.Color = Color3.fromRGB(255, 255, 255)
+    bannerStroke.Thickness = 1.5
+    bannerStroke.Transparency = 0.2
+    bannerStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    bannerStroke.Parent = BannerFrame
 
-    -- Avatar (on top of banner)
-    local avatar = Instance.new("ImageLabel")
-    avatar.Name = "Avatar"
-    avatar.Size = UDim2.new(0, 44, 0, 44)
-    avatar.Position = UDim2.new(0, 10, 0.5, -22)
-    avatar.BackgroundTransparency = 1
-    avatar.BorderSizePixel = 2
-    avatar.BorderColor3 = Color3.fromRGB(255,255,255)
-    avatar.Image = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. p.UserId .. "&width=100&height=100&format=png"
-    avatar.ScaleType = Enum.ScaleType.Fit
-    avatar.ZIndex = 2
-    avatar.Parent = ProfileFrame
-    Instance.new("UICorner", avatar).CornerRadius = UDim.new(0.5, 0)
-
-    -- Username (auto-scaled)
-    local username = Instance.new("TextLabel")
-    username.Name = "Username"
-    username.Size = UDim2.new(1, -70, 0, 24)
-    username.Position = UDim2.new(0, 60, 0.5, -30)
-    username.BackgroundTransparency = 1
-    username.Font = Enum.Font.GothamBold
-    username.Text = p.Name
-    username.TextColor3 = Color3.fromRGB(255, 255, 255)
-    username.TextScaled = true
-    username.TextSize = 18
-    username.TextXAlignment = Enum.TextXAlignment.Left
-    username.TextStrokeColor3 = Color3.fromRGB(0,0,0)
-    username.TextStrokeTransparency = 0
-    username.ZIndex = 3
-    username.Parent = ProfileFrame
-
-    -- Status dot
-    local statusDot = Instance.new("Frame")
-    statusDot.Name = "StatusDot"
-    statusDot.Size = UDim2.new(0, 10, 0, 10)
-    statusDot.Position = UDim2.new(0, 60, 0.5, 8)
-    statusDot.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
-    statusDot.BorderSizePixel = 0
-    statusDot.ZIndex = 3
-    statusDot.Parent = ProfileFrame
-    Instance.new("UICorner", statusDot).CornerRadius = UDim.new(0.5, 0)
-
-    -- Status text
-    local statusText = Instance.new("TextLabel")
-    statusText.Name = "StatusText"
-    statusText.Size = UDim2.new(0, 50, 0, 16)
-    statusText.Position = UDim2.new(0, 75, 0.5, 6)
-    statusText.BackgroundTransparency = 1
-    statusText.Font = Enum.Font.GothamBold
-    statusText.Text = "Online"
-    statusText.TextColor3 = Color3.fromRGB(180, 255, 180)
-    statusText.TextSize = 10
-    statusText.TextXAlignment = Enum.TextXAlignment.Left
-    statusText.TextStrokeColor3 = Color3.fromRGB(0,0,0)
-    statusText.TextStrokeTransparency = 0
-    statusText.ZIndex = 3
-    statusText.Parent = ProfileFrame
-
-    -- ===== TAB BUTTONS =====
+    -- ===== TAB BUTTONS (positioned below banner) =====
     local TabButtons = Instance.new("ScrollingFrame")
     TabButtons.Name = "TabButtons"
-    TabButtons.Size = UDim2.new(1, -10, 1, -90)
-    TabButtons.Position = UDim2.new(0, 5, 0, 75)
+    TabButtons.Size = UDim2.new(1, -10, 1, -95) -- leave space for banner
+    TabButtons.Position = UDim2.new(0, 5, 0, 85) -- below banner
     TabButtons.BackgroundTransparency = 1
     TabButtons.BorderSizePixel = 0
     TabButtons.CanvasSize = UDim2.new(0, 0, 0, 0)
