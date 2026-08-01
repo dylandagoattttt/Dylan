@@ -316,7 +316,7 @@ function library:AddWindow(title, options)
         CloseButton:TweenSize(UDim2.fromOffset(56, 56), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
 
-    -- MINIMIZED STATE (restore button) - moved left
+    -- MINIMIZED STATE (restore button) with PORTAL IMAGE + ANIMATION
     local MinimizedFrame = Instance.new("ImageButton")
     MinimizedFrame.Name = "MinimizedFrame_" .. windows
     MinimizedFrame.AnchorPoint = Vector2.new(1, 0)
@@ -326,7 +326,8 @@ function library:AddWindow(title, options)
     MinimizedFrame.BorderSizePixel = 0
     MinimizedFrame.Visible = false
     MinimizedFrame.ZIndex = 100
-    MinimizedFrame.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=103591022804634&width=678&height=810&format=png"
+    -- Portal image (Rick and Morty style)
+    MinimizedFrame.Image = "rbxassetid://108067574147759"
     MinimizedFrame.ScaleType = Enum.ScaleType.Fit
     MinimizedFrame.Parent = windowsFrame
     Instance.new("UICorner", MinimizedFrame).CornerRadius = UDim.new(1, 0)
@@ -337,6 +338,41 @@ function library:AddWindow(title, options)
     MinimizedStroke.Transparency = 0.3
     MinimizedStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     MinimizedStroke.Parent = MinimizedFrame
+
+    -- Portal animation variables
+    local portalConnection = nil
+    local portalAngle = 0
+
+    local function startPortalAnimation()
+        if portalConnection then return end
+        portalAngle = 0
+        portalConnection = RS.Heartbeat:Connect(function(dt)
+            -- Rotate continuously
+            portalAngle = portalAngle + dt * 120 -- degrees per second
+            MinimizedFrame.Rotation = portalAngle
+
+            -- Pulse scale (subtle breathing)
+            local pulse = 1 + 0.05 * math.sin(tick() * 2.5)
+            local targetSize = 60 * pulse
+            -- We'll tween size smoothly, or just set it each frame? For simplicity, set size each frame.
+            -- But using TweenService might be smoother, but we'll just set the size directly.
+            -- However, we also have the initial size tween when appearing. To avoid conflict, we'll handle scaling in the heartbeat.
+            -- We'll store a base size and apply pulse.
+            -- Since we have a tween that sets size to 60, we can just override it here.
+            -- Better: set the size using UDim2 from offset with pulse.
+            MinimizedFrame.Size = UDim2.fromOffset(60 * pulse, 60 * pulse)
+        end)
+    end
+
+    local function stopPortalAnimation()
+        if portalConnection then
+            portalConnection:Disconnect()
+            portalConnection = nil
+        end
+        -- Reset rotation and size
+        MinimizedFrame.Rotation = 0
+        MinimizedFrame.Size = UDim2.fromOffset(60, 60)
+    end
 
     local isMinimized = false
     CloseButton.MouseButton1Click:Connect(function()
@@ -357,14 +393,22 @@ function library:AddWindow(title, options)
             SidePanel.Shadow.Visible = false
 
             MinimizedFrame.Visible = true
+            -- Start with small size then tween to full (portal pop)
             MinimizedFrame.Size = UDim2.fromOffset(0, 0)
             MinimizedFrame:TweenSize(UDim2.fromOffset(60, 60), Enum.EasingDirection.Out, Enum.EasingStyle.Back, 0.3, true)
+            -- Start the portal animation after the pop
+            task.wait(0.35)
+            startPortalAnimation()
             isMinimized = true
         end
     end)
 
     MinimizedFrame.MouseButton1Click:Connect(function()
+        -- Stop portal animation
+        stopPortalAnimation()
+        -- Hide minimized frame
         MinimizedFrame.Visible = false
+        -- Restore main & side panels
         MainPanel.Frame.Visible = true
         MainPanel.Shadow.Visible = true
         SidePanel.Frame.Visible = true
@@ -603,7 +647,7 @@ function library:AddWindow(title, options)
 
                 -- Toggle container (right-aligned)
                 local toggleContainer = Instance.new("Frame")
-                toggleContainer.Size = UDim2.new(0, 55, 1, 0)   -- slightly wider for ON/OFF text
+                toggleContainer.Size = UDim2.new(0, 55, 1, 0)
                 toggleContainer.Position = UDim2.new(1, -60, 0, 0)
                 toggleContainer.BackgroundTransparency = 1
                 toggleContainer.Parent = switchFrame
