@@ -21,11 +21,7 @@ local CoreGui = cloneref(game:GetService("CoreGui"))
 imgui.Name = "imgui"
 imgui.Parent = gethui and gethui() or (CoreGui or game.Players.LocalPlayer:WaitForChild("PlayerGui"))
 
--- Minimal prefab holder: only what's actually cloned/used at runtime
--- (the ripple effect clones `Circle`, and format_windows clones the
--- default-named UIListLayout to auto-space windows). Everything else
--- that used to live here was dead scaffolding never referenced by
--- AddWindow/AddTab, since those build their UI fresh with Instance.new.
+-- Minimal prefab holder
 prefabs.Name = "Prefabs"
 prefabs.Parent = imgui
 prefabs.BackgroundColor3 = Color3.new(1, 1, 1)
@@ -530,12 +526,29 @@ function library:AddWindow(title, options)
                 return label
             end
 
+            -- UPDATED: AddButton with drop shadow, rounded corners, gradient, bold stroked text
             function tab_data:AddButton(button_text, callback)
                 button_text = tostring(button_text or "New Button")
                 callback = typeof(callback) == "function" and callback or function() end
 
+                local buttonFrame = Instance.new("Frame")
+                buttonFrame.Size = UDim2.new(1, 0, 0, 35)
+                buttonFrame.BackgroundTransparency = 1
+                buttonFrame.BorderSizePixel = 0
+                buttonFrame.Parent = tabContainer
+
+                -- Drop shadow
+                local shadow = Instance.new("Frame")
+                shadow.Size = UDim2.new(1, 0, 1, 0)
+                shadow.Position = UDim2.new(0, 0, 0, 4)
+                shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                shadow.BackgroundTransparency = 0.4
+                shadow.BorderSizePixel = 0
+                shadow.Parent = buttonFrame
+                Instance.new("UICorner", shadow).CornerRadius = UDim.new(0, 10)
+
                 local button = Instance.new("TextButton")
-                button.Size = UDim2.new(1, 0, 0, 35)
+                button.Size = UDim2.new(1, 0, 1, 0)
                 button.BackgroundColor3 = options.main_color or Color3.fromRGB(110, 45, 220)
                 button.BorderSizePixel = 0
                 button.Font = Enum.Font.GothamBold
@@ -544,7 +557,7 @@ function library:AddWindow(title, options)
                 button.TextSize = 14
                 button.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
                 button.TextStrokeTransparency = 0
-                button.Parent = tabContainer
+                button.Parent = buttonFrame
                 Instance.new("UICorner", button).CornerRadius = UDim.new(0, 10)
 
                 local btnGradient = Instance.new("UIGradient")
@@ -562,6 +575,7 @@ function library:AddWindow(title, options)
                 return button
             end
 
+            -- UPDATED: AddSwitch with red pill toggle, label left, toggle right
             function tab_data:AddSwitch(switch_text, callback)
                 local switch_data = {}
                 switch_text = tostring(switch_text or "New Switch")
@@ -573,24 +587,10 @@ function library:AddWindow(title, options)
                 switchFrame.BorderSizePixel = 0
                 switchFrame.Parent = tabContainer
 
-                local switchButton = Instance.new("TextButton")
-                switchButton.Size = UDim2.new(0, 30, 0, 30)
-                switchButton.Position = UDim2.new(0, 5, 0, 2)
-                switchButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                switchButton.BackgroundTransparency = 0.7
-                switchButton.BorderSizePixel = 0
-                switchButton.Font = Enum.Font.SourceSans
-                switchButton.Text = ""
-                switchButton.TextColor3 = Color3.new(1, 1, 1)
-                switchButton.TextSize = 18
-                switchButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-                switchButton.TextStrokeTransparency = 0
-                switchButton.Parent = switchFrame
-                Instance.new("UICorner", switchButton).CornerRadius = UDim.new(0, 8)
-
+                -- Label
                 local titleLabel = Instance.new("TextLabel")
-                titleLabel.Size = UDim2.new(1, -45, 1, 0)
-                titleLabel.Position = UDim2.new(0, 40, 0, 0)
+                titleLabel.Size = UDim2.new(1, -70, 1, 0)
+                titleLabel.Position = UDim2.new(0, 0, 0, 0)
                 titleLabel.BackgroundTransparency = 1
                 titleLabel.Font = Enum.Font.GothamSemibold
                 titleLabel.Text = switch_text
@@ -601,28 +601,50 @@ function library:AddWindow(title, options)
                 titleLabel.TextStrokeTransparency = 0
                 titleLabel.Parent = switchFrame
 
+                -- Toggle container (right-aligned)
+                local toggleContainer = Instance.new("Frame")
+                toggleContainer.Size = UDim2.new(0, 50, 1, 0)
+                toggleContainer.Position = UDim2.new(1, -55, 0, 0)
+                toggleContainer.BackgroundTransparency = 1
+                toggleContainer.Parent = switchFrame
+
+                -- Toggle shadow
+                local toggleShadow = Instance.new("Frame")
+                toggleShadow.Size = UDim2.new(1, 0, 1, 0)
+                toggleShadow.Position = UDim2.new(0, 0, 0, 3)
+                toggleShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                toggleShadow.BackgroundTransparency = 0.4
+                toggleShadow.BorderSizePixel = 0
+                toggleShadow.Parent = toggleContainer
+                Instance.new("UICorner", toggleShadow).CornerRadius = UDim.new(1, 0)
+
+                -- Toggle button (pill)
+                local toggleButton = Instance.new("TextButton")
+                toggleButton.Size = UDim2.new(1, 0, 1, 0)
+                toggleButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)  -- red (off)
+                toggleButton.BorderSizePixel = 0
+                toggleButton.Font = Enum.Font.SourceSans
+                toggleButton.Text = ""
+                toggleButton.Parent = toggleContainer
+                Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(1, 0)
+
                 local toggled = false
-                switchButton.MouseButton1Click:Connect(function()
-                    toggled = not toggled
-                    switchButton.Text = toggled and utf8.char(10003) or ""
-                    if toggled then
-                        switchButton.BackgroundTransparency = 0.3
-                    else
-                        switchButton.BackgroundTransparency = 0.7
-                    end
+
+                local function updateToggle(state)
+                    toggled = state
+                    local targetColor = toggled and (options.main_color or Color3.fromRGB(110, 45, 220)) or Color3.fromRGB(200, 50, 50)
+                    TweenService:Create(toggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = targetColor}):Play()
                     pcall(callback, toggled)
+                end
+
+                toggleButton.MouseButton1Click:Connect(function()
+                    updateToggle(not toggled)
                 end)
 
                 function switch_data:Set(bool)
-                    toggled = (typeof(bool) == "boolean") and bool or false
-                    switchButton.Text = toggled and utf8.char(10003) or ""
-                    if toggled then
-                        switchButton.BackgroundTransparency = 0.3
-                    else
-                        switchButton.BackgroundTransparency = 0.7
-                    end
-                    pcall(callback, toggled)
+                    updateToggle((typeof(bool) == "boolean") and bool or false)
                 end
+
                 return switch_data, switchFrame
             end
 
@@ -663,6 +685,7 @@ function library:AddWindow(title, options)
                 return textbox
             end
 
+            -- UPDATED: AddSlider with rounded bar and pill-shaped value badge
             function tab_data:AddSlider(slider_text, callback, slider_options)
                 local slider_data = {}
                 slider_text = tostring(slider_text or "New Slider")
@@ -693,7 +716,7 @@ function library:AddWindow(title, options)
                 title.Parent = slider
 
                 local sliderBg = Instance.new("Frame")
-                sliderBg.Size = UDim2.new(1, -50, 0, 15)
+                sliderBg.Size = UDim2.new(1, -55, 0, 15)
                 sliderBg.Position = UDim2.new(0, 0, 0, 20)
                 sliderBg.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                 sliderBg.BackgroundTransparency = 0.8
@@ -708,17 +731,34 @@ function library:AddWindow(title, options)
                 indicator.Parent = sliderBg
                 Instance.new("UICorner", indicator).CornerRadius = UDim.new(0, 7)
 
+                -- Value badge (pill-shaped)
+                local valueContainer = Instance.new("Frame")
+                valueContainer.Size = UDim2.new(0, 45, 0, 20)
+                valueContainer.Position = UDim2.new(1, -50, 0, 17)
+                valueContainer.BackgroundTransparency = 1
+                valueContainer.Parent = slider
+
+                local valueShadow = Instance.new("Frame")
+                valueShadow.Size = UDim2.new(1, 0, 1, 0)
+                valueShadow.Position = UDim2.new(0, 0, 0, 3)
+                valueShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                valueShadow.BackgroundTransparency = 0.4
+                valueShadow.BorderSizePixel = 0
+                valueShadow.Parent = valueContainer
+                Instance.new("UICorner", valueShadow).CornerRadius = UDim.new(1, 0)
+
                 local value = Instance.new("TextLabel")
-                value.Size = UDim2.new(0, 45, 0, 15)
-                value.Position = UDim2.new(1, -45, 0, 20)
-                value.BackgroundTransparency = 1
+                value.Size = UDim2.new(1, 0, 1, 0)
+                value.BackgroundColor3 = options.main_color or Color3.fromRGB(110, 45, 220)
+                value.BorderSizePixel = 0
                 value.Font = Enum.Font.GothamBold
                 value.Text = "0"
                 value.TextColor3 = Color3.fromRGB(255, 255, 255)
                 value.TextSize = 12
                 value.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
                 value.TextStrokeTransparency = 0
-                value.Parent = slider
+                value.Parent = valueContainer
+                Instance.new("UICorner", value).CornerRadius = UDim.new(1, 0)
 
                 do
                     local dragging = false
