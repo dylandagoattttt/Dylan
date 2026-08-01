@@ -333,37 +333,30 @@ function library:AddWindow(title, options)
     Instance.new("UICorner", MinimizedFrame).CornerRadius = UDim.new(1, 0)
 
     local MinimizedStroke = Instance.new("UIStroke")
-    MinimizedStroke.Color = Color3.fromRGB(255, 255, 255)
-    MinimizedStroke.Thickness = 2
-    MinimizedStroke.Transparency = 0.3
-    MinimizedStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    MinimizedStroke.Parent = MinimizedFrame
+MinimizedStroke.Color = Color3.fromRGB(0, 255, 100) -- Portal Green (was white)
+MinimizedStroke.Thickness = 2
+MinimizedStroke.Transparency = 0.3
+MinimizedStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+MinimizedStroke.Parent = MinimizedFrame
 
     -- Portal animation variables
     local portalConnection = nil
     local portalAngle = 0
 
+    
     local function startPortalAnimation()
-        if portalConnection then return end
-        portalAngle = 0
-        portalConnection = RS.Heartbeat:Connect(function(dt)
-            -- Rotate continuously
-            portalAngle = portalAngle + dt * 120 -- degrees per second
-            MinimizedFrame.Rotation = portalAngle
+    if portalConnection then return end
+    portalAngle = 0
+    portalConnection = RS.Heartbeat:Connect(function(dt)
+        -- Rotate continuously (slower)
+        portalAngle = portalAngle + dt * 45 -- degrees per second (was 120)
+        MinimizedFrame.Rotation = portalAngle
 
-            -- Pulse scale (subtle breathing)
-            local pulse = 1 + 0.05 * math.sin(tick() * 2.5)
-            local targetSize = 60 * pulse
-            -- We'll tween size smoothly, or just set it each frame? For simplicity, set size each frame.
-            -- But using TweenService might be smoother, but we'll just set the size directly.
-            -- However, we also have the initial size tween when appearing. To avoid conflict, we'll handle scaling in the heartbeat.
-            -- We'll store a base size and apply pulse.
-            -- Since we have a tween that sets size to 60, we can just override it here.
-            -- Better: set the size using UDim2 from offset with pulse.
-            MinimizedFrame.Size = UDim2.fromOffset(60 * pulse, 60 * pulse)
-        end)
+        -- Pulse scale (subtle breathing, slower)
+        local pulse = 1 + 0.05 * math.sin(tick() * 1.0) -- was 2.5
+        MinimizedFrame.Size = UDim2.fromOffset(60 * pulse, 60 * pulse)
+    end)
     end
-
     local function stopPortalAnimation()
         if portalConnection then
             portalConnection:Disconnect()
