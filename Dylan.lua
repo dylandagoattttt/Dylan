@@ -575,7 +575,7 @@ function library:AddWindow(title, options)
                 return button
             end
 
-            -- UPDATED: AddSwitch with red pill toggle, label left, toggle right
+            -- UPDATED: AddSwitch with red pill toggle, label left, toggle right, ON/OFF text
             function tab_data:AddSwitch(switch_text, callback)
                 local switch_data = {}
                 switch_text = tostring(switch_text or "New Switch")
@@ -603,8 +603,8 @@ function library:AddWindow(title, options)
 
                 -- Toggle container (right-aligned)
                 local toggleContainer = Instance.new("Frame")
-                toggleContainer.Size = UDim2.new(0, 50, 1, 0)
-                toggleContainer.Position = UDim2.new(1, -55, 0, 0)
+                toggleContainer.Size = UDim2.new(0, 55, 1, 0)   -- slightly wider for ON/OFF text
+                toggleContainer.Position = UDim2.new(1, -60, 0, 0)
                 toggleContainer.BackgroundTransparency = 1
                 toggleContainer.Parent = switchFrame
 
@@ -623,8 +623,12 @@ function library:AddWindow(title, options)
                 toggleButton.Size = UDim2.new(1, 0, 1, 0)
                 toggleButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)  -- red (off)
                 toggleButton.BorderSizePixel = 0
-                toggleButton.Font = Enum.Font.SourceSans
-                toggleButton.Text = ""
+                toggleButton.Font = Enum.Font.GothamBold
+                toggleButton.Text = "OFF"
+                toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+                toggleButton.TextSize = 12
+                toggleButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                toggleButton.TextStrokeTransparency = 0
                 toggleButton.Parent = toggleContainer
                 Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(1, 0)
 
@@ -633,6 +637,7 @@ function library:AddWindow(title, options)
                 local function updateToggle(state)
                     toggled = state
                     local targetColor = toggled and (options.main_color or Color3.fromRGB(110, 45, 220)) or Color3.fromRGB(200, 50, 50)
+                    toggleButton.Text = toggled and "ON" or "OFF"
                     TweenService:Create(toggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = targetColor}):Play()
                     pcall(callback, toggled)
                 end
