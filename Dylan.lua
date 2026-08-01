@@ -978,7 +978,26 @@ function library:FormatWindows()
     format_windows()
 end
 
--- Helper function to create panels with new background
+-- Animated gradients storage
+local animated_gradients = {}
+local gradient_animation_running = false
+
+local function start_gradient_animation()
+    if gradient_animation_running then return end
+    gradient_animation_running = true
+    spawn(function()
+        while true do
+            for _, grad in pairs(animated_gradients) do
+                if grad and grad.Parent then
+                    grad.Rotation = (grad.Rotation + 0.3) % 360
+                end
+            end
+            wait(0.016) -- ~60 FPS
+        end
+    end)
+end
+
+-- Helper function to create panels with new background and animated gradient
 local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     local panel = {}
     
@@ -1014,6 +1033,7 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     stroke.Parent = panel.Frame
 
+    -- Gradient (will be animated)
     local gradient = Instance.new("UIGradient")
     gradient.Rotation = 90
     gradient.Color = ColorSequence.new{
@@ -1022,6 +1042,10 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
         ColorSequenceKeypoint.new(1.00, Color3.fromRGB(236,198,255))
     }
     gradient.Parent = panel.Frame
+    
+    -- Store gradient for animation
+    table.insert(animated_gradients, gradient)
+    start_gradient_animation()
 
     -- New background image on panels
     local bgImage = Instance.new("ImageLabel")
