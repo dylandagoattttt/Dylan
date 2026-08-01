@@ -5,6 +5,8 @@ local ui_options = {
     can_resize = true,
 }
 
+print("DylanUI v1.0 - Loaded") -- Version indicator
+
 do
     local imgui = game:GetService("CoreGui"):FindFirstChild("imgui")
     if imgui then imgui:Destroy() end
@@ -978,26 +980,7 @@ function library:FormatWindows()
     format_windows()
 end
 
--- Animated gradients storage
-local animated_gradients = {}
-local gradient_animation_running = false
-
-local function start_gradient_animation()
-    if gradient_animation_running then return end
-    gradient_animation_running = true
-    spawn(function()
-        while true do
-            for _, grad in pairs(animated_gradients) do
-                if grad and grad.Parent then
-                    grad.Rotation = (grad.Rotation + 0.3) % 360
-                end
-            end
-            wait(0.016) -- ~60 FPS
-        end
-    end)
-end
-
--- Helper function to create panels with new background and animated gradient
+-- Helper function to create panels with new background
 local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     local panel = {}
     
@@ -1033,7 +1016,6 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     stroke.Parent = panel.Frame
 
-    -- Gradient (will be animated)
     local gradient = Instance.new("UIGradient")
     gradient.Rotation = 90
     gradient.Color = ColorSequence.new{
@@ -1042,10 +1024,6 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
         ColorSequenceKeypoint.new(1.00, Color3.fromRGB(236,198,255))
     }
     gradient.Parent = panel.Frame
-    
-    -- Store gradient for animation
-    table.insert(animated_gradients, gradient)
-    start_gradient_animation()
 
     -- New background image on panels
     local bgImage = Instance.new("ImageLabel")
@@ -1076,7 +1054,7 @@ function library:AddWindow(title, options)
     local SideHeight = 0.75
     local Gap = 0.025
 
-    -- Main panel (perfectly centered)
+    -- Main panel
     local MainSize = UDim2.fromScale(MainWidth, MainHeight)
     local MainPos = UDim2.fromScale(0.5, 0.5)
     local MainPanel = CreatePanel("Main_" .. windows, MainPos, MainSize, 20, 1, windowsFrame)
@@ -1086,6 +1064,71 @@ function library:AddWindow(title, options)
     local SidePos = UDim2.new(SideX, 0, 0.5, 0)
     local SideSize = UDim2.fromScale(SideWidth, SideHeight)
     local SidePanel = CreatePanel("Side_" .. windows, SidePos, SideSize, 20, 1, windowsFrame)
+
+    -- PROFILE SECTION (top of side panel)
+    local ProfileFrame = Instance.new("Frame")
+    ProfileFrame.Name = "ProfileFrame"
+    ProfileFrame.Size = UDim2.new(1, 0, 0, 60)
+    ProfileFrame.Position = UDim2.new(0, 0, 0, 0)
+    ProfileFrame.BackgroundColor3 = Color3.fromRGB(30, 10, 60)
+    ProfileFrame.BackgroundTransparency = 0.3
+    ProfileFrame.BorderSizePixel = 0
+    ProfileFrame.ClipsDescendants = true
+    ProfileFrame.Parent = SidePanel.Frame
+    Instance.new("UICorner", ProfileFrame).CornerRadius = UDim.new(0, 12)
+
+    -- Avatar thumbnail
+    local avatar = Instance.new("ImageLabel")
+    avatar.Name = "Avatar"
+    avatar.Size = UDim2.new(0, 40, 0, 40)
+    avatar.Position = UDim2.new(0, 10, 0.5, -20)
+    avatar.BackgroundTransparency = 1
+    avatar.BorderSizePixel = 0
+    avatar.Image = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. p.UserId .. "&width=100&height=100&format=png"
+    avatar.ScaleType = Enum.ScaleType.Fit
+    avatar.Parent = ProfileFrame
+    Instance.new("UICorner", avatar).CornerRadius = UDim.new(0.5, 0)
+
+    -- Username
+    local username = Instance.new("TextLabel")
+    username.Name = "Username"
+    username.Size = UDim2.new(1, -60, 0, 20)
+    username.Position = UDim2.new(0, 55, 0.5, -10)
+    username.BackgroundTransparency = 1
+    username.Font = Enum.Font.GothamBold
+    username.Text = p.Name
+    username.TextColor3 = Color3.fromRGB(255, 255, 255)
+    username.TextSize = 14
+    username.TextXAlignment = Enum.TextXAlignment.Left
+    username.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+    username.TextStrokeTransparency = 0
+    username.Parent = ProfileFrame
+
+    -- Small status dot (optional)
+    local statusDot = Instance.new("Frame")
+    statusDot.Name = "StatusDot"
+    statusDot.Size = UDim2.new(0, 10, 0, 10)
+    statusDot.Position = UDim2.new(0, 45, 1, -8)
+    statusDot.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+    statusDot.BorderSizePixel = 0
+    statusDot.Parent = ProfileFrame
+    Instance.new("UICorner", statusDot).CornerRadius = UDim.new(0.5, 0)
+
+    -- TabButtons (adjusted to start below profile)
+    local TabButtons = Instance.new("ScrollingFrame")
+    TabButtons.Name = "TabButtons"
+    TabButtons.Size = UDim2.new(1, -10, 1, -80) -- leave space for profile
+    TabButtons.Position = UDim2.new(0, 5, 0, 65) -- below profile
+    TabButtons.BackgroundTransparency = 1
+    TabButtons.BorderSizePixel = 0
+    TabButtons.CanvasSize = UDim2.new(0, 0, 0, 0)
+    TabButtons.ScrollBarThickness = 4
+    TabButtons.Parent = SidePanel.Frame
+    
+    local TabButtonsList = Instance.new("UIListLayout")
+    TabButtonsList.SortOrder = Enum.SortOrder.LayoutOrder
+    TabButtonsList.Padding = UDim.new(0, 5)
+    TabButtonsList.Parent = TabButtons
 
     -- HEADER
     local HeaderShadow = Instance.new("Frame")
@@ -1106,7 +1149,6 @@ function library:AddWindow(title, options)
     Header.Position = UDim2.new(0.5,0,-0.04,0)
     Header.Size = UDim2.fromScale(0.5,0.09)
     Header.BackgroundColor3 = Color3.fromRGB(255,255,255)
-    Header.BackgroundTransparency = 0.15
     Header.BorderSizePixel = 0
     Header.Parent = MainPanel.Frame
     Instance.new("UICorner", Header).CornerRadius = UDim.new(0,18)
@@ -1124,7 +1166,6 @@ function library:AddWindow(title, options)
     HeaderBg.Parent = Header
     Instance.new("UICorner", HeaderBg).CornerRadius = UDim.new(0, 18)
 
-    -- Professionally styled header title
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Name = "Title"
     TitleLabel.AnchorPoint = Vector2.new(0.5,0.5)
@@ -1139,7 +1180,7 @@ function library:AddWindow(title, options)
     TitleLabel.TextStrokeTransparency = 0
     TitleLabel.Parent = Header
 
-    -- CLOSE/MINIMIZE BUTTON (original position)
+    -- CLOSE/MINIMIZE BUTTON
     local CloseButton = Instance.new("ImageButton")
     CloseButton.Name = "CloseButton"
     CloseButton.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -1160,7 +1201,7 @@ function library:AddWindow(title, options)
         CloseButton:TweenSize(UDim2.fromOffset(56, 56), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
 
-    -- MINIMIZED STATE (restore button) - moved left
+    -- MINIMIZED STATE
     local MinimizedFrame = Instance.new("ImageButton")
     MinimizedFrame.Name = "MinimizedFrame_" .. windows
     MinimizedFrame.AnchorPoint = Vector2.new(1, 0)
@@ -1222,9 +1263,7 @@ function library:AddWindow(title, options)
         isMinimized = false
     end)
 
-    -- Store references
-    local window_data = {}
-    local Window = MainPanel.Frame
+    -- Tabs container
     local Tabs = Instance.new("Frame")
     Tabs.Name = "Tabs"
     Tabs.Size = UDim2.new(1, -20, 1, -40)
@@ -1233,27 +1272,15 @@ function library:AddWindow(title, options)
     Tabs.BorderSizePixel = 0
     Tabs.Parent = MainPanel.Frame
     
-    local TabButtons = Instance.new("ScrollingFrame")
-    TabButtons.Name = "TabButtons"
-    TabButtons.Size = UDim2.new(1, -10, 1, -20)
-    TabButtons.Position = UDim2.new(0, 5, 0, 10)
-    TabButtons.BackgroundTransparency = 1
-    TabButtons.BorderSizePixel = 0
-    TabButtons.CanvasSize = UDim2.new(0, 0, 0, 0)
-    TabButtons.ScrollBarThickness = 4
-    TabButtons.Parent = SidePanel.Frame
-    
-    local TabButtonsList = Instance.new("UIListLayout")
-    TabButtonsList.SortOrder = Enum.SortOrder.LayoutOrder
-    TabButtonsList.Padding = UDim.new(0, 5)
-    TabButtonsList.Parent = TabButtons
+    local window_data = {}
+    local Window = MainPanel.Frame
 
     do -- Add Tab
         function window_data:AddTab(tab_name)
             local tab_data = {}
             tab_name = tostring(tab_name or "New Tab")
             
-            -- Tab button with background image (professional font)
+            -- Tab button
             local new_button = Instance.new("ImageButton")
             new_button.Name = "TabButton_" .. tab_name
             new_button.Size = UDim2.new(1, 0, 0, 35)
@@ -1265,7 +1292,6 @@ function library:AddWindow(title, options)
             new_button.Parent = TabButtons
             Instance.new("UICorner", new_button).CornerRadius = UDim.new(0, 10)
             
-            -- Tab button label - professional font
             local buttonLabel = Instance.new("TextLabel")
             buttonLabel.Name = "ButtonLabel"
             buttonLabel.Size = UDim2.new(1, 0, 1, 0)
@@ -1279,10 +1305,8 @@ function library:AddWindow(title, options)
             buttonLabel.TextStrokeTransparency = 0
             buttonLabel.Parent = new_button
             
-            -- Update canvas size
             TabButtons.CanvasSize = UDim2.new(0, 0, 0, (#TabButtons:GetChildren() - 1) * 40)
             
-            -- Tab content container (transparent)
             local tabContainer = Instance.new("ScrollingFrame")
             tabContainer.Name = "TabContainer_" .. tab_name
             tabContainer.Size = UDim2.new(1, 0, 1, 0)
@@ -1305,7 +1329,6 @@ function library:AddWindow(title, options)
                 tabContainer.CanvasSize = UDim2.new(0, 0, 0, tabLayout.AbsoluteContentSize.Y + 10)
             end)
             
-            -- Highlight indicator
             local selectedIndicator = Instance.new("Frame")
             selectedIndicator.Name = "SelectedIndicator"
             selectedIndicator.Size = UDim2.new(0, 4, 0, 4)
@@ -1319,7 +1342,6 @@ function library:AddWindow(title, options)
             
             local function show()
                 if dropdown_open then return end
-                -- Reset all tabs
                 for i, v in pairs(TabButtons:GetChildren()) do
                     if v:IsA("ImageButton") then
                         v.ImageTransparency = 0.3
@@ -1335,7 +1357,6 @@ function library:AddWindow(title, options)
                         v.Visible = false
                     end
                 end
-                -- Activate current tab
                 new_button.ImageTransparency = 0
                 if selectedIndicator then
                     selectedIndicator.Size = UDim2.new(0, 4, 0, 16)
@@ -1355,7 +1376,7 @@ function library:AddWindow(title, options)
                 show()
             end
             
-            -- All tab elements
+            -- All tab elements (unchanged)
             function tab_data:AddLabel(label_text)
                 label_text = tostring(label_text or "New Label")
                 local label = Instance.new("TextLabel")
@@ -1710,7 +1731,7 @@ function library:AddWindow(title, options)
                 return keybind_data, keybindFrame
             end
             
-            -- UPDATED DROPDOWN with themed purple overlay (matches the theme)
+            -- UPDATED DROPDOWN with themed overlay
             function tab_data:AddDropdown(dropdown_name, callback)
                 local dropdown_data = {}
                 dropdown_name = tostring(dropdown_name or "New Dropdown")
@@ -1744,18 +1765,17 @@ function library:AddWindow(title, options)
                 indicator.TextStrokeTransparency = 0
                 indicator.Parent = dropdown
                 
-                -- DROPDOWN BOX - Dark purple overlay (matches theme)
+                -- DROPDOWN BOX - dark purple overlay with gradient
                 local box = Instance.new("Frame")
                 box.Size = UDim2.new(1, 0, 0, 0)
                 box.Position = UDim2.new(0, 0, 1, 5)
-                box.BackgroundColor3 = Color3.fromRGB(40, 15, 80)  -- Dark purple
-                box.BackgroundTransparency = 0                      -- fully opaque
+                box.BackgroundColor3 = Color3.fromRGB(40, 15, 80)
+                box.BackgroundTransparency = 0
                 box.BorderSizePixel = 0
                 box.ClipsDescendants = true
                 box.ZIndex = 50
                 box.Parent = dropdown
                 
-                -- Add a subtle gradient to the box to match theme
                 local boxGradient = Instance.new("UIGradient")
                 boxGradient.Rotation = 90
                 boxGradient.Color = ColorSequence.new{
@@ -1763,8 +1783,6 @@ function library:AddWindow(title, options)
                     ColorSequenceKeypoint.new(1.00, Color3.fromRGB(80, 40, 150))
                 }
                 boxGradient.Parent = box
-                
-                -- No stroke
                 
                 local objects = Instance.new("ScrollingFrame")
                 objects.Name = "Objects"
@@ -1806,7 +1824,7 @@ function library:AddWindow(title, options)
                     
                     local object = Instance.new("TextButton")
                     object.Size = UDim2.new(1, 0, 0, 35)
-                    object.BackgroundColor3 = Color3.fromRGB(60, 30, 110)  -- Medium dark purple
+                    object.BackgroundColor3 = Color3.fromRGB(60, 30, 110)
                     object.BackgroundTransparency = 0
                     object.BorderSizePixel = 0
                     object.Font = Enum.Font.GothamBold
@@ -1819,10 +1837,8 @@ function library:AddWindow(title, options)
                     object.ZIndex = 52
                     object.Parent = objects
                     
-                    -- No stroke
-                    
                     object.MouseEnter:Connect(function()
-                        object.BackgroundColor3 = Color3.fromRGB(90, 50, 160)  -- Brighter on hover
+                        object.BackgroundColor3 = Color3.fromRGB(90, 50, 160)
                     end)
                     object.MouseLeave:Connect(function()
                         object.BackgroundColor3 = Color3.fromRGB(60, 30, 110)
