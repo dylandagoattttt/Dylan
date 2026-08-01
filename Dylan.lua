@@ -5,7 +5,7 @@ local ui_options = {
     can_resize = true,
 }
 
-print("DylanUI vbdbejej1.0 - Loaded")
+print("DylanUI v1.0 - Loaded")
 
 do
     local imgui = game:GetService("CoreGui"):FindFirstChild("imgui")
@@ -1065,27 +1065,18 @@ function library:AddWindow(title, options)
     local SideSize = UDim2.fromScale(SideWidth, SideHeight)
     local SidePanel = CreatePanel("Side_" .. windows, SidePos, SideSize, 20, 1, windowsFrame)
 
-    -- ===== BANNER SECTION (semi-transparent, fills top of side panel) =====
+    -- ===== BANNER (semi-transparent, no stroke – side panel's stroke handles the border) =====
     local Banner = Instance.new("ImageLabel")
     Banner.Name = "Banner"
-    Banner.Size = UDim2.new(1, 0, 0, 80)          -- full width, 80px height
-    Banner.Position = UDim2.new(0, 0, 0, 0)       -- top-left corner
+    Banner.Size = UDim2.new(1, 0, 0, 80)          -- full width
+    Banner.Position = UDim2.new(0, 0, 0, 0)       -- top-left
     Banner.BackgroundTransparency = 1
     Banner.BorderSizePixel = 0
-    -- Correct image URL with parameters
     Banner.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=94165866231069&width=420&height=420&format=png"
-    Banner.ImageTransparency = 0.4                -- semi-transparent so gradient shows through
+    Banner.ImageTransparency = 0.35               -- semi-transparent to show gradient
     Banner.ScaleType = Enum.ScaleType.Stretch
     Banner.ZIndex = 2
-    Banner.Parent = SidePanel.Frame               -- child of side panel
-
-    -- Subtle border around banner
-    local bannerStroke = Instance.new("UIStroke")
-    bannerStroke.Color = Color3.fromRGB(255, 255, 255)
-    bannerStroke.Thickness = 1.5
-    bannerStroke.Transparency = 0.2
-    bannerStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    bannerStroke.Parent = Banner                  -- stroke is child of banner
+    Banner.Parent = SidePanel.Frame
 
     -- ===== TAB BUTTONS (positioned below banner) =====
     local TabButtons = Instance.new("ScrollingFrame")
