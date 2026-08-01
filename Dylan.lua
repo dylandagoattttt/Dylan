@@ -5,7 +5,7 @@ local ui_options = {
     can_resize = true,
 }
 
-print("DylanUI v1.0 - Loaded") -- Version indicator
+print("DylanUI v1.0 - Loaded")
 
 do
     local imgui = game:GetService("CoreGui"):FindFirstChild("imgui")
@@ -1025,7 +1025,6 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     }
     gradient.Parent = panel.Frame
 
-    -- New background image on panels
     local bgImage = Instance.new("ImageLabel")
     bgImage.Name = "BackgroundImage"
     bgImage.Size = UDim2.fromScale(1,1)
@@ -1065,64 +1064,101 @@ function library:AddWindow(title, options)
     local SideSize = UDim2.fromScale(SideWidth, SideHeight)
     local SidePanel = CreatePanel("Side_" .. windows, SidePos, SideSize, 20, 1, windowsFrame)
 
-    -- PROFILE SECTION (top of side panel)
+    -- ===== PROFILE SECTION (improved) =====
     local ProfileFrame = Instance.new("Frame")
     ProfileFrame.Name = "ProfileFrame"
-    ProfileFrame.Size = UDim2.new(1, 0, 0, 60)
+    ProfileFrame.Size = UDim2.new(1, 0, 0, 70)
     ProfileFrame.Position = UDim2.new(0, 0, 0, 0)
+    ProfileFrame.BackgroundTransparency = 0
     ProfileFrame.BackgroundColor3 = Color3.fromRGB(30, 10, 60)
-    ProfileFrame.BackgroundTransparency = 0.3
     ProfileFrame.BorderSizePixel = 0
     ProfileFrame.ClipsDescendants = true
+    ProfileFrame.ZIndex = 2
     ProfileFrame.Parent = SidePanel.Frame
     Instance.new("UICorner", ProfileFrame).CornerRadius = UDim.new(0, 12)
 
-    -- Avatar thumbnail
+    -- Gradient overlay for profile
+    local profileGrad = Instance.new("UIGradient")
+    profileGrad.Rotation = 90
+    profileGrad.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0.00, Color3.fromRGB(60, 30, 120)),
+        ColorSequenceKeypoint.new(1.00, Color3.fromRGB(30, 10, 60))
+    }
+    profileGrad.Parent = ProfileFrame
+
+    -- Border stroke for profile
+    local profileStroke = Instance.new("UIStroke")
+    profileStroke.Color = Color3.fromRGB(255, 255, 255)
+    profileStroke.Thickness = 1.5
+    profileStroke.Transparency = 0.2
+    profileStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    profileStroke.Parent = ProfileFrame
+
+    -- Avatar (with white border)
     local avatar = Instance.new("ImageLabel")
     avatar.Name = "Avatar"
-    avatar.Size = UDim2.new(0, 40, 0, 40)
-    avatar.Position = UDim2.new(0, 10, 0.5, -20)
+    avatar.Size = UDim2.new(0, 44, 0, 44)
+    avatar.Position = UDim2.new(0, 10, 0.5, -22)
     avatar.BackgroundTransparency = 1
-    avatar.BorderSizePixel = 0
+    avatar.BorderSizePixel = 2
+    avatar.BorderColor3 = Color3.fromRGB(255,255,255)
     avatar.Image = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. p.UserId .. "&width=100&height=100&format=png"
     avatar.ScaleType = Enum.ScaleType.Fit
     avatar.Parent = ProfileFrame
     Instance.new("UICorner", avatar).CornerRadius = UDim.new(0.5, 0)
 
-    -- Username
+    -- Username (auto-scaled)
     local username = Instance.new("TextLabel")
     username.Name = "Username"
-    username.Size = UDim2.new(1, -60, 0, 20)
-    username.Position = UDim2.new(0, 55, 0.5, -10)
+    username.Size = UDim2.new(1, -70, 0, 24)
+    username.Position = UDim2.new(0, 60, 0.5, -30)
     username.BackgroundTransparency = 1
     username.Font = Enum.Font.GothamBold
     username.Text = p.Name
     username.TextColor3 = Color3.fromRGB(255, 255, 255)
-    username.TextSize = 14
+    username.TextScaled = true
+    username.TextSize = 18
+    username.MaxTextSize = 18
     username.TextXAlignment = Enum.TextXAlignment.Left
     username.TextStrokeColor3 = Color3.fromRGB(0,0,0)
     username.TextStrokeTransparency = 0
     username.Parent = ProfileFrame
 
-    -- Small status dot (optional)
+    -- Status dot
     local statusDot = Instance.new("Frame")
     statusDot.Name = "StatusDot"
     statusDot.Size = UDim2.new(0, 10, 0, 10)
-    statusDot.Position = UDim2.new(0, 45, 1, -8)
+    statusDot.Position = UDim2.new(0, 60, 0.5, 8)
     statusDot.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
     statusDot.BorderSizePixel = 0
     statusDot.Parent = ProfileFrame
     Instance.new("UICorner", statusDot).CornerRadius = UDim.new(0.5, 0)
 
-    -- TabButtons (adjusted to start below profile)
+    -- Status text
+    local statusText = Instance.new("TextLabel")
+    statusText.Name = "StatusText"
+    statusText.Size = UDim2.new(0, 50, 0, 16)
+    statusText.Position = UDim2.new(0, 75, 0.5, 6)
+    statusText.BackgroundTransparency = 1
+    statusText.Font = Enum.Font.GothamBold
+    statusText.Text = "Online"
+    statusText.TextColor3 = Color3.fromRGB(180, 255, 180)
+    statusText.TextSize = 10
+    statusText.TextXAlignment = Enum.TextXAlignment.Left
+    statusText.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+    statusText.TextStrokeTransparency = 0
+    statusText.Parent = ProfileFrame
+
+    -- ===== TAB BUTTONS (now placed below profile) =====
     local TabButtons = Instance.new("ScrollingFrame")
     TabButtons.Name = "TabButtons"
-    TabButtons.Size = UDim2.new(1, -10, 1, -80) -- leave space for profile
-    TabButtons.Position = UDim2.new(0, 5, 0, 65) -- below profile
+    TabButtons.Size = UDim2.new(1, -10, 1, -90) -- leave space for profile
+    TabButtons.Position = UDim2.new(0, 5, 0, 75) -- below profile
     TabButtons.BackgroundTransparency = 1
     TabButtons.BorderSizePixel = 0
     TabButtons.CanvasSize = UDim2.new(0, 0, 0, 0)
     TabButtons.ScrollBarThickness = 4
+    TabButtons.ZIndex = 1
     TabButtons.Parent = SidePanel.Frame
     
     local TabButtonsList = Instance.new("UIListLayout")
