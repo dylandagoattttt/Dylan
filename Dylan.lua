@@ -239,12 +239,12 @@ function library:AddWindow(title, options)
     local SideSize = UDim2.fromScale(SideWidth, SideHeight)
     local SidePanel = CreatePanel("Side_" .. windows, SidePos, SideSize, 20, 1, windowsFrame)
 
-    -- HEADER - even higher (Y offset -0.10)
+    -- HEADER - HIGHER (10% overlap with main panel)
     local HeaderShadow = Instance.new("Frame")
     HeaderShadow.Name = "HeaderShadow"
     HeaderShadow.AnchorPoint = Vector2.new(0.5, 0)
-    HeaderShadow.Position = UDim2.new(0.5, 2, -0.10, 4)       -- higher
-    HeaderShadow.Size = UDim2.fromScale(0.43, 0.16)
+    HeaderShadow.Position = UDim2.new(0.5, 2, -0.06, 4)      -- higher (was -0.07)
+    HeaderShadow.Size = UDim2.fromScale(0.43, 0.16)           -- match main width
     HeaderShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     HeaderShadow.BackgroundTransparency = 0.4
     HeaderShadow.BorderSizePixel = 0
@@ -255,8 +255,8 @@ function library:AddWindow(title, options)
     local Header = Instance.new("Frame")
     Header.Name = "Header"
     Header.AnchorPoint = Vector2.new(0.5, 0)
-    Header.Position = UDim2.new(0.5, 0, -0.10, 0)             -- higher
-    Header.Size = UDim2.fromScale(0.43, 0.16)
+    Header.Position = UDim2.new(0.5, 0, -0.06, 0)            -- higher (was -0.07)
+    Header.Size = UDim2.fromScale(0.43, 0.16)                 -- match main width
     Header.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Header.BackgroundTransparency = 0.15
     Header.BorderSizePixel = 0
@@ -309,11 +309,11 @@ function library:AddWindow(title, options)
     TitleLabel.TextStrokeTransparency = 0.3
     TitleLabel.Parent = titleContainer
 
-    -- CLOSE BUTTON - sticking out of the main panel (Y = -0.08, so it's above the top edge)
+    -- CLOSE BUTTON - ORIGINAL POSITION (top-right of main panel, no offset)
     local CloseButton = Instance.new("ImageButton")
     CloseButton.Name = "CloseButton"
     CloseButton.AnchorPoint = Vector2.new(0.5, 0.5)
-    CloseButton.Position = UDim2.new(1, -10, -0.08, 0)        -- sticks out above, touches header
+    CloseButton.Position = UDim2.new(1, 0, 0, 0)   -- original position
     CloseButton.Size = UDim2.fromOffset(56, 56)
     CloseButton.BackgroundTransparency = 1
     CloseButton.BorderSizePixel = 0
@@ -582,30 +582,11 @@ function library:AddWindow(title, options)
                 show()
             end
 
+            -- LABEL - NO DROP SHADOW (just TextStroke)
             function tab_data:AddLabel(label_text)
                 label_text = tostring(label_text or "New Label")
-                local container = Instance.new("Frame")
-                container.Size = UDim2.new(1, 0, 0, 20)
-                container.BackgroundTransparency = 1
-                container.Parent = tabContainer
-
-                local offsetX, offsetY = 2, 2
-                local shadow = Instance.new("TextLabel")
-                shadow.Size = UDim2.new(1, 0, 1, 0)
-                shadow.Position = UDim2.new(0, offsetX, 0, offsetY)
-                shadow.BackgroundTransparency = 1
-                shadow.Font = Enum.Font.GothamBlack
-                shadow.Text = label_text
-                shadow.TextColor3 = Color3.fromRGB(20, 20, 20)
-                shadow.TextSize = 14
-                shadow.TextXAlignment = Enum.TextXAlignment.Left
-                shadow.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-                shadow.TextStrokeTransparency = 0.5
-                shadow.Parent = container
-
                 local label = Instance.new("TextLabel")
-                label.Size = UDim2.new(1, 0, 1, 0)
-                label.Position = UDim2.new(0, 0, 0, 0)
+                label.Size = UDim2.new(1, 0, 0, 20)
                 label.BackgroundTransparency = 1
                 label.Font = Enum.Font.GothamBlack
                 label.Text = label_text
@@ -614,8 +595,7 @@ function library:AddWindow(title, options)
                 label.TextXAlignment = Enum.TextXAlignment.Left
                 label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
                 label.TextStrokeTransparency = 0.3
-                label.Parent = container
-
+                label.Parent = tabContainer
                 return label
             end
 
