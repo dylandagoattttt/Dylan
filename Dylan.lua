@@ -138,6 +138,99 @@ end
 local windows = 0
 local library = {}
 
+-- Color helpers used to derive hover/gradient/accent shades from a single
+-- theme color instead of hardcoding extra RGB values everywhere.
+local function Lighten(color, amt)
+    return color:Lerp(Color3.new(1, 1, 1), amt)
+end
+local function Darken(color, amt)
+    return color:Lerp(Color3.new(0, 0, 0), amt)
+end
+
+-- Toast notification system (library:Notify). Stacks multiple toasts in the
+-- top-right corner and cleans itself up after `duration` seconds.
+local activeToasts = 0
+function library:Notify(title, message, duration)
+    title = tostring(title or "Notice")
+    message = tostring(message or "")
+    duration = tonumber(duration) or 3
+
+    local slot = activeToasts
+    activeToasts = activeToasts + 1
+
+    local toastShadow = Instance.new("Frame")
+    toastShadow.AnchorPoint = Vector2.new(1, 0)
+    toastShadow.Position = UDim2.new(1, 24, 0, 20 + slot * 78 + 4)
+    toastShadow.Size = UDim2.new(0, 260, 0, 68)
+    toastShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    toastShadow.BackgroundTransparency = 0.5
+    toastShadow.BorderSizePixel = 0
+    toastShadow.ZIndex = 199
+    toastShadow.Parent = imgui
+    Instance.new("UICorner", toastShadow).CornerRadius = UDim.new(0, 12)
+
+    local toast = Instance.new("Frame")
+    toast.AnchorPoint = Vector2.new(1, 0)
+    toast.Position = UDim2.new(1, 20, 0, 20 + slot * 78)
+    toast.Size = UDim2.new(0, 260, 0, 68)
+    toast.BackgroundColor3 = Color3.fromRGB(30, 20, 45)
+    toast.BorderSizePixel = 0
+    toast.ZIndex = 200
+    toast.ClipsDescendants = true
+    toast.Parent = imgui
+    Instance.new("UICorner", toast).CornerRadius = UDim.new(0, 12)
+
+    local accentBar = Instance.new("Frame")
+    accentBar.Size = UDim2.new(0, 5, 1, 0)
+    accentBar.BackgroundColor3 = ui_options.main_color or Color3.fromRGB(150, 80, 255)
+    accentBar.BorderSizePixel = 0
+    accentBar.ZIndex = 201
+    accentBar.Parent = toast
+    Instance.new("UICorner", accentBar).CornerRadius = UDim.new(0, 12)
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, -24, 0, 24)
+    titleLabel.Position = UDim2.new(0, 16, 0, 8)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Font = Enum.Font.GothamBlack
+    titleLabel.Text = title
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.TextSize = 15
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    titleLabel.TextStrokeTransparency = 0.3
+    titleLabel.ZIndex = 201
+    titleLabel.Parent = toast
+
+    local messageLabel = Instance.new("TextLabel")
+    messageLabel.Size = UDim2.new(1, -24, 0, 28)
+    messageLabel.Position = UDim2.new(0, 16, 0, 32)
+    messageLabel.BackgroundTransparency = 1
+    messageLabel.Font = Enum.Font.Gotham -- lighter secondary font, pairs with the bold title
+    messageLabel.Text = message
+    messageLabel.TextColor3 = Color3.fromRGB(220, 210, 235)
+    messageLabel.TextSize = 13
+    messageLabel.TextXAlignment = Enum.TextXAlignment.Left
+    messageLabel.TextYAlignment = Enum.TextYAlignment.Top
+    messageLabel.TextWrapped = true
+    messageLabel.ZIndex = 201
+    messageLabel.Parent = toast
+
+    local tweenIn = TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+    TweenService:Create(toast, tweenIn, {Position = UDim2.new(1, -20, 0, 20 + slot * 78)}):Play()
+    TweenService:Create(toastShadow, tweenIn, {Position = UDim2.new(1, -16, 0, 20 + slot * 78 + 4)}):Play()
+
+    task.delay(duration, function()
+        local tweenOut = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+        TweenService:Create(toast, tweenOut, {Position = UDim2.new(1, 20, 0, toast.Position.Y.Offset)}):Play()
+        TweenService:Create(toastShadow, tweenOut, {Position = UDim2.new(1, 24, 0, toastShadow.Position.Y.Offset)}):Play()
+        task.wait(0.3)
+        toast:Destroy()
+        toastShadow:Destroy()
+        activeToasts = math.max(0, activeToasts - 1)
+    end)
+end
+
 local function format_windows()
     local ull = prefabs:FindFirstChild("UIListLayout"):Clone()
     ull.Parent = windowsFrame
@@ -158,7 +251,8 @@ function library:FormatWindows()
 end
 
 -- Helper function to create panels with new background
-local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
+local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent, accentColor)
+    accentColor = accentColor or ui_options.main_color or Color3.fromRGB(150, 80, 255)
     local panel = {}
 
     panel.Shadow = Instance.new("Frame")
@@ -194,9 +288,9 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     local gradient = Instance.new("UIGradient")
     gradient.Rotation = 90
     gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0.00, Color3.fromRGB(150, 80, 255)),
-        ColorSequenceKeypoint.new(0.45, Color3.fromRGB(200, 130, 255)),
-        ColorSequenceKeypoint.new(1.00, Color3.fromRGB(236, 198, 255))
+        ColorSequenceKeypoint.new(0.00, accentColor),
+        ColorSequenceKeypoint.new(0.45, Lighten(accentColor, 0.2)),
+        ColorSequenceKeypoint.new(1.00, Lighten(accentColor, 0.55))
     }
     gradient.Parent = panel.Frame
 
@@ -231,13 +325,13 @@ function library:AddWindow(title, options)
     -- Main panel (perfectly centered)
     local MainSize = UDim2.fromScale(MainWidth, MainHeight)
     local MainPos = UDim2.fromScale(0.5, 0.5)
-    local MainPanel = CreatePanel("Main_" .. windows, MainPos, MainSize, 20, 1, windowsFrame)
+    local MainPanel = CreatePanel("Main_" .. windows, MainPos, MainSize, 20, 1, windowsFrame, options.main_color)
 
     -- Side panel
     local SideX = (0.5 - MainWidth / 2) - Gap - SideWidth / 2
     local SidePos = UDim2.new(SideX, 0, 0.5, 0)
     local SideSize = UDim2.fromScale(SideWidth, SideHeight)
-    local SidePanel = CreatePanel("Side_" .. windows, SidePos, SideSize, 20, 1, windowsFrame)
+    local SidePanel = CreatePanel("Side_" .. windows, SidePos, SideSize, 20, 1, windowsFrame, options.main_color)
 
     -- HEADER - HIGHER (10% overlap with main panel)
     local HeaderShadow = Instance.new("Frame")
@@ -599,62 +693,163 @@ function library:AddWindow(title, options)
                 return label
             end
 
+            -- Lighter secondary text, meant to sit under a bold AddLabel/AddButton
+            -- for hierarchy (e.g. a one-line explanation of what a setting does).
+            function tab_data:AddDescription(desc_text)
+                desc_text = tostring(desc_text or "")
+                local desc = Instance.new("TextLabel")
+                desc.Size = UDim2.new(1, 0, 0, 16)
+                desc.BackgroundTransparency = 1
+                desc.Font = Enum.Font.Gotham
+                desc.Text = desc_text
+                desc.TextColor3 = Color3.fromRGB(210, 200, 225)
+                desc.TextSize = 12
+                desc.TextXAlignment = Enum.TextXAlignment.Left
+                desc.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                desc.TextStrokeTransparency = 0.6
+                desc.TextWrapped = true
+                desc.Parent = tabContainer
+                return desc
+            end
+
+            -- Thin gradient rule to visually separate groups of settings inside
+            -- a tab (fades from transparent -> accent color -> transparent).
+            function tab_data:AddDivider()
+                local base = options.main_color or Color3.fromRGB(150, 80, 255)
+                local dividerFrame = Instance.new("Frame")
+                dividerFrame.Size = UDim2.new(1, 0, 0, 12)
+                dividerFrame.BackgroundTransparency = 1
+                dividerFrame.Parent = tabContainer
+
+                local line = Instance.new("Frame")
+                line.Size = UDim2.new(1, 0, 0, 1)
+                line.Position = UDim2.new(0, 0, 0.5, 0)
+                line.BackgroundColor3 = Lighten(base, 0.3)
+                line.BackgroundTransparency = 0.3
+                line.BorderSizePixel = 0
+                line.Parent = dividerFrame
+
+                local grad = Instance.new("UIGradient")
+                grad.Transparency = NumberSequence.new{
+                    NumberSequenceKeypoint.new(0, 1),
+                    NumberSequenceKeypoint.new(0.5, 0),
+                    NumberSequenceKeypoint.new(1, 1),
+                }
+                grad.Parent = line
+
+                return dividerFrame
+            end
+
             function tab_data:AddButton(button_text, callback)
                 button_text = tostring(button_text or "New Button")
                 callback = typeof(callback) == "function" and callback or function() end
 
+                local base = options.main_color or Color3.fromRGB(150, 80, 255)
+                local baseLight = Lighten(base, 0.18)
+                local baseDark = Darken(base, 0.15)
+
                 local buttonFrame = Instance.new("Frame")
-                buttonFrame.Size = UDim2.new(1, 0, 0, 35)
+                buttonFrame.Size = UDim2.new(1, 0, 0, 38)
                 buttonFrame.BackgroundTransparency = 1
                 buttonFrame.BorderSizePixel = 0
                 buttonFrame.Parent = tabContainer
 
                 local shadow = Instance.new("Frame")
-                shadow.Size = UDim2.new(1, 0, 1, 0)
-                shadow.Position = UDim2.new(0, 0, 0, 4)
+                shadow.Size = UDim2.new(1, 0, 0, 35)
+                shadow.Position = UDim2.new(0, 0, 0, 5)
                 shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                shadow.BackgroundTransparency = 0.4
+                shadow.BackgroundTransparency = 0.45
                 shadow.BorderSizePixel = 0
                 shadow.Parent = buttonFrame
-                Instance.new("UICorner", shadow).CornerRadius = UDim.new(0, 10)
+                Instance.new("UICorner", shadow).CornerRadius = UDim.new(0, 12)
 
                 local button = Instance.new("TextButton")
-                button.Size = UDim2.new(1, 0, 1, 0)
-                button.BackgroundColor3 = Color3.fromRGB(150, 80, 255)
+                button.Size = UDim2.new(1, 0, 0, 35)
+                button.BackgroundColor3 = base
                 button.BorderSizePixel = 0
-                button.Font = Enum.Font.GothamBlack
-                button.Text = button_text
-                button.TextColor3 = Color3.fromRGB(255, 255, 255)
-                button.TextSize = 14
-                button.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-                button.TextStrokeTransparency = 0.3
+                button.AutoButtonColor = false
+                button.Text = "" -- text is drawn by child labels below; keeping this
+                                  -- empty avoids the parent-drew-its-own-text-on-top-
+                                  -- of-the-shadow-label ghosting bug.
+                button.ClipsDescendants = false
                 button.Parent = buttonFrame
-                Instance.new("UICorner", button).CornerRadius = UDim.new(0, 10)
+                Instance.new("UICorner", button).CornerRadius = UDim.new(0, 12)
 
-                local offsetX, offsetY = math.floor(14*0.15), math.floor(14*0.15)
+                local btnGradient = Instance.new("UIGradient")
+                btnGradient.Rotation = 100
+                btnGradient.Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0.00, baseDark),
+                    ColorSequenceKeypoint.new(0.55, base),
+                    ColorSequenceKeypoint.new(1.00, baseLight)
+                }
+                btnGradient.Parent = button
+
+                -- Thin left accent strip, a bit brighter than the fill, so the
+                -- button reads as more than a flat rectangle at a glance.
+                local accentStrip = Instance.new("Frame")
+                accentStrip.Size = UDim2.new(0, 4, 1, -10)
+                accentStrip.Position = UDim2.new(0, 5, 0, 5)
+                accentStrip.BackgroundColor3 = Lighten(base, 0.45)
+                accentStrip.BorderSizePixel = 0
+                accentStrip.Parent = button
+                Instance.new("UICorner", accentStrip).CornerRadius = UDim.new(1, 0)
+
+                local hoverGlow = Instance.new("UIStroke")
+                hoverGlow.Color = Lighten(base, 0.5)
+                hoverGlow.Thickness = 1.5
+                hoverGlow.Transparency = 1 -- invisible until hover
+                hoverGlow.Parent = button
+
+                -- Text container holds shadow+real label as siblings (the correct
+                -- pattern used elsewhere in this file), separate from `button`
+                -- itself so `button` never owns its own competing Text.
+                local textContainer = Instance.new("Frame")
+                textContainer.Size = UDim2.new(1, -20, 1, 0)
+                textContainer.Position = UDim2.new(0, 16, 0, 0)
+                textContainer.BackgroundTransparency = 1
+                textContainer.Parent = button
+
                 local textShadow = Instance.new("TextLabel")
                 textShadow.Size = UDim2.new(1, 0, 1, 0)
-                textShadow.Position = UDim2.new(0, offsetX, 0, offsetY)
+                textShadow.Position = UDim2.new(0, 2, 0, 2)
                 textShadow.BackgroundTransparency = 1
                 textShadow.Font = Enum.Font.GothamBlack
                 textShadow.Text = button_text
                 textShadow.TextColor3 = Color3.fromRGB(20, 20, 20)
                 textShadow.TextSize = 14
+                textShadow.TextXAlignment = Enum.TextXAlignment.Left
                 textShadow.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
                 textShadow.TextStrokeTransparency = 0.5
-                textShadow.Parent = button
                 textShadow.ZIndex = 0
+                textShadow.Parent = textContainer
 
-                button.Text = button_text
-                button.ZIndex = 1
+                local textLabel = Instance.new("TextLabel")
+                textLabel.Size = UDim2.new(1, 0, 1, 0)
+                textLabel.BackgroundTransparency = 1
+                textLabel.Font = Enum.Font.GothamBlack
+                textLabel.Text = button_text
+                textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                textLabel.TextSize = 14
+                textLabel.TextXAlignment = Enum.TextXAlignment.Left
+                textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                textLabel.TextStrokeTransparency = 0.3
+                textLabel.ZIndex = 1
+                textLabel.Parent = textContainer
 
-                local btnGradient = Instance.new("UIGradient")
-                btnGradient.Rotation = 90
-                btnGradient.Color = ColorSequence.new{
-                    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(150, 80, 255)),
-                    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(200, 130, 255))
-                }
-                btnGradient.Parent = button
+                button.MouseEnter:Connect(function()
+                    TweenService:Create(hoverGlow, TweenInfo.new(0.15), {Transparency = 0.3}):Play()
+                    TweenService:Create(button, TweenInfo.new(0.15), {BackgroundColor3 = baseLight}):Play()
+                end)
+                button.MouseLeave:Connect(function()
+                    TweenService:Create(hoverGlow, TweenInfo.new(0.15), {Transparency = 1}):Play()
+                    TweenService:Create(button, TweenInfo.new(0.15), {BackgroundColor3 = base}):Play()
+                end)
+                button.MouseButton1Down:Connect(function()
+                    TweenService:Create(buttonFrame, TweenInfo.new(0.08), {Size = UDim2.new(1, 0, 0, 35)}):Play()
+                end)
+                button.MouseButton1Up:Connect(function()
+                    TweenService:Create(buttonFrame, TweenInfo.new(0.08), {Size = UDim2.new(1, 0, 0, 38)}):Play()
+                end)
 
                 button.MouseButton1Click:Connect(function()
                     ripple(button, mouse.X, mouse.Y)
@@ -726,12 +921,10 @@ function library:AddWindow(title, options)
                 toggleButton.Size = UDim2.new(1, 0, 1, 0)
                 toggleButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
                 toggleButton.BorderSizePixel = 0
-                toggleButton.Font = Enum.Font.GothamBlack
-                toggleButton.Text = "OFF"
-                toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-                toggleButton.TextSize = 12
-                toggleButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-                toggleButton.TextStrokeTransparency = 0.3
+                toggleButton.AutoButtonColor = false
+                toggleButton.Text = "" -- drawn via sibling labels below instead, so
+                                        -- the button itself never competes with its
+                                        -- own shadow-text child for the same pixels
                 toggleButton.Parent = toggleContainer
                 Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(1, 0)
 
@@ -749,14 +942,24 @@ function library:AddWindow(title, options)
                 toggleTextShadow.Parent = toggleButton
                 toggleTextShadow.ZIndex = 0
 
-                toggleButton.ZIndex = 1
+                local toggleTextLabel = Instance.new("TextLabel")
+                toggleTextLabel.Size = UDim2.new(1, 0, 1, 0)
+                toggleTextLabel.BackgroundTransparency = 1
+                toggleTextLabel.Font = Enum.Font.GothamBlack
+                toggleTextLabel.Text = "OFF"
+                toggleTextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                toggleTextLabel.TextSize = 12
+                toggleTextLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                toggleTextLabel.TextStrokeTransparency = 0.3
+                toggleTextLabel.ZIndex = 1
+                toggleTextLabel.Parent = toggleButton
 
                 local toggled = false
 
                 local function updateToggle(state)
                     toggled = state
                     local targetColor = toggled and Color3.fromRGB(0, 200, 80) or Color3.fromRGB(200, 50, 50)
-                    toggleButton.Text = toggled and "ON" or "OFF"
+                    toggleTextLabel.Text = toggled and "ON" or "OFF"
                     toggleTextShadow.Text = toggled and "ON" or "OFF"
                     TweenService:Create(toggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = targetColor}):Play()
                     pcall(callback, toggled)
@@ -867,6 +1070,13 @@ function library:AddWindow(title, options)
                 sliderBg.BorderSizePixel = 0
                 sliderBg.Parent = slider
                 Instance.new("UICorner", sliderBg).CornerRadius = UDim.new(0, 7)
+
+                sliderBg.MouseEnter:Connect(function()
+                    TweenService:Create(sliderBg, TweenInfo.new(0.15), {BackgroundTransparency = 0.65}):Play()
+                end)
+                sliderBg.MouseLeave:Connect(function()
+                    TweenService:Create(sliderBg, TweenInfo.new(0.15), {BackgroundTransparency = 0.8}):Play()
+                end)
 
                 local indicator = Instance.new("Frame")
                 indicator.Size = UDim2.new(0, 0, 1, 0)
@@ -1033,12 +1243,7 @@ function library:AddWindow(title, options)
                 input.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                 input.BackgroundTransparency = 0.7
                 input.BorderSizePixel = 0
-                input.Font = Enum.Font.GothamBlack
-                input.Text = "RShift"
-                input.TextColor3 = Color3.fromRGB(255, 255, 255)
-                input.TextSize = 12
-                input.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-                input.TextStrokeTransparency = 0.3
+                input.Text = "" -- drawn via sibling labels below
                 input.Parent = keybindFrame
                 Instance.new("UICorner", input).CornerRadius = UDim.new(0, 8)
 
@@ -1056,7 +1261,17 @@ function library:AddWindow(title, options)
                 inputTextShadow.Parent = input
                 inputTextShadow.ZIndex = 0
 
-                input.ZIndex = 1
+                local inputTextLabel = Instance.new("TextLabel")
+                inputTextLabel.Size = UDim2.new(1, 0, 1, 0)
+                inputTextLabel.BackgroundTransparency = 1
+                inputTextLabel.Font = Enum.Font.GothamBlack
+                inputTextLabel.Text = "RShift"
+                inputTextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                inputTextLabel.TextSize = 12
+                inputTextLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                inputTextLabel.TextStrokeTransparency = 0.3
+                inputTextLabel.ZIndex = 1
+                inputTextLabel.Parent = input
 
                 local shortkeys = {
                     RightControl = 'RightCtrl',
@@ -1070,7 +1285,7 @@ function library:AddWindow(title, options)
 
                 function keybind_data:SetKeybind(Keybind)
                     local key = shortkeys[Keybind.Name] or Keybind.Name
-                    input.Text = key
+                    inputTextLabel.Text = key
                     inputTextShadow.Text = key
                     keybind = Keybind
                 end
@@ -1092,7 +1307,7 @@ function library:AddWindow(title, options)
 
                 input.MouseButton1Click:Connect(function()
                     if checks.binding then return end
-                    input.Text = "..."
+                    inputTextLabel.Text = "..."
                     inputTextShadow.Text = "..."
                     checks.binding = true
                     local a, b = UIS.InputBegan:Wait()
@@ -1107,68 +1322,96 @@ function library:AddWindow(title, options)
                 dropdown_name = tostring(dropdown_name or "New Dropdown")
                 callback = typeof(callback) == "function" and callback or function() end
 
+                local base = options.main_color or Color3.fromRGB(150, 80, 255)
+
+                local dropdownFrame = Instance.new("Frame")
+                dropdownFrame.Size = UDim2.new(1, 0, 0, 38)
+                dropdownFrame.BackgroundTransparency = 1
+                dropdownFrame.BorderSizePixel = 0
+                dropdownFrame.ClipsDescendants = false
+                dropdownFrame.Parent = tabContainer
+
+                local headerShadow = Instance.new("Frame")
+                headerShadow.Size = UDim2.new(1, 0, 0, 35)
+                headerShadow.Position = UDim2.new(0, 0, 0, 5)
+                headerShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                headerShadow.BackgroundTransparency = 0.45
+                headerShadow.BorderSizePixel = 0
+                headerShadow.Parent = dropdownFrame
+                Instance.new("UICorner", headerShadow).CornerRadius = UDim.new(0, 10)
+
                 local dropdown = Instance.new("TextButton")
                 dropdown.Size = UDim2.new(1, 0, 0, 35)
-                dropdown.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                dropdown.BackgroundTransparency = 0.8
+                dropdown.BackgroundColor3 = Darken(base, 0.55)
                 dropdown.BorderSizePixel = 0
-                dropdown.Font = Enum.Font.GothamBlack
-                dropdown.Text = " " .. dropdown_name
-                dropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
-                dropdown.TextSize = 14
-                dropdown.TextXAlignment = Enum.TextXAlignment.Left
-                dropdown.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-                dropdown.TextStrokeTransparency = 0.3
-                dropdown.Parent = tabContainer
+                dropdown.AutoButtonColor = false
+                dropdown.Text = "" -- drawn via sibling labels below
                 dropdown.ZIndex = 10
+                dropdown.Parent = dropdownFrame
                 Instance.new("UICorner", dropdown).CornerRadius = UDim.new(0, 10)
 
-                local offX, offY = 2, 2
+                local headerStroke = Instance.new("UIStroke")
+                headerStroke.Color = base
+                headerStroke.Thickness = 1
+                headerStroke.Transparency = 0.4
+                headerStroke.Parent = dropdown
+
                 local dropdownTextShadow = Instance.new("TextLabel")
-                dropdownTextShadow.Size = UDim2.new(1, 0, 1, 0)
-                dropdownTextShadow.Position = UDim2.new(0, offX, 0, offY)
+                dropdownTextShadow.Size = UDim2.new(1, -35, 1, 0)
+                dropdownTextShadow.Position = UDim2.new(0, 14, 0, 2)
                 dropdownTextShadow.BackgroundTransparency = 1
                 dropdownTextShadow.Font = Enum.Font.GothamBlack
-                dropdownTextShadow.Text = " " .. dropdown_name
+                dropdownTextShadow.Text = dropdown_name
                 dropdownTextShadow.TextColor3 = Color3.fromRGB(20, 20, 20)
                 dropdownTextShadow.TextSize = 14
                 dropdownTextShadow.TextXAlignment = Enum.TextXAlignment.Left
                 dropdownTextShadow.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
                 dropdownTextShadow.TextStrokeTransparency = 0.5
                 dropdownTextShadow.Parent = dropdown
-                dropdownTextShadow.ZIndex = 0
+                dropdownTextShadow.ZIndex = 11
 
-                dropdown.ZIndex = 1
+                local dropdownTextLabel = Instance.new("TextLabel")
+                dropdownTextLabel.Size = UDim2.new(1, -35, 1, 0)
+                dropdownTextLabel.Position = UDim2.new(0, 12, 0, 0)
+                dropdownTextLabel.BackgroundTransparency = 1
+                dropdownTextLabel.Font = Enum.Font.GothamBlack
+                dropdownTextLabel.Text = dropdown_name
+                dropdownTextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                dropdownTextLabel.TextSize = 14
+                dropdownTextLabel.TextXAlignment = Enum.TextXAlignment.Left
+                dropdownTextLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                dropdownTextLabel.TextStrokeTransparency = 0.3
+                dropdownTextLabel.ZIndex = 12
+                dropdownTextLabel.Parent = dropdown
 
                 local indicator = Instance.new("TextLabel")
-                indicator.Size = UDim2.new(0, 20, 1, 0)
-                indicator.Position = UDim2.new(1, -25, 0, 0)
+                indicator.Size = UDim2.new(0, 24, 1, 0)
+                indicator.Position = UDim2.new(1, -30, 0, 0)
                 indicator.BackgroundTransparency = 1
                 indicator.Font = Enum.Font.GothamBlack
                 indicator.Text = "▼"
-                indicator.TextColor3 = Color3.fromRGB(255, 255, 255)
+                indicator.TextColor3 = Lighten(base, 0.5)
                 indicator.TextSize = 14
                 indicator.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
                 indicator.TextStrokeTransparency = 0.3
+                indicator.ZIndex = 12
                 indicator.Parent = dropdown
 
                 local box = Instance.new("Frame")
                 box.Size = UDim2.new(1, 0, 0, 0)
-                box.Position = UDim2.new(0, 0, 1, 5)
-                box.BackgroundColor3 = Color3.fromRGB(40, 15, 80)
-                box.BackgroundTransparency = 0
+                box.Position = UDim2.new(0, 0, 1, 8)
+                box.BackgroundColor3 = Darken(base, 0.65)
                 box.BorderSizePixel = 0
                 box.ClipsDescendants = true
                 box.ZIndex = 50
                 box.Parent = dropdown
+                Instance.new("UICorner", box).CornerRadius = UDim.new(0, 10)
 
-                local boxGradient = Instance.new("UIGradient")
-                boxGradient.Rotation = 90
-                boxGradient.Color = ColorSequence.new{
-                    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(40, 15, 80)),
-                    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(80, 40, 150))
-                }
-                boxGradient.Parent = box
+                local boxStroke = Instance.new("UIStroke")
+                boxStroke.Color = base
+                boxStroke.Thickness = 1
+                boxStroke.Transparency = 0.3
+                boxStroke.Parent = box
 
                 local objects = Instance.new("ScrollingFrame")
                 objects.Name = "Objects"
@@ -1185,22 +1428,24 @@ function library:AddWindow(title, options)
                 objectsLayout.Parent = objects
 
                 local open = false
+                local selectedObject = nil
+
                 dropdown.MouseButton1Click:Connect(function()
                     open = not open
-                    local len = (#objects:GetChildren() - 1) * 35
+                    local len = (#objects:GetChildren() - 1) * 34
                     if #objects:GetChildren() - 1 >= 10 then
-                        len = 10 * 35
-                        objects.CanvasSize = UDim2.new(0, 0, 0, (#objects:GetChildren() - 1) * 35)
+                        len = 10 * 34
+                        objects.CanvasSize = UDim2.new(0, 0, 0, (#objects:GetChildren() - 1) * 34)
                     end
                     if open then
                         if dropdown_open then return end
                         dropdown_open = true
                         Resize(box, {Size = UDim2.new(1, 0, 0, len)}, options.tween_time)
-                        indicator.Text = "▲"
+                        TweenService:Create(indicator, TweenInfo.new(0.15), {Rotation = 180}):Play()
                     else
                         dropdown_open = false
                         Resize(box, {Size = UDim2.new(1, 0, 0, 0)}, options.tween_time)
-                        indicator.Text = "▼"
+                        TweenService:Create(indicator, TweenInfo.new(0.15), {Rotation = 0}):Play()
                     end
                 end)
 
@@ -1209,46 +1454,74 @@ function library:AddWindow(title, options)
                     n = tostring(n or "New Object")
 
                     local object = Instance.new("TextButton")
-                    object.Size = UDim2.new(1, 0, 0, 35)
-                    object.BackgroundColor3 = Color3.fromRGB(60, 30, 110)
-                    object.BackgroundTransparency = 0
+                    object.Size = UDim2.new(1, 0, 0, 34)
+                    object.BackgroundColor3 = Darken(base, 0.5)
                     object.BorderSizePixel = 0
-                    object.Font = Enum.Font.GothamBlack
-                    object.Text = n
-                    object.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    object.TextSize = 14
-                    object.TextXAlignment = Enum.TextXAlignment.Left
-                    object.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-                    object.TextStrokeTransparency = 0.3
+                    object.AutoButtonColor = false
+                    object.Text = ""
                     object.ZIndex = 52
                     object.Parent = objects
 
-                    -- No extra shadow labels, just use TextStroke
+                    local selectBar = Instance.new("Frame")
+                    selectBar.Size = UDim2.new(0, 3, 1, -8)
+                    selectBar.Position = UDim2.new(0, 0, 0, 4)
+                    selectBar.BackgroundColor3 = Lighten(base, 0.4)
+                    selectBar.BackgroundTransparency = 1 -- only visible when selected
+                    selectBar.BorderSizePixel = 0
+                    selectBar.ZIndex = 53
+                    selectBar.Parent = object
+
+                    local objectLabel = Instance.new("TextLabel")
+                    objectLabel.Size = UDim2.new(1, -16, 1, 0)
+                    objectLabel.Position = UDim2.new(0, 12, 0, 0)
+                    objectLabel.BackgroundTransparency = 1
+                    objectLabel.Font = Enum.Font.GothamSemibold
+                    objectLabel.Text = n
+                    objectLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    objectLabel.TextSize = 14
+                    objectLabel.TextXAlignment = Enum.TextXAlignment.Left
+                    objectLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                    objectLabel.TextStrokeTransparency = 0.4
+                    objectLabel.ZIndex = 53
+                    objectLabel.Parent = object
 
                     object.MouseEnter:Connect(function()
-                        object.BackgroundColor3 = Color3.fromRGB(90, 50, 160)
+                        if object ~= selectedObject then
+                            TweenService:Create(object, TweenInfo.new(0.12), {BackgroundColor3 = Darken(base, 0.3)}):Play()
+                        end
                     end)
                     object.MouseLeave:Connect(function()
-                        object.BackgroundColor3 = Color3.fromRGB(60, 30, 110)
+                        if object ~= selectedObject then
+                            TweenService:Create(object, TweenInfo.new(0.12), {BackgroundColor3 = Darken(base, 0.5)}):Play()
+                        end
                     end)
 
                     if open then
-                        local len = (#objects:GetChildren() - 1) * 35
+                        local len = (#objects:GetChildren() - 1) * 34
                         if #objects:GetChildren() - 1 >= 10 then
-                            len = 10 * 35
-                            objects.CanvasSize = UDim2.new(0, 0, 0, (#objects:GetChildren() - 1) * 35)
+                            len = 10 * 34
+                            objects.CanvasSize = UDim2.new(0, 0, 0, (#objects:GetChildren() - 1) * 34)
                         end
                         Resize(box, {Size = UDim2.new(1, 0, 0, len)}, options.tween_time)
                     end
 
                     object.MouseButton1Click:Connect(function()
                         if dropdown_open then
-                            dropdown.Text = " [ " .. n .. " ]"
-                            dropdownTextShadow.Text = " [ " .. n .. " ]"
+                            if selectedObject and selectedObject ~= object then
+                                local prevBar = selectedObject:FindFirstChild("Frame")
+                                TweenService:Create(selectedObject, TweenInfo.new(0.12), {BackgroundColor3 = Darken(base, 0.5)}):Play()
+                                if prevBar then TweenService:Create(prevBar, TweenInfo.new(0.12), {BackgroundTransparency = 1}):Play() end
+                            end
+                            selectedObject = object
+                            TweenService:Create(object, TweenInfo.new(0.12), {BackgroundColor3 = Darken(base, 0.15)}):Play()
+                            TweenService:Create(selectBar, TweenInfo.new(0.12), {BackgroundTransparency = 0}):Play()
+
+                            dropdownTextLabel.Text = n
+                            dropdownTextShadow.Text = n
                             dropdown_open = false
                             open = false
                             Resize(box, {Size = UDim2.new(1, 0, 0, 0)}, options.tween_time)
-                            indicator.Text = "▼"
+                            TweenService:Create(indicator, TweenInfo.new(0.15), {Rotation = 0}):Play()
                             pcall(callback, n)
                         end
                     end)
@@ -1525,13 +1798,7 @@ function library:AddWindow(title, options)
                 button.Size = UDim2.new(1, 0, 0, 35)
                 button.BackgroundTransparency = 1
                 button.BorderSizePixel = 0
-                button.Font = Enum.Font.GothamBlack
-                button.Text = "▼ " .. folder_name
-                button.TextColor3 = Color3.fromRGB(255, 255, 255)
-                button.TextSize = 14
-                button.TextXAlignment = Enum.TextXAlignment.Left
-                button.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-                button.TextStrokeTransparency = 0.3
+                button.Text = "" -- drawn via sibling labels below
                 button.Parent = folder
 
                 local offX, offY = 2, 2
@@ -1549,7 +1816,18 @@ function library:AddWindow(title, options)
                 folderTextShadow.Parent = button
                 folderTextShadow.ZIndex = 0
 
-                button.ZIndex = 1
+                local folderTextLabel = Instance.new("TextLabel")
+                folderTextLabel.Size = UDim2.new(1, 0, 1, 0)
+                folderTextLabel.BackgroundTransparency = 1
+                folderTextLabel.Font = Enum.Font.GothamBlack
+                folderTextLabel.Text = "▼ " .. folder_name
+                folderTextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                folderTextLabel.TextSize = 14
+                folderTextLabel.TextXAlignment = Enum.TextXAlignment.Left
+                folderTextLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                folderTextLabel.TextStrokeTransparency = 0.3
+                folderTextLabel.ZIndex = 1
+                folderTextLabel.Parent = button
 
                 local objects = Instance.new("Frame")
                 objects.Name = "Objects"
@@ -1579,11 +1857,11 @@ function library:AddWindow(title, options)
                 button.MouseButton1Click:Connect(function()
                     open = not open
                     if open then
-                        button.Text = "▲ " .. folder_name
+                        folderTextLabel.Text = "▲ " .. folder_name
                         folderTextShadow.Text = "▲ " .. folder_name
                         objects.Visible = true
                     else
-                        button.Text = "▼ " .. folder_name
+                        folderTextLabel.Text = "▼ " .. folder_name
                         folderTextShadow.Text = "▼ " .. folder_name
                         objects.Visible = false
                     end
