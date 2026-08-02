@@ -21,7 +21,6 @@ local CoreGui = cloneref(game:GetService("CoreGui"))
 imgui.Name = "imgui"
 imgui.Parent = gethui and gethui() or (CoreGui or game.Players.LocalPlayer:WaitForChild("PlayerGui"))
 
--- Minimal prefab holder
 prefabs.Name = "Prefabs"
 prefabs.Parent = imgui
 prefabs.BackgroundColor3 = Color3.new(1, 1, 1)
@@ -162,7 +161,6 @@ end
 local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     local panel = {}
 
-    -- Shadow
     panel.Shadow = Instance.new("Frame")
     panel.Shadow.Name = name .. "Shadow"
     panel.Shadow.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -175,7 +173,6 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     panel.Shadow.Parent = parent or windowsFrame
     Instance.new("UICorner", panel.Shadow).CornerRadius = UDim.new(0, cornerRadius or 20)
 
-    -- Main frame - fully opaque
     panel.Frame = Instance.new("Frame")
     panel.Frame.Name = name
     panel.Frame.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -203,7 +200,6 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent)
     }
     gradient.Parent = panel.Frame
 
-    -- New background image on panels
     local bgImage = Instance.new("ImageLabel")
     bgImage.Name = "BackgroundImage"
     bgImage.Size = UDim2.fromScale(1, 1)
@@ -227,9 +223,9 @@ function library:AddWindow(title, options)
 
     -- LAYOUT PARAMETERS
     local MainWidth = 0.40
-    local MainHeight = 0.75
-    local SideWidth = 0.15
-    local SideHeight = 0.75
+    local MainHeight = 0.90          -- now 0.90 (was 0.75)
+    local SideWidth = 0.17
+    local SideHeight = 0.90          -- now 0.90 (was 0.80)
     local Gap = 0.025
 
     -- Main panel (perfectly centered)
@@ -237,18 +233,18 @@ function library:AddWindow(title, options)
     local MainPos = UDim2.fromScale(0.5, 0.5)
     local MainPanel = CreatePanel("Main_" .. windows, MainPos, MainSize, 20, 1, windowsFrame)
 
-    -- Side panel
+    -- Side panel - taller and slightly wider
     local SideX = (0.5 - MainWidth / 2) - Gap - SideWidth / 2
     local SidePos = UDim2.new(SideX, 0, 0.5, 0)
     local SideSize = UDim2.fromScale(SideWidth, SideHeight)
     local SidePanel = CreatePanel("Side_" .. windows, SidePos, SideSize, 20, 1, windowsFrame)
 
-    -- HEADER - TALLER & NARROWER, POSITIONED HIGHER
+    -- HEADER - even TALLER & HIGHER
     local HeaderShadow = Instance.new("Frame")
     HeaderShadow.Name = "HeaderShadow"
     HeaderShadow.AnchorPoint = Vector2.new(0.5, 0)
-    HeaderShadow.Position = UDim2.new(0.5, 2, -0.06, 4)  -- higher Y offset
-    HeaderShadow.Size = UDim2.fromScale(0.40, 0.14)       -- taller (0.14)
+    HeaderShadow.Position = UDim2.new(0.5, 2, -0.07, 4)      -- higher
+    HeaderShadow.Size = UDim2.fromScale(0.40, 0.16)           -- taller
     HeaderShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     HeaderShadow.BackgroundTransparency = 0.4
     HeaderShadow.BorderSizePixel = 0
@@ -259,8 +255,8 @@ function library:AddWindow(title, options)
     local Header = Instance.new("Frame")
     Header.Name = "Header"
     Header.AnchorPoint = Vector2.new(0.5, 0)
-    Header.Position = UDim2.new(0.5, 0, -0.06, 0)          -- higher Y offset
-    Header.Size = UDim2.fromScale(0.40, 0.14)               -- taller (0.14)
+    Header.Position = UDim2.new(0.5, 0, -0.07, 0)              -- higher
+    Header.Size = UDim2.fromScale(0.40, 0.16)                   -- taller
     Header.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Header.BackgroundTransparency = 0.15
     Header.BorderSizePixel = 0
@@ -280,7 +276,7 @@ function library:AddWindow(title, options)
     HeaderBg.Parent = Header
     Instance.new("UICorner", HeaderBg).CornerRadius = UDim.new(0, 18)
 
-    -- Header title with drop shadow (Gotham Black, White, Dark Shadow)
+    -- Header title with auto-matched drop shadow
     local titleContainer = Instance.new("Frame")
     titleContainer.Size = UDim2.fromScale(0.9, 0.8)
     titleContainer.Position = UDim2.fromScale(0.05, 0.1)
@@ -290,7 +286,7 @@ function library:AddWindow(title, options)
     local titleShadow = Instance.new("TextLabel")
     titleShadow.Name = "TitleShadow"
     titleShadow.Size = UDim2.fromScale(1, 1)
-    titleShadow.Position = UDim2.new(0, 3, 0, 3)
+    titleShadow.Position = UDim2.new(0.005, 0, 0.005, 0)
     titleShadow.BackgroundTransparency = 1
     titleShadow.Font = Enum.Font.GothamBlack
     titleShadow.Text = title
@@ -313,25 +309,25 @@ function library:AddWindow(title, options)
     TitleLabel.TextStrokeTransparency = 0.3
     TitleLabel.Parent = titleContainer
 
-    -- CLOSE/MINIMIZE BUTTON (original position)
+    -- CLOSE BUTTON (now a child of Header, positioned at top-right)
     local CloseButton = Instance.new("ImageButton")
     CloseButton.Name = "CloseButton"
     CloseButton.AnchorPoint = Vector2.new(0.5, 0.5)
-    CloseButton.Position = UDim2.new(1, 0, 0, 0)
-    CloseButton.Size = UDim2.fromOffset(56, 56)
+    CloseButton.Position = UDim2.new(1, 0, 0, 0)   -- top-right of Header
+    CloseButton.Size = UDim2.fromOffset(48, 48)    -- slightly smaller to fit header
     CloseButton.BackgroundTransparency = 1
     CloseButton.BorderSizePixel = 0
     CloseButton.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=114840795551292&width=678&height=810&format=png"
     CloseButton.ScaleType = Enum.ScaleType.Fit
     CloseButton.ZIndex = 10
-    CloseButton.Parent = MainPanel.Frame
+    CloseButton.Parent = Header
     Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(1, 0)
 
     CloseButton.MouseEnter:Connect(function()
-        CloseButton:TweenSize(UDim2.fromOffset(62, 62), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
+        CloseButton:TweenSize(UDim2.fromOffset(52, 52), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
     CloseButton.MouseLeave:Connect(function()
-        CloseButton:TweenSize(UDim2.fromOffset(56, 56), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
+        CloseButton:TweenSize(UDim2.fromOffset(48, 48), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
 
     -- MINIMIZED STATE (restore button) with PORTAL IMAGE + ANIMATION
@@ -356,7 +352,6 @@ function library:AddWindow(title, options)
     MinimizedStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     MinimizedStroke.Parent = MinimizedFrame
 
-    -- Portal animation variables
     local portalConnection = nil
     local portalAngle = 0
 
@@ -479,7 +474,7 @@ function library:AddWindow(title, options)
             new_button.Parent = TabButtons
             Instance.new("UICorner", new_button).CornerRadius = UDim.new(0, 10)
 
-            -- Tab button label - Gotham Black with drop shadow
+            -- Tab button label - Gotham Black with auto-matched drop shadow
             local buttonContainer = Instance.new("Frame")
             buttonContainer.Size = UDim2.new(1, 0, 1, 0)
             buttonContainer.BackgroundTransparency = 1
@@ -488,7 +483,7 @@ function library:AddWindow(title, options)
             local buttonShadow = Instance.new("TextLabel")
             buttonShadow.Name = "ButtonShadow"
             buttonShadow.Size = UDim2.new(1, 0, 1, 0)
-            buttonShadow.Position = UDim2.new(0, 2, 0, 2)
+            buttonShadow.Position = UDim2.new(0.005, 0, 0.005, 0)
             buttonShadow.BackgroundTransparency = 1
             buttonShadow.Font = Enum.Font.GothamBlack
             buttonShadow.Text = tab_name
@@ -594,9 +589,10 @@ function library:AddWindow(title, options)
                 container.BackgroundTransparency = 1
                 container.Parent = tabContainer
 
+                local offsetX, offsetY = 2, 2
                 local shadow = Instance.new("TextLabel")
                 shadow.Size = UDim2.new(1, 0, 1, 0)
-                shadow.Position = UDim2.new(0, 2, 0, 2)
+                shadow.Position = UDim2.new(0, offsetX, 0, offsetY)
                 shadow.BackgroundTransparency = 1
                 shadow.Font = Enum.Font.GothamBlack
                 shadow.Text = label_text
@@ -633,7 +629,6 @@ function library:AddWindow(title, options)
                 buttonFrame.BorderSizePixel = 0
                 buttonFrame.Parent = tabContainer
 
-                -- Drop shadow
                 local shadow = Instance.new("Frame")
                 shadow.Size = UDim2.new(1, 0, 1, 0)
                 shadow.Position = UDim2.new(0, 0, 0, 4)
@@ -656,10 +651,10 @@ function library:AddWindow(title, options)
                 button.Parent = buttonFrame
                 Instance.new("UICorner", button).CornerRadius = UDim.new(0, 10)
 
-                -- Text shadow
+                local offsetX, offsetY = math.floor(14*0.15), math.floor(14*0.15)
                 local textShadow = Instance.new("TextLabel")
                 textShadow.Size = UDim2.new(1, 0, 1, 0)
-                textShadow.Position = UDim2.new(0, 2, 0, 2)
+                textShadow.Position = UDim2.new(0, offsetX, 0, offsetY)
                 textShadow.BackgroundTransparency = 1
                 textShadow.Font = Enum.Font.GothamBlack
                 textShadow.Text = button_text
@@ -699,16 +694,16 @@ function library:AddWindow(title, options)
                 switchFrame.BorderSizePixel = 0
                 switchFrame.Parent = tabContainer
 
-                -- Label with drop shadow
                 local labelContainer = Instance.new("Frame")
                 labelContainer.Size = UDim2.new(1, -70, 1, 0)
                 labelContainer.Position = UDim2.new(0, 0, 0, 0)
                 labelContainer.BackgroundTransparency = 1
                 labelContainer.Parent = switchFrame
 
+                local offsetX, offsetY = 2, 2
                 local labelShadow = Instance.new("TextLabel")
                 labelShadow.Size = UDim2.new(1, 0, 1, 0)
-                labelShadow.Position = UDim2.new(0, 2, 0, 2)
+                labelShadow.Position = UDim2.new(0, offsetX, 0, offsetY)
                 labelShadow.BackgroundTransparency = 1
                 labelShadow.Font = Enum.Font.GothamBlack
                 labelShadow.Text = switch_text
@@ -732,14 +727,12 @@ function library:AddWindow(title, options)
                 titleLabel.TextStrokeTransparency = 0.3
                 titleLabel.Parent = labelContainer
 
-                -- Toggle container (right-aligned)
                 local toggleContainer = Instance.new("Frame")
                 toggleContainer.Size = UDim2.new(0, 55, 1, 0)
                 toggleContainer.Position = UDim2.new(1, -60, 0, 0)
                 toggleContainer.BackgroundTransparency = 1
                 toggleContainer.Parent = switchFrame
 
-                -- Toggle shadow
                 local toggleShadow = Instance.new("Frame")
                 toggleShadow.Size = UDim2.new(1, 0, 1, 0)
                 toggleShadow.Position = UDim2.new(0, 0, 0, 3)
@@ -749,7 +742,6 @@ function library:AddWindow(title, options)
                 toggleShadow.Parent = toggleContainer
                 Instance.new("UICorner", toggleShadow).CornerRadius = UDim.new(1, 0)
 
-                -- Toggle button (pill)
                 local toggleButton = Instance.new("TextButton")
                 toggleButton.Size = UDim2.new(1, 0, 1, 0)
                 toggleButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
@@ -763,10 +755,10 @@ function library:AddWindow(title, options)
                 toggleButton.Parent = toggleContainer
                 Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(1, 0)
 
-                -- Text shadow for toggle
+                local offX, offY = math.floor(12*0.15), math.floor(12*0.15)
                 local toggleTextShadow = Instance.new("TextLabel")
                 toggleTextShadow.Size = UDim2.new(1, 0, 1, 0)
-                toggleTextShadow.Position = UDim2.new(0, 1, 0, 1)
+                toggleTextShadow.Position = UDim2.new(0, offX, 0, offY)
                 toggleTextShadow.BackgroundTransparency = 1
                 toggleTextShadow.Font = Enum.Font.GothamBlack
                 toggleTextShadow.Text = "OFF"
@@ -855,15 +847,15 @@ function library:AddWindow(title, options)
                 slider.BorderSizePixel = 0
                 slider.Parent = tabContainer
 
-                -- Title with drop shadow
                 local titleContainer = Instance.new("Frame")
                 titleContainer.Size = UDim2.new(1, 0, 0, 15)
                 titleContainer.BackgroundTransparency = 1
                 titleContainer.Parent = slider
 
+                local offX, offY = 2, 2
                 local titleShadow = Instance.new("TextLabel")
                 titleShadow.Size = UDim2.new(1, 0, 1, 0)
-                titleShadow.Position = UDim2.new(0, 2, 0, 2)
+                titleShadow.Position = UDim2.new(0, offX, 0, offY)
                 titleShadow.BackgroundTransparency = 1
                 titleShadow.Font = Enum.Font.GothamBlack
                 titleShadow.Text = slider_text
@@ -903,7 +895,6 @@ function library:AddWindow(title, options)
                 indicator.Parent = sliderBg
                 Instance.new("UICorner", indicator).CornerRadius = UDim.new(0, 7)
 
-                -- Value badge (pill-shaped)
                 local valueContainer = Instance.new("Frame")
                 valueContainer.Size = UDim2.new(0, 45, 0, 20)
                 valueContainer.Position = UDim2.new(1, -50, 0, 17)
@@ -919,10 +910,10 @@ function library:AddWindow(title, options)
                 valueShadow.Parent = valueContainer
                 Instance.new("UICorner", valueShadow).CornerRadius = UDim.new(1, 0)
 
-                -- Value text with shadow
+                local vOffX, vOffY = math.floor(12*0.15), math.floor(12*0.15)
                 local valueTextShadow = Instance.new("TextLabel")
                 valueTextShadow.Size = UDim2.new(1, 0, 1, 0)
-                valueTextShadow.Position = UDim2.new(0, 2, 0, 2)
+                valueTextShadow.Position = UDim2.new(0, vOffX, 0, vOffY)
                 valueTextShadow.BackgroundTransparency = 1
                 valueTextShadow.Font = Enum.Font.GothamBlack
                 valueTextShadow.Text = "0"
@@ -1024,15 +1015,15 @@ function library:AddWindow(title, options)
                 keybindFrame.BorderSizePixel = 0
                 keybindFrame.Parent = tabContainer
 
-                -- Title with shadow
                 local titleContainer = Instance.new("Frame")
                 titleContainer.Size = UDim2.new(0.5, 0, 1, 0)
                 titleContainer.BackgroundTransparency = 1
                 titleContainer.Parent = keybindFrame
 
+                local offX, offY = 2, 2
                 local titleShadow = Instance.new("TextLabel")
                 titleShadow.Size = UDim2.new(1, 0, 1, 0)
-                titleShadow.Position = UDim2.new(0, 2, 0, 2)
+                titleShadow.Position = UDim2.new(0, offX, 0, offY)
                 titleShadow.BackgroundTransparency = 1
                 titleShadow.Font = Enum.Font.GothamBlack
                 titleShadow.Text = keybind_name
@@ -1071,10 +1062,10 @@ function library:AddWindow(title, options)
                 input.Parent = keybindFrame
                 Instance.new("UICorner", input).CornerRadius = UDim.new(0, 8)
 
-                -- Input text shadow
+                local inpOffX, inpOffY = math.floor(12*0.15), math.floor(12*0.15)
                 local inputTextShadow = Instance.new("TextLabel")
                 inputTextShadow.Size = UDim2.new(1, 0, 1, 0)
-                inputTextShadow.Position = UDim2.new(0, 1, 0, 1)
+                inputTextShadow.Position = UDim2.new(0, inpOffX, 0, inpOffY)
                 inputTextShadow.BackgroundTransparency = 1
                 inputTextShadow.Font = Enum.Font.GothamBlack
                 inputTextShadow.Text = "RShift"
@@ -1131,7 +1122,6 @@ function library:AddWindow(title, options)
                 return keybind_data, keybindFrame
             end
 
-            -- FIXED: AddDropdown - items now visible (removed extra text shadow labels)
             function tab_data:AddDropdown(dropdown_name, callback)
                 local dropdown_data = {}
                 dropdown_name = tostring(dropdown_name or "New Dropdown")
@@ -1153,10 +1143,10 @@ function library:AddWindow(title, options)
                 dropdown.ZIndex = 10
                 Instance.new("UICorner", dropdown).CornerRadius = UDim.new(0, 10)
 
-                -- Dropdown text shadow
+                local offX, offY = 2, 2
                 local dropdownTextShadow = Instance.new("TextLabel")
                 dropdownTextShadow.Size = UDim2.new(1, 0, 1, 0)
-                dropdownTextShadow.Position = UDim2.new(0, 1, 0, 1)
+                dropdownTextShadow.Position = UDim2.new(0, offX, 0, offY)
                 dropdownTextShadow.BackgroundTransparency = 1
                 dropdownTextShadow.Font = Enum.Font.GothamBlack
                 dropdownTextShadow.Text = " " .. dropdown_name
@@ -1564,10 +1554,10 @@ function library:AddWindow(title, options)
                 button.TextStrokeTransparency = 0.3
                 button.Parent = folder
 
-                -- Folder text shadow
+                local offX, offY = 2, 2
                 local folderTextShadow = Instance.new("TextLabel")
                 folderTextShadow.Size = UDim2.new(1, 0, 1, 0)
-                folderTextShadow.Position = UDim2.new(0, 1, 0, 1)
+                folderTextShadow.Position = UDim2.new(0, offX, 0, offY)
                 folderTextShadow.BackgroundTransparency = 1
                 folderTextShadow.Font = Enum.Font.GothamBlack
                 folderTextShadow.Text = "▼ " .. folder_name
