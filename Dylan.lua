@@ -222,10 +222,10 @@ function library:AddWindow(title, options)
     options.tween_time = 0.1
 
     -- LAYOUT PARAMETERS
-    local MainWidth = 0.40
-    local MainHeight = 0.90          -- now 0.90 (was 0.75)
-    local SideWidth = 0.17
-    local SideHeight = 0.90          -- now 0.90 (was 0.80)
+    local MainWidth = 0.43          -- wider (was 0.40)
+    local MainHeight = 0.90
+    local SideWidth = 0.14          -- narrower (was 0.17)
+    local SideHeight = 0.90
     local Gap = 0.025
 
     -- Main panel (perfectly centered)
@@ -233,18 +233,18 @@ function library:AddWindow(title, options)
     local MainPos = UDim2.fromScale(0.5, 0.5)
     local MainPanel = CreatePanel("Main_" .. windows, MainPos, MainSize, 20, 1, windowsFrame)
 
-    -- Side panel - taller and slightly wider
+    -- Side panel - taller and narrower
     local SideX = (0.5 - MainWidth / 2) - Gap - SideWidth / 2
     local SidePos = UDim2.new(SideX, 0, 0.5, 0)
     local SideSize = UDim2.fromScale(SideWidth, SideHeight)
     local SidePanel = CreatePanel("Side_" .. windows, SidePos, SideSize, 20, 1, windowsFrame)
 
-    -- HEADER - even TALLER & HIGHER
+    -- HEADER - TALLER & HIGHER
     local HeaderShadow = Instance.new("Frame")
     HeaderShadow.Name = "HeaderShadow"
     HeaderShadow.AnchorPoint = Vector2.new(0.5, 0)
-    HeaderShadow.Position = UDim2.new(0.5, 2, -0.07, 4)      -- higher
-    HeaderShadow.Size = UDim2.fromScale(0.40, 0.16)           -- taller
+    HeaderShadow.Position = UDim2.new(0.5, 2, -0.07, 4)
+    HeaderShadow.Size = UDim2.fromScale(0.43, 0.16)     -- match main width
     HeaderShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     HeaderShadow.BackgroundTransparency = 0.4
     HeaderShadow.BorderSizePixel = 0
@@ -255,8 +255,8 @@ function library:AddWindow(title, options)
     local Header = Instance.new("Frame")
     Header.Name = "Header"
     Header.AnchorPoint = Vector2.new(0.5, 0)
-    Header.Position = UDim2.new(0.5, 0, -0.07, 0)              -- higher
-    Header.Size = UDim2.fromScale(0.40, 0.16)                   -- taller
+    Header.Position = UDim2.new(0.5, 0, -0.07, 0)
+    Header.Size = UDim2.fromScale(0.43, 0.16)           -- match main width
     Header.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Header.BackgroundTransparency = 0.15
     Header.BorderSizePixel = 0
@@ -278,7 +278,7 @@ function library:AddWindow(title, options)
 
     -- Header title with auto-matched drop shadow
     local titleContainer = Instance.new("Frame")
-    titleContainer.Size = UDim2.fromScale(0.9, 0.8)
+    titleContainer.Size = UDim2.fromScale(0.85, 0.8)
     titleContainer.Position = UDim2.fromScale(0.05, 0.1)
     titleContainer.BackgroundTransparency = 1
     titleContainer.Parent = Header
@@ -309,25 +309,25 @@ function library:AddWindow(title, options)
     TitleLabel.TextStrokeTransparency = 0.3
     TitleLabel.Parent = titleContainer
 
-    -- CLOSE BUTTON (now a child of Header, positioned at top-right)
+    -- CLOSE BUTTON - back on MAIN PANEL (top-right edge)
     local CloseButton = Instance.new("ImageButton")
     CloseButton.Name = "CloseButton"
     CloseButton.AnchorPoint = Vector2.new(0.5, 0.5)
-    CloseButton.Position = UDim2.new(1, 0, 0, 0)   -- top-right of Header
-    CloseButton.Size = UDim2.fromOffset(48, 48)    -- slightly smaller to fit header
+    CloseButton.Position = UDim2.new(1, -10, 0, 15)     -- top-right of main panel with small offset
+    CloseButton.Size = UDim2.fromOffset(56, 56)
     CloseButton.BackgroundTransparency = 1
     CloseButton.BorderSizePixel = 0
     CloseButton.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=114840795551292&width=678&height=810&format=png"
     CloseButton.ScaleType = Enum.ScaleType.Fit
     CloseButton.ZIndex = 10
-    CloseButton.Parent = Header
+    CloseButton.Parent = MainPanel.Frame
     Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(1, 0)
 
     CloseButton.MouseEnter:Connect(function()
-        CloseButton:TweenSize(UDim2.fromOffset(52, 52), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
+        CloseButton:TweenSize(UDim2.fromOffset(60, 60), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
     CloseButton.MouseLeave:Connect(function()
-        CloseButton:TweenSize(UDim2.fromOffset(48, 48), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
+        CloseButton:TweenSize(UDim2.fromOffset(56, 56), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
 
     -- MINIMIZED STATE (restore button) with PORTAL IMAGE + ANIMATION
