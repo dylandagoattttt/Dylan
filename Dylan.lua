@@ -570,6 +570,7 @@ function library:AddWindow(title, options)
 
             -- Tab button label - Gotham Black with auto-matched drop shadow
             local buttonContainer = Instance.new("Frame")
+            buttonContainer.Name = "LabelContainer"
             buttonContainer.Size = UDim2.new(1, 0, 1, 0)
             buttonContainer.BackgroundTransparency = 1
             buttonContainer.Parent = new_button
@@ -628,27 +629,41 @@ function library:AddWindow(title, options)
                 tabContainer.CanvasSize = UDim2.new(0, 0, 0, tabLayout.AbsoluteContentSize.Y + 10)
             end)
 
-            -- Highlight indicator
-            local selectedIndicator = Instance.new("Frame")
-            selectedIndicator.Name = "SelectedIndicator"
-            selectedIndicator.Size = UDim2.new(0, 4, 0, 4)
-            selectedIndicator.Position = UDim2.new(0, 1, 0.5)
-            selectedIndicator.AnchorPoint = Vector2.new(0, 0.5)
-            selectedIndicator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            selectedIndicator.BackgroundTransparency = 1
-            selectedIndicator.BorderSizePixel = 0
-            selectedIndicator.Parent = new_button
-            Instance.new("UICorner", selectedIndicator).CornerRadius = UDim.new(0.5, 0)
+            -- Gold selection highlight (replaces the old growing side-bar):
+            -- a warm gold tint behind the label plus a glowing gold outline,
+            -- both invisible until the tab is the active one.
+            local GOLD = Color3.fromRGB(255, 200, 60)
+
+            local goldTint = Instance.new("Frame")
+            goldTint.Name = "GoldTint"
+            goldTint.Size = UDim2.new(1, 0, 1, 0)
+            goldTint.BackgroundColor3 = GOLD
+            goldTint.BackgroundTransparency = 1
+            goldTint.BorderSizePixel = 0
+            goldTint.ZIndex = 0
+            goldTint.Parent = new_button
+            Instance.new("UICorner", goldTint).CornerRadius = UDim.new(0, 10)
+
+            local goldStroke = Instance.new("UIStroke")
+            goldStroke.Name = "GoldStroke"
+            goldStroke.Color = GOLD
+            goldStroke.Thickness = 2
+            goldStroke.Transparency = 1
+            goldStroke.Parent = new_button
 
             local function show()
                 if dropdown_open then return end
                 for i, v in pairs(TabButtons:GetChildren()) do
                     if v:IsA("ImageButton") then
                         v.ImageTransparency = 0.3
-                        local ind = v:FindFirstChild("SelectedIndicator")
-                        if ind then
-                            ind.Size = UDim2.new(0, 4, 0, 4)
-                            ind.BackgroundTransparency = 1
+                        local tint = v:FindFirstChild("GoldTint")
+                        if tint then tint.BackgroundTransparency = 1 end
+                        local strokeReset = v:FindFirstChild("GoldStroke")
+                        if strokeReset then strokeReset.Transparency = 1 end
+                        local container = v:FindFirstChild("LabelContainer")
+                        if container then
+                            local lbl = container:FindFirstChild("ButtonLabel")
+                            if lbl then lbl.TextColor3 = Color3.fromRGB(255, 255, 255) end
                         end
                     end
                 end
@@ -658,10 +673,9 @@ function library:AddWindow(title, options)
                     end
                 end
                 new_button.ImageTransparency = 0
-                if selectedIndicator then
-                    selectedIndicator.Size = UDim2.new(0, 4, 0, 16)
-                    selectedIndicator.BackgroundTransparency = 0
-                end
+                TweenService:Create(goldTint, TweenInfo.new(0.15), {BackgroundTransparency = 0.82}):Play()
+                TweenService:Create(goldStroke, TweenInfo.new(0.15), {Transparency = 0.2}):Play()
+                buttonLabel.TextColor3 = GOLD
                 tabContainer.Visible = true
                 task.delay(0.05, function()
                     tabContainer.CanvasSize = UDim2.new(0, 0, 0, tabLayout.AbsoluteContentSize.Y + 10)
@@ -745,8 +759,6 @@ function library:AddWindow(title, options)
                 callback = typeof(callback) == "function" and callback or function() end
 
                 local base = options.main_color or Color3.fromRGB(150, 80, 255)
-                local baseLight = Lighten(base, 0.18)
-                local baseDark = Darken(base, 0.15)
 
                 local buttonFrame = Instance.new("Frame")
                 buttonFrame.Size = UDim2.new(1, 0, 0, 38)
@@ -754,58 +766,62 @@ function library:AddWindow(title, options)
                 buttonFrame.BorderSizePixel = 0
                 buttonFrame.Parent = tabContainer
 
+                -- Soft ambient shadow beneath the glass so it still reads as
+                -- a raised, tappable surface rather than a flat sticker.
                 local shadow = Instance.new("Frame")
                 shadow.Size = UDim2.new(1, 0, 0, 35)
                 shadow.Position = UDim2.new(0, 0, 0, 5)
                 shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                shadow.BackgroundTransparency = 0.45
+                shadow.BackgroundTransparency = 0.55
                 shadow.BorderSizePixel = 0
                 shadow.Parent = buttonFrame
                 Instance.new("UICorner", shadow).CornerRadius = UDim.new(0, 12)
 
+                -- The "glass" pane itself: a tinted, translucent panel (no solid
+                -- fill) so whatever's behind it subtly shows through.
                 local button = Instance.new("TextButton")
                 button.Size = UDim2.new(1, 0, 0, 35)
-                button.BackgroundColor3 = base
+                button.BackgroundColor3 = Lighten(base, 0.1)
+                button.BackgroundTransparency = 0.45
                 button.BorderSizePixel = 0
                 button.AutoButtonColor = false
-                button.Text = "" -- text is drawn by child labels below; keeping this
-                                  -- empty avoids the parent-drew-its-own-text-on-top-
-                                  -- of-the-shadow-label ghosting bug.
-                button.ClipsDescendants = false
+                button.Text = "" -- drawn via sibling labels below, avoids the
+                                  -- shadow-text ghosting bug from earlier
+                button.ClipsDescendants = true
                 button.Parent = buttonFrame
                 Instance.new("UICorner", button).CornerRadius = UDim.new(0, 12)
 
-                local btnGradient = Instance.new("UIGradient")
-                btnGradient.Rotation = 100
-                btnGradient.Color = ColorSequence.new{
-                    ColorSequenceKeypoint.new(0.00, baseDark),
-                    ColorSequenceKeypoint.new(0.55, base),
-                    ColorSequenceKeypoint.new(1.00, baseLight)
+                -- Glass "sheen": a bright highlight band across the top portion
+                -- of the pane, faded out toward the bottom, like light catching
+                -- the top edge of frosted glass.
+                local sheen = Instance.new("Frame")
+                sheen.Size = UDim2.new(1, 0, 0.55, 0)
+                sheen.Position = UDim2.new(0, 0, 0, 0)
+                sheen.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                sheen.BackgroundTransparency = 0.75
+                sheen.BorderSizePixel = 0
+                sheen.Parent = button
+                local sheenCorner = Instance.new("UICorner", sheen)
+                sheenCorner.CornerRadius = UDim.new(0, 12)
+                local sheenGradient = Instance.new("UIGradient")
+                sheenGradient.Rotation = 90
+                sheenGradient.Transparency = NumberSequence.new{
+                    NumberSequenceKeypoint.new(0, 0),
+                    NumberSequenceKeypoint.new(1, 1),
                 }
-                btnGradient.Parent = button
+                sheenGradient.Parent = sheen
 
-                -- Thin left accent strip, a bit brighter than the fill, so the
-                -- button reads as more than a flat rectangle at a glance.
-                local accentStrip = Instance.new("Frame")
-                accentStrip.Size = UDim2.new(0, 4, 1, -10)
-                accentStrip.Position = UDim2.new(0, 5, 0, 5)
-                accentStrip.BackgroundColor3 = Lighten(base, 0.45)
-                accentStrip.BorderSizePixel = 0
-                accentStrip.Parent = button
-                Instance.new("UICorner", accentStrip).CornerRadius = UDim.new(1, 0)
+                -- Soft glowing border, always faintly visible (the "frosted
+                -- edge"), brightening further on hover.
+                local glowStroke = Instance.new("UIStroke")
+                glowStroke.Color = Lighten(base, 0.55)
+                glowStroke.Thickness = 1.25
+                glowStroke.Transparency = 0.45
+                glowStroke.Parent = button
 
-                local hoverGlow = Instance.new("UIStroke")
-                hoverGlow.Color = Lighten(base, 0.5)
-                hoverGlow.Thickness = 1.5
-                hoverGlow.Transparency = 1 -- invisible until hover
-                hoverGlow.Parent = button
-
-                -- Text container holds shadow+real label as siblings (the correct
-                -- pattern used elsewhere in this file), separate from `button`
-                -- itself so `button` never owns its own competing Text.
                 local textContainer = Instance.new("Frame")
-                textContainer.Size = UDim2.new(1, -20, 1, 0)
-                textContainer.Position = UDim2.new(0, 16, 0, 0)
+                textContainer.Size = UDim2.new(1, -24, 1, 0)
+                textContainer.Position = UDim2.new(0, 14, 0, 0)
                 textContainer.BackgroundTransparency = 1
                 textContainer.Parent = button
 
@@ -837,12 +853,12 @@ function library:AddWindow(title, options)
                 textLabel.Parent = textContainer
 
                 button.MouseEnter:Connect(function()
-                    TweenService:Create(hoverGlow, TweenInfo.new(0.15), {Transparency = 0.3}):Play()
-                    TweenService:Create(button, TweenInfo.new(0.15), {BackgroundColor3 = baseLight}):Play()
+                    TweenService:Create(glowStroke, TweenInfo.new(0.15), {Transparency = 0.1, Thickness = 1.75}):Play()
+                    TweenService:Create(button, TweenInfo.new(0.15), {BackgroundTransparency = 0.3}):Play()
                 end)
                 button.MouseLeave:Connect(function()
-                    TweenService:Create(hoverGlow, TweenInfo.new(0.15), {Transparency = 1}):Play()
-                    TweenService:Create(button, TweenInfo.new(0.15), {BackgroundColor3 = base}):Play()
+                    TweenService:Create(glowStroke, TweenInfo.new(0.15), {Transparency = 0.45, Thickness = 1.25}):Play()
+                    TweenService:Create(button, TweenInfo.new(0.15), {BackgroundTransparency = 0.45}):Play()
                 end)
                 button.MouseButton1Down:Connect(function()
                     TweenService:Create(buttonFrame, TweenInfo.new(0.08), {Size = UDim2.new(1, 0, 0, 35)}):Play()
@@ -1335,25 +1351,47 @@ function library:AddWindow(title, options)
                 headerShadow.Size = UDim2.new(1, 0, 0, 35)
                 headerShadow.Position = UDim2.new(0, 0, 0, 5)
                 headerShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                headerShadow.BackgroundTransparency = 0.45
+                headerShadow.BackgroundTransparency = 0.55
                 headerShadow.BorderSizePixel = 0
                 headerShadow.Parent = dropdownFrame
                 Instance.new("UICorner", headerShadow).CornerRadius = UDim.new(0, 10)
 
+                -- Glass header pane (translucent tint, not a flat fill)
                 local dropdown = Instance.new("TextButton")
                 dropdown.Size = UDim2.new(1, 0, 0, 35)
-                dropdown.BackgroundColor3 = Darken(base, 0.55)
+                dropdown.BackgroundColor3 = Lighten(base, 0.1)
+                dropdown.BackgroundTransparency = 0.45
                 dropdown.BorderSizePixel = 0
                 dropdown.AutoButtonColor = false
                 dropdown.Text = "" -- drawn via sibling labels below
+                dropdown.ClipsDescendants = false -- the options `box` below is a
+                                                    -- child that extends past this
+                                                    -- frame's own bounds; clipping
+                                                    -- here would cut it off
                 dropdown.ZIndex = 10
                 dropdown.Parent = dropdownFrame
                 Instance.new("UICorner", dropdown).CornerRadius = UDim.new(0, 10)
 
+                local headerSheen = Instance.new("Frame")
+                headerSheen.Size = UDim2.new(1, 0, 0.55, 0)
+                headerSheen.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                headerSheen.BackgroundTransparency = 0.78
+                headerSheen.BorderSizePixel = 0
+                headerSheen.ZIndex = 10
+                headerSheen.Parent = dropdown
+                Instance.new("UICorner", headerSheen).CornerRadius = UDim.new(0, 10)
+                local headerSheenGradient = Instance.new("UIGradient")
+                headerSheenGradient.Rotation = 90
+                headerSheenGradient.Transparency = NumberSequence.new{
+                    NumberSequenceKeypoint.new(0, 0),
+                    NumberSequenceKeypoint.new(1, 1),
+                }
+                headerSheenGradient.Parent = headerSheen
+
                 local headerStroke = Instance.new("UIStroke")
-                headerStroke.Color = base
-                headerStroke.Thickness = 1
-                headerStroke.Transparency = 0.4
+                headerStroke.Color = Lighten(base, 0.55)
+                headerStroke.Thickness = 1.25
+                headerStroke.Transparency = 0.45
                 headerStroke.Parent = dropdown
 
                 local dropdownTextShadow = Instance.new("TextLabel")
@@ -1397,10 +1435,22 @@ function library:AddWindow(title, options)
                 indicator.ZIndex = 12
                 indicator.Parent = dropdown
 
+                dropdown.MouseEnter:Connect(function()
+                    TweenService:Create(headerStroke, TweenInfo.new(0.15), {Transparency = 0.1, Thickness = 1.75}):Play()
+                    TweenService:Create(dropdown, TweenInfo.new(0.15), {BackgroundTransparency = 0.3}):Play()
+                end)
+                dropdown.MouseLeave:Connect(function()
+                    TweenService:Create(headerStroke, TweenInfo.new(0.15), {Transparency = 0.45, Thickness = 1.25}):Play()
+                    TweenService:Create(dropdown, TweenInfo.new(0.15), {BackgroundTransparency = 0.45}):Play()
+                end)
+
+                -- Frosted options panel: translucent dark-tinted glass instead
+                -- of the old flat dark-purple overlay.
                 local box = Instance.new("Frame")
                 box.Size = UDim2.new(1, 0, 0, 0)
                 box.Position = UDim2.new(0, 0, 1, 8)
-                box.BackgroundColor3 = Darken(base, 0.65)
+                box.BackgroundColor3 = Darken(base, 0.35)
+                box.BackgroundTransparency = 0.25
                 box.BorderSizePixel = 0
                 box.ClipsDescendants = true
                 box.ZIndex = 50
@@ -1408,9 +1458,9 @@ function library:AddWindow(title, options)
                 Instance.new("UICorner", box).CornerRadius = UDim.new(0, 10)
 
                 local boxStroke = Instance.new("UIStroke")
-                boxStroke.Color = base
-                boxStroke.Thickness = 1
-                boxStroke.Transparency = 0.3
+                boxStroke.Color = Lighten(base, 0.4)
+                boxStroke.Thickness = 1.25
+                boxStroke.Transparency = 0.35
                 boxStroke.Parent = box
 
                 local objects = Instance.new("ScrollingFrame")
@@ -1455,7 +1505,8 @@ function library:AddWindow(title, options)
 
                     local object = Instance.new("TextButton")
                     object.Size = UDim2.new(1, 0, 0, 34)
-                    object.BackgroundColor3 = Darken(base, 0.5)
+                    object.BackgroundColor3 = Lighten(base, 0.05)
+                    object.BackgroundTransparency = 0.75
                     object.BorderSizePixel = 0
                     object.AutoButtonColor = false
                     object.Text = ""
@@ -1487,12 +1538,12 @@ function library:AddWindow(title, options)
 
                     object.MouseEnter:Connect(function()
                         if object ~= selectedObject then
-                            TweenService:Create(object, TweenInfo.new(0.12), {BackgroundColor3 = Darken(base, 0.3)}):Play()
+                            TweenService:Create(object, TweenInfo.new(0.12), {BackgroundTransparency = 0.55}):Play()
                         end
                     end)
                     object.MouseLeave:Connect(function()
                         if object ~= selectedObject then
-                            TweenService:Create(object, TweenInfo.new(0.12), {BackgroundColor3 = Darken(base, 0.5)}):Play()
+                            TweenService:Create(object, TweenInfo.new(0.12), {BackgroundTransparency = 0.75}):Play()
                         end
                     end)
 
@@ -1509,11 +1560,11 @@ function library:AddWindow(title, options)
                         if dropdown_open then
                             if selectedObject and selectedObject ~= object then
                                 local prevBar = selectedObject:FindFirstChild("Frame")
-                                TweenService:Create(selectedObject, TweenInfo.new(0.12), {BackgroundColor3 = Darken(base, 0.5)}):Play()
+                                TweenService:Create(selectedObject, TweenInfo.new(0.12), {BackgroundTransparency = 0.75}):Play()
                                 if prevBar then TweenService:Create(prevBar, TweenInfo.new(0.12), {BackgroundTransparency = 1}):Play() end
                             end
                             selectedObject = object
-                            TweenService:Create(object, TweenInfo.new(0.12), {BackgroundColor3 = Darken(base, 0.15)}):Play()
+                            TweenService:Create(object, TweenInfo.new(0.12), {BackgroundTransparency = 0.4}):Play()
                             TweenService:Create(selectBar, TweenInfo.new(0.12), {BackgroundTransparency = 0}):Play()
 
                             dropdownTextLabel.Text = n
