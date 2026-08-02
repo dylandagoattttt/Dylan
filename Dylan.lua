@@ -145,7 +145,6 @@ local function Darken(color, amt)
     return color:Lerp(Color3.new(0, 0, 0), amt)
 end
 
--- Toast notification system
 local activeToasts = 0
 function library:Notify(title, message, duration)
     title = tostring(title or "Notice")
@@ -400,7 +399,7 @@ function library:AddWindow(title, options)
     TitleLabel.TextStrokeTransparency = 0.3
     TitleLabel.Parent = titleContainer
 
-    -- CLOSE BUTTON - ORIGINAL POSITION (top-right of main panel, no offset)
+    -- CLOSE BUTTON - ORIGINAL POSITION
     local CloseButton = Instance.new("ImageButton")
     CloseButton.Name = "CloseButton"
     CloseButton.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -520,11 +519,11 @@ function library:AddWindow(title, options)
     Tabs.BorderSizePixel = 0
     Tabs.Parent = MainPanel.Frame
 
-    -- TabButtons with drop shadow
+    -- TabButtons with drop shadow - moved scrollbar to the right
     local TabButtonsShadow = Instance.new("Frame")
     TabButtonsShadow.Name = "TabButtonsShadow"
-    TabButtonsShadow.Size = UDim2.new(1, -10, 1, -20)
-    TabButtonsShadow.Position = UDim2.new(0, 5, 0, 10)
+    TabButtonsShadow.Size = UDim2.new(1, -3, 1, -20)  -- reduced right margin (was -10)
+    TabButtonsShadow.Position = UDim2.new(0, 3, 0, 10) -- adjusted offset
     TabButtonsShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     TabButtonsShadow.BackgroundTransparency = 0.5
     TabButtonsShadow.BorderSizePixel = 0
@@ -534,8 +533,8 @@ function library:AddWindow(title, options)
 
     local TabButtons = Instance.new("ScrollingFrame")
     TabButtons.Name = "TabButtons"
-    TabButtons.Size = UDim2.new(1, -10, 1, -20)
-    TabButtons.Position = UDim2.new(0, 5, 0, 10)
+    TabButtons.Size = UDim2.new(1, -3, 1, -20)  -- reduced right margin (was -10)
+    TabButtons.Position = UDim2.new(0, 3, 0, 10) -- adjusted offset
     TabButtons.BackgroundTransparency = 1
     TabButtons.BorderSizePixel = 0
     TabButtons.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -626,7 +625,7 @@ function library:AddWindow(title, options)
                 tabContainer.CanvasSize = UDim2.new(0, 0, 0, tabLayout.AbsoluteContentSize.Y + 10)
             end)
 
-            -- Gold selection highlight (NO STROKE - just the tint and gold text)
+            -- Gold selection highlight (no stroke)
             local GOLD = Color3.fromRGB(255, 200, 60)
 
             local goldTint = Instance.new("Frame")
@@ -639,7 +638,14 @@ function library:AddWindow(title, options)
             goldTint.Parent = new_button
             Instance.new("UICorner", goldTint).CornerRadius = UDim.new(0, 10)
 
-            -- NO STROKE - removed completely
+            -- We keep the stroke but never show it – just set transparency to 1
+            -- (effectively removed)
+            local goldStroke = Instance.new("UIStroke")
+            goldStroke.Name = "GoldStroke"
+            goldStroke.Color = GOLD
+            goldStroke.Thickness = 2
+            goldStroke.Transparency = 1  -- always hidden
+            goldStroke.Parent = new_button
 
             local function show()
                 if dropdown_open then return end
@@ -648,6 +654,7 @@ function library:AddWindow(title, options)
                         v.ImageTransparency = 0.3
                         local tint = v:FindFirstChild("GoldTint")
                         if tint then tint.BackgroundTransparency = 1 end
+                        -- No stroke adjustment needed
                         local container = v:FindFirstChild("LabelContainer")
                         if container then
                             local lbl = container:FindFirstChild("ButtonLabel")
@@ -662,6 +669,7 @@ function library:AddWindow(title, options)
                 end
                 new_button.ImageTransparency = 0
                 TweenService:Create(goldTint, TweenInfo.new(0.15), {BackgroundTransparency = 0.82}):Play()
+                -- goldStroke stays hidden (transparency = 1)
                 buttonLabel.TextColor3 = GOLD
                 tabContainer.Visible = true
                 task.delay(0.05, function()
@@ -694,6 +702,7 @@ function library:AddWindow(title, options)
                 return label
             end
 
+            -- Lighter secondary text, meant to sit under a bold AddLabel/AddButton
             function tab_data:AddDescription(desc_text)
                 desc_text = tostring(desc_text or "")
                 local desc = Instance.new("TextLabel")
@@ -711,6 +720,7 @@ function library:AddWindow(title, options)
                 return desc
             end
 
+            -- Thin gradient rule to visually separate groups of settings inside
             function tab_data:AddDivider()
                 local base = options.main_color or Color3.fromRGB(150, 80, 255)
                 local dividerFrame = Instance.new("Frame")
@@ -737,7 +747,6 @@ function library:AddWindow(title, options)
                 return dividerFrame
             end
 
-            -- UPDATED: AddButton with proper right padding
             function tab_data:AddButton(button_text, callback)
                 button_text = tostring(button_text or "New Button")
                 callback = typeof(callback) == "function" and callback or function() end
@@ -964,7 +973,6 @@ function library:AddWindow(title, options)
                 return switch_data, switchFrame
             end
 
-            -- UPDATED: AddTextBox with proper right padding
             function tab_data:AddTextBox(textbox_text, callback, textbox_options)
                 textbox_text = tostring(textbox_text or "New TextBox")
                 callback = typeof(callback) == "function" and callback or function() end
@@ -1002,7 +1010,6 @@ function library:AddWindow(title, options)
                 return textbox
             end
 
-            -- UPDATED: AddSlider with proper right padding and wider track
             function tab_data:AddSlider(slider_text, callback, slider_options)
                 local slider_data = {}
                 slider_text = tostring(slider_text or "New Slider")
@@ -1052,9 +1059,8 @@ function library:AddWindow(title, options)
                 title.TextStrokeTransparency = 0.3
                 title.Parent = titleContainer
 
-                -- Wider slider track (was 1, -55, now 1, -65 to give more room)
                 local sliderBg = Instance.new("Frame")
-                sliderBg.Size = UDim2.new(1, -65, 0, 15)   -- extra right padding
+                sliderBg.Size = UDim2.new(1, -55, 0, 15)
                 sliderBg.Position = UDim2.new(0, 0, 0, 20)
                 sliderBg.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                 sliderBg.BackgroundTransparency = 0.8
@@ -1078,7 +1084,7 @@ function library:AddWindow(title, options)
 
                 local valueContainer = Instance.new("Frame")
                 valueContainer.Size = UDim2.new(0, 45, 0, 20)
-                valueContainer.Position = UDim2.new(1, -55, 0, 17)   -- adjusted position
+                valueContainer.Position = UDim2.new(1, -50, 0, 17)
                 valueContainer.BackgroundTransparency = 1
                 valueContainer.Parent = slider
 
@@ -1308,7 +1314,6 @@ function library:AddWindow(title, options)
                 return keybind_data, keybindFrame
             end
 
-            -- UPDATED: AddDropdown with proper right padding
             function tab_data:AddDropdown(dropdown_name, callback)
                 local dropdown_data = {}
                 dropdown_name = tostring(dropdown_name or "New Dropdown")
