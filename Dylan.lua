@@ -138,8 +138,6 @@ end
 local windows = 0
 local library = {}
 
--- Color helpers used to derive hover/gradient/accent shades from a single
--- theme color instead of hardcoding extra RGB values everywhere.
 local function Lighten(color, amt)
     return color:Lerp(Color3.new(1, 1, 1), amt)
 end
@@ -147,8 +145,7 @@ local function Darken(color, amt)
     return color:Lerp(Color3.new(0, 0, 0), amt)
 end
 
--- Toast notification system (library:Notify). Stacks multiple toasts in the
--- top-right corner and cleans itself up after `duration` seconds.
+-- Toast notification system
 local activeToasts = 0
 function library:Notify(title, message, duration)
     title = tostring(title or "Notice")
@@ -206,7 +203,7 @@ function library:Notify(title, message, duration)
     messageLabel.Size = UDim2.new(1, -24, 0, 28)
     messageLabel.Position = UDim2.new(0, 16, 0, 32)
     messageLabel.BackgroundTransparency = 1
-    messageLabel.Font = Enum.Font.Gotham -- lighter secondary font, pairs with the bold title
+    messageLabel.Font = Enum.Font.Gotham
     messageLabel.Text = message
     messageLabel.TextColor3 = Color3.fromRGB(220, 210, 235)
     messageLabel.TextSize = 13
@@ -337,8 +334,8 @@ function library:AddWindow(title, options)
     local HeaderShadow = Instance.new("Frame")
     HeaderShadow.Name = "HeaderShadow"
     HeaderShadow.AnchorPoint = Vector2.new(0.5, 0)
-    HeaderShadow.Position = UDim2.new(0.5, 2, -0.06, 4)      -- higher (was -0.07)
-    HeaderShadow.Size = UDim2.fromScale(0.43, 0.16)           -- match main width
+    HeaderShadow.Position = UDim2.new(0.5, 2, -0.06, 4)
+    HeaderShadow.Size = UDim2.fromScale(0.43, 0.16)
     HeaderShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     HeaderShadow.BackgroundTransparency = 0.4
     HeaderShadow.BorderSizePixel = 0
@@ -349,8 +346,8 @@ function library:AddWindow(title, options)
     local Header = Instance.new("Frame")
     Header.Name = "Header"
     Header.AnchorPoint = Vector2.new(0.5, 0)
-    Header.Position = UDim2.new(0.5, 0, -0.06, 0)            -- higher (was -0.07)
-    Header.Size = UDim2.fromScale(0.43, 0.16)                 -- match main width
+    Header.Position = UDim2.new(0.5, 0, -0.06, 0)
+    Header.Size = UDim2.fromScale(0.43, 0.16)
     Header.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Header.BackgroundTransparency = 0.15
     Header.BorderSizePixel = 0
@@ -407,7 +404,7 @@ function library:AddWindow(title, options)
     local CloseButton = Instance.new("ImageButton")
     CloseButton.Name = "CloseButton"
     CloseButton.AnchorPoint = Vector2.new(0.5, 0.5)
-    CloseButton.Position = UDim2.new(1, 0, 0, 0)   -- original position
+    CloseButton.Position = UDim2.new(1, 0, 0, 0)
     CloseButton.Size = UDim2.fromOffset(56, 56)
     CloseButton.BackgroundTransparency = 1
     CloseButton.BorderSizePixel = 0
@@ -629,9 +626,7 @@ function library:AddWindow(title, options)
                 tabContainer.CanvasSize = UDim2.new(0, 0, 0, tabLayout.AbsoluteContentSize.Y + 10)
             end)
 
-            -- Gold selection highlight (replaces the old growing side-bar):
-            -- a warm gold tint behind the label plus a glowing gold outline,
-            -- both invisible until the tab is the active one.
+            -- Gold selection highlight (NO STROKE - just the tint and gold text)
             local GOLD = Color3.fromRGB(255, 200, 60)
 
             local goldTint = Instance.new("Frame")
@@ -644,12 +639,7 @@ function library:AddWindow(title, options)
             goldTint.Parent = new_button
             Instance.new("UICorner", goldTint).CornerRadius = UDim.new(0, 10)
 
-            local goldStroke = Instance.new("UIStroke")
-            goldStroke.Name = "GoldStroke"
-            goldStroke.Color = GOLD
-            goldStroke.Thickness = 2
-            goldStroke.Transparency = 1
-            goldStroke.Parent = new_button
+            -- NO STROKE - removed completely
 
             local function show()
                 if dropdown_open then return end
@@ -658,8 +648,6 @@ function library:AddWindow(title, options)
                         v.ImageTransparency = 0.3
                         local tint = v:FindFirstChild("GoldTint")
                         if tint then tint.BackgroundTransparency = 1 end
-                        local strokeReset = v:FindFirstChild("GoldStroke")
-                        if strokeReset then strokeReset.Transparency = 1 end
                         local container = v:FindFirstChild("LabelContainer")
                         if container then
                             local lbl = container:FindFirstChild("ButtonLabel")
@@ -674,7 +662,6 @@ function library:AddWindow(title, options)
                 end
                 new_button.ImageTransparency = 0
                 TweenService:Create(goldTint, TweenInfo.new(0.15), {BackgroundTransparency = 0.82}):Play()
-                TweenService:Create(goldStroke, TweenInfo.new(0.15), {Transparency = 0.2}):Play()
                 buttonLabel.TextColor3 = GOLD
                 tabContainer.Visible = true
                 task.delay(0.05, function()
@@ -707,8 +694,6 @@ function library:AddWindow(title, options)
                 return label
             end
 
-            -- Lighter secondary text, meant to sit under a bold AddLabel/AddButton
-            -- for hierarchy (e.g. a one-line explanation of what a setting does).
             function tab_data:AddDescription(desc_text)
                 desc_text = tostring(desc_text or "")
                 local desc = Instance.new("TextLabel")
@@ -726,8 +711,6 @@ function library:AddWindow(title, options)
                 return desc
             end
 
-            -- Thin gradient rule to visually separate groups of settings inside
-            -- a tab (fades from transparent -> accent color -> transparent).
             function tab_data:AddDivider()
                 local base = options.main_color or Color3.fromRGB(150, 80, 255)
                 local dividerFrame = Instance.new("Frame")
@@ -754,6 +737,7 @@ function library:AddWindow(title, options)
                 return dividerFrame
             end
 
+            -- UPDATED: AddButton with proper right padding
             function tab_data:AddButton(button_text, callback)
                 button_text = tostring(button_text or "New Button")
                 callback = typeof(callback) == "function" and callback or function() end
@@ -766,8 +750,6 @@ function library:AddWindow(title, options)
                 buttonFrame.BorderSizePixel = 0
                 buttonFrame.Parent = tabContainer
 
-                -- Soft ambient shadow beneath the glass so it still reads as
-                -- a raised, tappable surface rather than a flat sticker.
                 local shadow = Instance.new("Frame")
                 shadow.Size = UDim2.new(1, 0, 0, 35)
                 shadow.Position = UDim2.new(0, 0, 0, 5)
@@ -777,23 +759,17 @@ function library:AddWindow(title, options)
                 shadow.Parent = buttonFrame
                 Instance.new("UICorner", shadow).CornerRadius = UDim.new(0, 12)
 
-                -- The "glass" pane itself: a tinted, translucent panel (no solid
-                -- fill) so whatever's behind it subtly shows through.
                 local button = Instance.new("TextButton")
                 button.Size = UDim2.new(1, 0, 0, 35)
                 button.BackgroundColor3 = Lighten(base, 0.1)
                 button.BackgroundTransparency = 0.45
                 button.BorderSizePixel = 0
                 button.AutoButtonColor = false
-                button.Text = "" -- drawn via sibling labels below, avoids the
-                                  -- shadow-text ghosting bug from earlier
+                button.Text = ""
                 button.ClipsDescendants = true
                 button.Parent = buttonFrame
                 Instance.new("UICorner", button).CornerRadius = UDim.new(0, 12)
 
-                -- Glass "sheen": a bright highlight band across the top portion
-                -- of the pane, faded out toward the bottom, like light catching
-                -- the top edge of frosted glass.
                 local sheen = Instance.new("Frame")
                 sheen.Size = UDim2.new(1, 0, 0.55, 0)
                 sheen.Position = UDim2.new(0, 0, 0, 0)
@@ -811,8 +787,6 @@ function library:AddWindow(title, options)
                 }
                 sheenGradient.Parent = sheen
 
-                -- Soft glowing border, always faintly visible (the "frosted
-                -- edge"), brightening further on hover.
                 local glowStroke = Instance.new("UIStroke")
                 glowStroke.Color = Lighten(base, 0.55)
                 glowStroke.Thickness = 1.25
@@ -938,9 +912,7 @@ function library:AddWindow(title, options)
                 toggleButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
                 toggleButton.BorderSizePixel = 0
                 toggleButton.AutoButtonColor = false
-                toggleButton.Text = "" -- drawn via sibling labels below instead, so
-                                        -- the button itself never competes with its
-                                        -- own shadow-text child for the same pixels
+                toggleButton.Text = ""
                 toggleButton.Parent = toggleContainer
                 Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(1, 0)
 
@@ -992,6 +964,7 @@ function library:AddWindow(title, options)
                 return switch_data, switchFrame
             end
 
+            -- UPDATED: AddTextBox with proper right padding
             function tab_data:AddTextBox(textbox_text, callback, textbox_options)
                 textbox_text = tostring(textbox_text or "New TextBox")
                 callback = typeof(callback) == "function" and callback or function() end
@@ -1029,6 +1002,7 @@ function library:AddWindow(title, options)
                 return textbox
             end
 
+            -- UPDATED: AddSlider with proper right padding and wider track
             function tab_data:AddSlider(slider_text, callback, slider_options)
                 local slider_data = {}
                 slider_text = tostring(slider_text or "New Slider")
@@ -1078,8 +1052,9 @@ function library:AddWindow(title, options)
                 title.TextStrokeTransparency = 0.3
                 title.Parent = titleContainer
 
+                -- Wider slider track (was 1, -55, now 1, -65 to give more room)
                 local sliderBg = Instance.new("Frame")
-                sliderBg.Size = UDim2.new(1, -55, 0, 15)
+                sliderBg.Size = UDim2.new(1, -65, 0, 15)   -- extra right padding
                 sliderBg.Position = UDim2.new(0, 0, 0, 20)
                 sliderBg.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                 sliderBg.BackgroundTransparency = 0.8
@@ -1103,7 +1078,7 @@ function library:AddWindow(title, options)
 
                 local valueContainer = Instance.new("Frame")
                 valueContainer.Size = UDim2.new(0, 45, 0, 20)
-                valueContainer.Position = UDim2.new(1, -50, 0, 17)
+                valueContainer.Position = UDim2.new(1, -55, 0, 17)   -- adjusted position
                 valueContainer.BackgroundTransparency = 1
                 valueContainer.Parent = slider
 
@@ -1259,7 +1234,7 @@ function library:AddWindow(title, options)
                 input.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                 input.BackgroundTransparency = 0.7
                 input.BorderSizePixel = 0
-                input.Text = "" -- drawn via sibling labels below
+                input.Text = ""
                 input.Parent = keybindFrame
                 Instance.new("UICorner", input).CornerRadius = UDim.new(0, 8)
 
@@ -1333,6 +1308,7 @@ function library:AddWindow(title, options)
                 return keybind_data, keybindFrame
             end
 
+            -- UPDATED: AddDropdown with proper right padding
             function tab_data:AddDropdown(dropdown_name, callback)
                 local dropdown_data = {}
                 dropdown_name = tostring(dropdown_name or "New Dropdown")
@@ -1356,18 +1332,14 @@ function library:AddWindow(title, options)
                 headerShadow.Parent = dropdownFrame
                 Instance.new("UICorner", headerShadow).CornerRadius = UDim.new(0, 10)
 
-                -- Glass header pane (translucent tint, not a flat fill)
                 local dropdown = Instance.new("TextButton")
                 dropdown.Size = UDim2.new(1, 0, 0, 35)
                 dropdown.BackgroundColor3 = Lighten(base, 0.1)
                 dropdown.BackgroundTransparency = 0.45
                 dropdown.BorderSizePixel = 0
                 dropdown.AutoButtonColor = false
-                dropdown.Text = "" -- drawn via sibling labels below
-                dropdown.ClipsDescendants = false -- the options `box` below is a
-                                                    -- child that extends past this
-                                                    -- frame's own bounds; clipping
-                                                    -- here would cut it off
+                dropdown.Text = ""
+                dropdown.ClipsDescendants = false
                 dropdown.ZIndex = 10
                 dropdown.Parent = dropdownFrame
                 Instance.new("UICorner", dropdown).CornerRadius = UDim.new(0, 10)
@@ -1444,8 +1416,6 @@ function library:AddWindow(title, options)
                     TweenService:Create(dropdown, TweenInfo.new(0.15), {BackgroundTransparency = 0.45}):Play()
                 end)
 
-                -- Frosted options panel: translucent dark-tinted glass instead
-                -- of the old flat dark-purple overlay.
                 local box = Instance.new("Frame")
                 box.Size = UDim2.new(1, 0, 0, 0)
                 box.Position = UDim2.new(0, 0, 1, 8)
@@ -1517,7 +1487,7 @@ function library:AddWindow(title, options)
                     selectBar.Size = UDim2.new(0, 3, 1, -8)
                     selectBar.Position = UDim2.new(0, 0, 0, 4)
                     selectBar.BackgroundColor3 = Lighten(base, 0.4)
-                    selectBar.BackgroundTransparency = 1 -- only visible when selected
+                    selectBar.BackgroundTransparency = 1
                     selectBar.BorderSizePixel = 0
                     selectBar.ZIndex = 53
                     selectBar.Parent = object
@@ -1849,7 +1819,7 @@ function library:AddWindow(title, options)
                 button.Size = UDim2.new(1, 0, 0, 35)
                 button.BackgroundTransparency = 1
                 button.BorderSizePixel = 0
-                button.Text = "" -- drawn via sibling labels below
+                button.Text = ""
                 button.Parent = folder
 
                 local offX, offY = 2, 2
