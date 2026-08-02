@@ -112,45 +112,6 @@ local function gMouse()
     return Vector2.new(UIS:GetMouseLocation().X + 1, UIS:GetMouseLocation().Y - 35)
 end
 
--- Helper to create text with drop shadow
-local function CreateTextWithShadow(parent, text, size, font, color, shadowColor, offsetX, offsetY)
-    font = font or Enum.Font.GothamBlack
-    color = color or Color3.fromRGB(255, 255, 255)
-    shadowColor = shadowColor or Color3.fromRGB(20, 20, 20)
-    offsetX = offsetX or 2
-    offsetY = offsetY or 2
-
-    -- Shadow label
-    local shadowLabel = Instance.new("TextLabel")
-    shadowLabel.Size = size
-    shadowLabel.Position = UDim2.new(0, offsetX, 0, offsetY)
-    shadowLabel.BackgroundTransparency = 1
-    shadowLabel.Font = font
-    shadowLabel.Text = text
-    shadowLabel.TextColor3 = shadowColor
-    shadowLabel.TextSize = 14
-    shadowLabel.TextScaled = false
-    shadowLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-    shadowLabel.TextStrokeTransparency = 0.5
-    shadowLabel.Parent = parent
-
-    -- Main label (on top)
-    local mainLabel = Instance.new("TextLabel")
-    mainLabel.Size = size
-    mainLabel.Position = UDim2.new(0, 0, 0, 0)
-    mainLabel.BackgroundTransparency = 1
-    mainLabel.Font = font
-    mainLabel.Text = text
-    mainLabel.TextColor3 = color
-    mainLabel.TextSize = 14
-    mainLabel.TextScaled = false
-    mainLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-    mainLabel.TextStrokeTransparency = 0.3
-    mainLabel.Parent = parent
-
-    return mainLabel, shadowLabel
-end
-
 local function ripple(button, x, y)
     task.spawn(function()
         button.ClipsDescendants = true
@@ -282,12 +243,12 @@ function library:AddWindow(title, options)
     local SideSize = UDim2.fromScale(SideWidth, SideHeight)
     local SidePanel = CreatePanel("Side_" .. windows, SidePos, SideSize, 20, 1, windowsFrame)
 
-    -- HEADER - TALLER & NARROWER (exact same position)
+    -- HEADER - TALLER & NARROWER, POSITIONED HIGHER
     local HeaderShadow = Instance.new("Frame")
     HeaderShadow.Name = "HeaderShadow"
     HeaderShadow.AnchorPoint = Vector2.new(0.5, 0)
-    HeaderShadow.Position = UDim2.new(0.5, 2, -0.04, 4)
-    HeaderShadow.Size = UDim2.fromScale(0.40, 0.12)  -- narrower (0.40) and taller (0.12)
+    HeaderShadow.Position = UDim2.new(0.5, 2, -0.06, 4)  -- higher Y offset
+    HeaderShadow.Size = UDim2.fromScale(0.40, 0.14)       -- taller (0.14)
     HeaderShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     HeaderShadow.BackgroundTransparency = 0.4
     HeaderShadow.BorderSizePixel = 0
@@ -298,8 +259,8 @@ function library:AddWindow(title, options)
     local Header = Instance.new("Frame")
     Header.Name = "Header"
     Header.AnchorPoint = Vector2.new(0.5, 0)
-    Header.Position = UDim2.new(0.5, 0, -0.04, 0)
-    Header.Size = UDim2.fromScale(0.40, 0.12)       -- narrower (0.40) and taller (0.12)
+    Header.Position = UDim2.new(0.5, 0, -0.06, 0)          -- higher Y offset
+    Header.Size = UDim2.fromScale(0.40, 0.14)               -- taller (0.14)
     Header.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Header.BackgroundTransparency = 0.15
     Header.BorderSizePixel = 0
@@ -473,6 +434,18 @@ function library:AddWindow(title, options)
     Tabs.BorderSizePixel = 0
     Tabs.Parent = MainPanel.Frame
 
+    -- TabButtons with drop shadow
+    local TabButtonsShadow = Instance.new("Frame")
+    TabButtonsShadow.Name = "TabButtonsShadow"
+    TabButtonsShadow.Size = UDim2.new(1, -10, 1, -20)
+    TabButtonsShadow.Position = UDim2.new(0, 5, 0, 10)
+    TabButtonsShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    TabButtonsShadow.BackgroundTransparency = 0.5
+    TabButtonsShadow.BorderSizePixel = 0
+    TabButtonsShadow.ZIndex = 0
+    TabButtonsShadow.Parent = SidePanel.Frame
+    Instance.new("UICorner", TabButtonsShadow).CornerRadius = UDim.new(0, 10)
+
     local TabButtons = Instance.new("ScrollingFrame")
     TabButtons.Name = "TabButtons"
     TabButtons.Size = UDim2.new(1, -10, 1, -20)
@@ -481,6 +454,7 @@ function library:AddWindow(title, options)
     TabButtons.BorderSizePixel = 0
     TabButtons.CanvasSize = UDim2.new(0, 0, 0, 0)
     TabButtons.ScrollBarThickness = 4
+    TabButtons.ZIndex = 1
     TabButtons.Parent = SidePanel.Frame
 
     local TabButtonsList = Instance.new("UIListLayout")
@@ -649,7 +623,6 @@ function library:AddWindow(title, options)
                 return label
             end
 
-            -- UPDATED: AddButton with drop shadow, Gotham Black text
             function tab_data:AddButton(button_text, callback)
                 button_text = tostring(button_text or "New Button")
                 callback = typeof(callback) == "function" and callback or function() end
@@ -683,8 +656,7 @@ function library:AddWindow(title, options)
                 button.Parent = buttonFrame
                 Instance.new("UICorner", button).CornerRadius = UDim.new(0, 10)
 
-                -- Text shadow via UIStroke is already there, but we also want a drop shadow effect
-                -- Add a small shadow label behind the text
+                -- Text shadow
                 local textShadow = Instance.new("TextLabel")
                 textShadow.Size = UDim2.new(1, 0, 1, 0)
                 textShadow.Position = UDim2.new(0, 2, 0, 2)
@@ -716,7 +688,6 @@ function library:AddWindow(title, options)
                 return button
             end
 
-            -- UPDATED: AddSwitch with red OFF / green ON, Gotham Black text
             function tab_data:AddSwitch(switch_text, callback)
                 local switch_data = {}
                 switch_text = tostring(switch_text or "New Switch")
@@ -867,7 +838,6 @@ function library:AddWindow(title, options)
                 return textbox
             end
 
-            -- UPDATED: AddSlider with Gotham Black text
             function tab_data:AddSlider(slider_text, callback, slider_options)
                 local slider_data = {}
                 slider_text = tostring(slider_text or "New Slider")
@@ -1161,6 +1131,7 @@ function library:AddWindow(title, options)
                 return keybind_data, keybindFrame
             end
 
+            -- FIXED: AddDropdown - items now visible (removed extra text shadow labels)
             function tab_data:AddDropdown(dropdown_name, callback)
                 local dropdown_data = {}
                 dropdown_name = tostring(dropdown_name or "New Dropdown")
@@ -1282,22 +1253,7 @@ function library:AddWindow(title, options)
                     object.ZIndex = 52
                     object.Parent = objects
 
-                    -- Object text shadow
-                    local objTextShadow = Instance.new("TextLabel")
-                    objTextShadow.Size = UDim2.new(1, 0, 1, 0)
-                    objTextShadow.Position = UDim2.new(0, 1, 0, 1)
-                    objTextShadow.BackgroundTransparency = 1
-                    objTextShadow.Font = Enum.Font.GothamBlack
-                    objTextShadow.Text = n
-                    objTextShadow.TextColor3 = Color3.fromRGB(20, 20, 20)
-                    objTextShadow.TextSize = 14
-                    objTextShadow.TextXAlignment = Enum.TextXAlignment.Left
-                    objTextShadow.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-                    objTextShadow.TextStrokeTransparency = 0.5
-                    objTextShadow.Parent = object
-                    objTextShadow.ZIndex = 0
-
-                    object.ZIndex = 1
+                    -- No extra shadow labels, just use TextStroke
 
                     object.MouseEnter:Connect(function()
                         object.BackgroundColor3 = Color3.fromRGB(90, 50, 160)
