@@ -6,24 +6,18 @@ local ui_options = {
 }
 
 -- ============================================================
--- ALL ASSETS USING THE ROBLOX THUMBNAIL API (100% reliable)
+-- ALL ASSETS (native decal format)
 -- ============================================================
 local ASSETS = {
-    -- Use this format for ANY asset ID (Decal, Image, Texture, etc.)
-    BackgroundTexture = "https://www.roblox.com/asset-thumbnail/image?assetId=16736132788&width=420&height=420&format=png",
-    RippleCircle      = "https://www.roblox.com/asset-thumbnail/image?assetId=266543268&width=420&height=420&format=png",
-    
-    CloseButton       = "https://www.roblox.com/asset-thumbnail/image?assetId=114840795551292&width=678&height=810&format=png",
-    MinimizedIcon     = "https://www.roblox.com/asset-thumbnail/image?assetId=108067574147759&width=678&height=810&format=png",
-    
-    -- Your banner (verify this asset ID actually exists!)
-    Banner            = "https://www.roblox.com/asset-thumbnail/image?assetId=119214568385242&width=1920&height=400&format=png",
-    
-    -- Color picker assets
-    ColorPickerPalette    = "https://www.roblox.com/asset-thumbnail/image?assetId=698052001&width=420&height=420&format=png",
-    ColorPickerIndicator  = "https://www.roblox.com/asset-thumbnail/image?assetId=2851926732&width=420&height=420&format=png",
-    ColorPickerSample     = "https://www.roblox.com/asset-thumbnail/image?assetId=2851929490&width=420&height=420&format=png",
-    ColorPickerSaturation = "https://www.roblox.com/asset-thumbnail/image?assetId=3641079629&width=420&height=420&format=png",
+    BackgroundTexture = "rbxassetid://16736132788",
+    RippleCircle      = "rbxassetid://266543268",
+    CloseButton       = "rbxassetid://114840795551292",
+    MinimizedIcon     = "rbxassetid://108067574147759",
+    Banner            = "rbxassetid://119214568385242",  -- replace with your actual decal ID
+    ColorPickerPalette    = "rbxassetid://698052001",
+    ColorPickerIndicator  = "rbxassetid://2851926732",
+    ColorPickerSample     = "rbxassetid://2851929490",
+    ColorPickerSaturation = "rbxassetid://3641079629",
 }
 -- ============================================================
 
@@ -160,8 +154,6 @@ end
 local windows = 0
 local library = {}
 
--- Color helpers used to derive hover/gradient/accent shades from a single
--- theme color instead of hardcoding extra RGB values everywhere.
 local function Lighten(color, amt)
     return color:Lerp(Color3.new(1, 1, 1), amt)
 end
@@ -169,8 +161,6 @@ local function Darken(color, amt)
     return color:Lerp(Color3.new(0, 0, 0), amt)
 end
 
--- Toast notification system (library:Notify). Stacks multiple toasts in the
--- top-right corner and cleans itself up after `duration` seconds.
 local activeToasts = 0
 function library:Notify(title, message, duration)
     title = tostring(title or "Notice")
@@ -272,7 +262,6 @@ function library:FormatWindows()
     format_windows()
 end
 
--- Helper function to create panels with new background
 local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent, accentColor)
     accentColor = accentColor or ui_options.main_color or Color3.fromRGB(150, 80, 255)
     local panel = {}
@@ -337,35 +326,17 @@ function library:AddWindow(title, options)
     options = (typeof(options) == "table") and options or ui_options
     options.tween_time = 0.1
 
-    -- LAYOUT PARAMETERS (made bigger per request)
-    local MainWidth = 0.75   -- wider
-    local MainHeight = 0.95  -- taller
+    local MainWidth = 0.75
+    local MainHeight = 0.95
     local SidebarWidth = 0.24
 
-    -- Main panel (perfectly centered)
     local MainSize = UDim2.fromScale(MainWidth, MainHeight)
     local MainPos = UDim2.fromScale(0.5, 0.5)
     local MainPanel = CreatePanel("Main_" .. windows, MainPos, MainSize, 20, 1, windowsFrame, options.main_color)
 
     -- =====================================================
-    -- NEW TITLE (replaces the removed floating header pill)
+    -- CLOSE BUTTON (top-right)
     -- =====================================================
-    local MainTitle = Instance.new("TextLabel")
-    MainTitle.Name = "MainTitle"
-    MainTitle.Size = UDim2.new(0, 300, 0, 40)
-    MainTitle.Position = UDim2.new(0, 15, 0, 15)
-    MainTitle.BackgroundTransparency = 1
-    MainTitle.Font = Enum.Font.GothamBlack
-    MainTitle.Text = title
-    MainTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    MainTitle.TextSize = 28
-    MainTitle.TextXAlignment = Enum.TextXAlignment.Left
-    MainTitle.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-    MainTitle.TextStrokeTransparency = 0.2
-    MainTitle.ZIndex = 20
-    MainTitle.Parent = MainPanel.Frame
-
-    -- CLOSE BUTTON (top-right, stays exactly where it was)
     local CloseButton = Instance.new("ImageButton")
     CloseButton.Name = "CloseButton"
     CloseButton.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -386,7 +357,9 @@ function library:AddWindow(title, options)
         CloseButton:TweenSize(UDim2.fromOffset(56, 56), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
 
-    -- BANNER (clan image strip)
+    -- =====================================================
+    -- BANNER (full‑width strip at the top)
+    -- =====================================================
     local Banner = Instance.new("ImageLabel")
     Banner.Name = "Banner"
     Banner.Position = UDim2.fromScale(0, 0)
@@ -396,11 +369,11 @@ function library:AddWindow(title, options)
     Banner.BorderSizePixel = 0
     Banner.Image = tostring(options.banner_image or ASSETS.Banner)
     Banner.ScaleType = Enum.ScaleType.Crop
-    Banner.ZIndex = 1
+    Banner.ZIndex = 2   -- above the BackgroundImage (texture)
     Banner.Parent = MainPanel.Frame
     Instance.new("UICorner", Banner).CornerRadius = UDim.new(0, 20)
 
-    -- Mask the bottom corners of the banner square
+    -- Mask the bottom corners of the banner
     local BannerMask = Instance.new("Frame")
     BannerMask.Name = "BannerMask"
     BannerMask.AnchorPoint = Vector2.new(0, 1)
@@ -421,7 +394,7 @@ function library:AddWindow(title, options)
     BannerGradient.Color = ColorSequence.new(Color3.fromRGB(0, 0, 0))
     BannerGradient.Parent = Banner
 
-    -- SIDEBAR (merged into the main frame)
+    -- SIDEBAR
     local Sidebar = Instance.new("Frame")
     Sidebar.Name = "Sidebar"
     Sidebar.Position = UDim2.new(0, 0, 0, Banner.Size.Y.Offset)
@@ -596,7 +569,6 @@ function library:AddWindow(title, options)
         isMinimized = false
     end)
 
-    -- Store references
     local window_data = {}
     local Window = MainPanel.Frame
     local Tabs = Instance.new("Frame")
@@ -607,7 +579,6 @@ function library:AddWindow(title, options)
     Tabs.BorderSizePixel = 0
     Tabs.Parent = MainPanel.Frame
 
-    -- TabButtons
     local TabButtonsTop = ProfileDivider.Position.Y.Offset + 10
 
     local TabButtonsShadow = Instance.new("Frame")
@@ -642,7 +613,6 @@ function library:AddWindow(title, options)
             local tab_data = {}
             tab_name = tostring(tab_name or "New Tab")
 
-            -- Tab button with background image
             local new_button = Instance.new("ImageButton")
             new_button.Name = "TabButton_" .. tab_name
             new_button.Size = UDim2.new(1, 0, 0, 35)
@@ -654,7 +624,6 @@ function library:AddWindow(title, options)
             new_button.Parent = TabButtons
             Instance.new("UICorner", new_button).CornerRadius = UDim.new(0, 10)
 
-            -- Tab button label
             local buttonContainer = Instance.new("Frame")
             buttonContainer.Name = "LabelContainer"
             buttonContainer.Size = UDim2.new(1, 0, 1, 0)
@@ -691,7 +660,6 @@ function library:AddWindow(title, options)
 
             TabButtons.CanvasSize = UDim2.new(0, 0, 0, (#TabButtons:GetChildren() - 1) * 40)
 
-            -- Tab content container
             local tabContainer = Instance.new("ScrollingFrame")
             tabContainer.Name = "TabContainer_" .. tab_name
             tabContainer.Size = UDim2.new(1, 0, 1, 0)
@@ -719,7 +687,6 @@ function library:AddWindow(title, options)
                 tabContainer.CanvasSize = UDim2.new(0, 0, 0, tabLayout.AbsoluteContentSize.Y + 10)
             end)
 
-            -- Gold selection highlight
             local GOLD = Color3.fromRGB(255, 200, 60)
 
             local goldTint = Instance.new("Frame")
@@ -768,7 +735,6 @@ function library:AddWindow(title, options)
                 show()
             end
 
-            -- LABEL
             function tab_data:AddLabel(label_text)
                 label_text = tostring(label_text or "New Label")
                 local label = Instance.new("TextLabel")
@@ -785,7 +751,6 @@ function library:AddWindow(title, options)
                 return label
             end
 
-            -- DESCRIPTION
             function tab_data:AddDescription(desc_text)
                 desc_text = tostring(desc_text or "")
                 local desc = Instance.new("TextLabel")
@@ -803,7 +768,6 @@ function library:AddWindow(title, options)
                 return desc
             end
 
-            -- DIVIDER
             function tab_data:AddDivider()
                 local base = options.main_color or Color3.fromRGB(150, 80, 255)
                 local dividerFrame = Instance.new("Frame")
@@ -830,7 +794,6 @@ function library:AddWindow(title, options)
                 return dividerFrame
             end
 
-            -- BUTTON
             function tab_data:AddButton(button_text, callback)
                 button_text = tostring(button_text or "New Button")
                 callback = typeof(callback) == "function" and callback or function() end
@@ -941,7 +904,6 @@ function library:AddWindow(title, options)
                 return button
             end
 
-            -- SWITCH
             function tab_data:AddSwitch(switch_text, callback)
                 local switch_data = {}
                 switch_text = tostring(switch_text or "New Switch")
@@ -1058,7 +1020,6 @@ function library:AddWindow(title, options)
                 return switch_data, switchFrame
             end
 
-            -- TEXTBOX
             function tab_data:AddTextBox(textbox_text, callback, textbox_options)
                 textbox_text = tostring(textbox_text or "New TextBox")
                 callback = typeof(callback) == "function" and callback or function() end
@@ -1096,7 +1057,6 @@ function library:AddWindow(title, options)
                 return textbox
             end
 
-            -- SLIDER
             function tab_data:AddSlider(slider_text, callback, slider_options)
                 local slider_data = {}
                 slider_text = tostring(slider_text or "New Slider")
@@ -1274,7 +1234,6 @@ function library:AddWindow(title, options)
                 return slider_data, slider
             end
 
-            -- KEYBIND
             function tab_data:AddKeybind(keybind_name, callback, keybind_options)
                 local keybind_data = {}
                 keybind_name = tostring(keybind_name or "New Keybind")
@@ -1402,7 +1361,6 @@ function library:AddWindow(title, options)
                 return keybind_data, keybindFrame
             end
 
-            -- DROPDOWN
             function tab_data:AddDropdown(dropdown_name, callback)
                 local dropdown_data = {}
                 dropdown_name = tostring(dropdown_name or "New Dropdown")
@@ -1656,7 +1614,6 @@ function library:AddWindow(title, options)
                 return dropdown_data, dropdown
             end
 
-            -- COLOR PICKER
             function tab_data:AddColorPicker(callback)
                 local color_picker_data = {}
                 callback = typeof(callback) == "function" and callback or function() end
@@ -1803,7 +1760,6 @@ function library:AddWindow(title, options)
                 return color_picker_data, color_picker
             end
 
-            -- CONSOLE
             function tab_data:AddConsole(console_options)
                 local console_data = {}
                 console_options = typeof(console_options) == "table" and console_options or {["readonly"] = true, ["full"] = false}
@@ -1875,7 +1831,6 @@ function library:AddWindow(title, options)
                 return console_data, console
             end
 
-            -- HORIZONTAL ALIGNMENT
             function tab_data:AddHorizontalAlignment()
                 local ha_data = {}
                 local ha = Instance.new("Frame")
@@ -1907,7 +1862,6 @@ function library:AddWindow(title, options)
                 return ha_data, ha
             end
 
-            -- FOLDER
             function tab_data:AddFolder(folder_name)
                 local folder_data = {}
                 folder_name = tostring(folder_name or "New Folder")
