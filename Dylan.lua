@@ -429,111 +429,31 @@ function library:AddWindow(title, options)
     local window_data = {}
     local Window = MainPanel.Frame
 
-    -- LEFT COLUMN (profile + tab nav) and RIGHT COLUMN (banner + content),
-    -- both living inside the single merged panel now.
-    local TopRowHeight = 130
-    local RowGap = 10
+    local Pad = 10
 
-    local LeftColumn = Instance.new("Frame")
-    LeftColumn.Name = "LeftColumn"
-    LeftColumn.Size = UDim2.new(0.28, -6, 1, -20)
-    LeftColumn.Position = UDim2.new(0, 10, 0, 10)
-    LeftColumn.BackgroundTransparency = 1
-    LeftColumn.BorderSizePixel = 0
-    LeftColumn.Parent = MainPanel.Frame
+    -- TOP SECTION (20% height): full-width banner, with a circular avatar
+    -- overlapping its bottom edge and a blank horizontal info strip beside it.
+    local TopSection = Instance.new("Frame")
+    TopSection.Name = "TopSection"
+    TopSection.Position = UDim2.new(0, Pad, 0, Pad)
+    TopSection.Size = UDim2.new(1, -Pad * 2, 0.2, -Pad)
+    TopSection.BackgroundTransparency = 1
+    TopSection.BorderSizePixel = 0
+    TopSection.ClipsDescendants = false
+    TopSection.ZIndex = 2
+    TopSection.Parent = MainPanel.Frame
 
-    local RightColumn = Instance.new("Frame")
-    RightColumn.Name = "RightColumn"
-    RightColumn.Size = UDim2.new(0.72, -14, 1, -20)
-    RightColumn.Position = UDim2.new(0.28, 4, 0, 10)
-    RightColumn.BackgroundTransparency = 1
-    RightColumn.BorderSizePixel = 0
-    RightColumn.Parent = MainPanel.Frame
-
-    -- PROFILE SECTION - round profile picture + name/username, top-left,
-    -- matched in height to the banner so they form one top row.
-    local ProfileSection = Instance.new("Frame")
-    ProfileSection.Name = "ProfileSection"
-    ProfileSection.Size = UDim2.new(1, 0, 0, TopRowHeight)
-    ProfileSection.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    ProfileSection.BackgroundTransparency = 0.85
-    ProfileSection.BorderSizePixel = 0
-    ProfileSection.Parent = LeftColumn
-    Instance.new("UICorner", ProfileSection).CornerRadius = UDim.new(0, 14)
-
-    local ProfileStroke = Instance.new("UIStroke")
-    ProfileStroke.Color = Color3.fromRGB(255, 255, 255)
-    ProfileStroke.Thickness = 2
-    ProfileStroke.Transparency = 0.4
-    ProfileStroke.Parent = ProfileSection
-
-    local ProfilePicture = Instance.new("ImageLabel")
-    ProfilePicture.Name = "ProfilePicture"
-    ProfilePicture.AnchorPoint = Vector2.new(0.5, 0.5)
-    ProfilePicture.Position = UDim2.new(0, TopRowHeight * 0.4, 0.5, 0)
-    ProfilePicture.Size = UDim2.new(0, TopRowHeight * 0.68, 0, TopRowHeight * 0.68)
-    ProfilePicture.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    ProfilePicture.BorderSizePixel = 0
-    ProfilePicture.Image = "rbxthumb://type=AvatarHeadShot&id=" .. p.UserId .. "&w=150&h=150"
-    ProfilePicture.Parent = ProfileSection
-    Instance.new("UICorner", ProfilePicture).CornerRadius = UDim.new(1, 0)
-
-    local ProfilePictureStroke = Instance.new("UIStroke")
-    ProfilePictureStroke.Color = Color3.fromRGB(255, 255, 255)
-    ProfilePictureStroke.Thickness = 2
-    ProfilePictureStroke.Transparency = 0.2
-    ProfilePictureStroke.Parent = ProfilePicture
-
-    local NameColumn = Instance.new("Frame")
-    NameColumn.Name = "NameColumn"
-    NameColumn.AnchorPoint = Vector2.new(0, 0.5)
-    NameColumn.Position = UDim2.new(0, TopRowHeight * 0.4 + TopRowHeight * 0.34 + 10, 0.5, 0)
-    NameColumn.Size = UDim2.new(1, -(TopRowHeight * 0.4 + TopRowHeight * 0.34 + 20), 0, 44)
-    NameColumn.BackgroundTransparency = 1
-    NameColumn.Parent = ProfileSection
-
-    local DisplayNameLabel = Instance.new("TextLabel")
-    DisplayNameLabel.Name = "DisplayName"
-    DisplayNameLabel.Size = UDim2.new(1, 0, 0, 20)
-    DisplayNameLabel.Position = UDim2.new(0, 0, 0, 0)
-    DisplayNameLabel.BackgroundTransparency = 1
-    DisplayNameLabel.Font = Enum.Font.GothamBlack
-    DisplayNameLabel.Text = "@" .. p.DisplayName
-    DisplayNameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    DisplayNameLabel.TextSize = 15
-    DisplayNameLabel.TextXAlignment = Enum.TextXAlignment.Left
-    DisplayNameLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-    DisplayNameLabel.TextStrokeTransparency = 0.3
-    DisplayNameLabel.TextTruncate = Enum.TextTruncate.AtEnd
-    DisplayNameLabel.Parent = NameColumn
-
-    local UsernameLabel = Instance.new("TextLabel")
-    UsernameLabel.Name = "Username"
-    UsernameLabel.Size = UDim2.new(1, 0, 0, 18)
-    UsernameLabel.Position = UDim2.new(0, 0, 0, 22)
-    UsernameLabel.BackgroundTransparency = 1
-    UsernameLabel.Font = Enum.Font.GothamBold
-    UsernameLabel.Text = "@" .. p.Name
-    UsernameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    UsernameLabel.TextTransparency = 0.25
-    UsernameLabel.TextSize = 14
-    UsernameLabel.TextXAlignment = Enum.TextXAlignment.Left
-    UsernameLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-    UsernameLabel.TextStrokeTransparency = 0.5
-    UsernameLabel.TextTruncate = Enum.TextTruncate.AtEnd
-    UsernameLabel.Parent = NameColumn
-
-    -- BANNER - same-height row as the profile card, top of the right column
     local Banner = Instance.new("ImageLabel")
     Banner.Name = "Banner"
-    Banner.Size = UDim2.new(1, 0, 0, TopRowHeight)
+    Banner.Size = UDim2.new(1, 0, 1, 0)
     Banner.Position = UDim2.new(0, 0, 0, 0)
     Banner.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     Banner.BackgroundTransparency = 0.2
     Banner.BorderSizePixel = 0
     Banner.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=119214568385242&width=678&height=810&format=png"
     Banner.ScaleType = Enum.ScaleType.Crop
-    Banner.Parent = RightColumn
+    Banner.ZIndex = 2
+    Banner.Parent = TopSection
     Instance.new("UICorner", Banner).CornerRadius = UDim.new(0, 14)
 
     local BannerStroke = Instance.new("UIStroke")
@@ -542,11 +462,104 @@ function library:AddWindow(title, options)
     BannerStroke.Transparency = 0.4
     BannerStroke.Parent = Banner
 
-    -- MAIN CONTENT BOX - bordered like the banner, holds the tab pages
+    -- Circular avatar, overlapping the banner's bottom edge
+    local AvatarSize = 84
+    local Avatar = Instance.new("ImageLabel")
+    Avatar.Name = "Avatar"
+    Avatar.AnchorPoint = Vector2.new(0, 0.5)
+    Avatar.Position = UDim2.new(0, 24, 1, 0)
+    Avatar.Size = UDim2.new(0, AvatarSize, 0, AvatarSize)
+    Avatar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Avatar.BorderSizePixel = 0
+    Avatar.Image = "rbxthumb://type=AvatarHeadShot&id=" .. p.UserId .. "&w=150&h=150"
+    Avatar.ZIndex = 4
+    Avatar.Parent = TopSection
+    Instance.new("UICorner", Avatar).CornerRadius = UDim.new(1, 0)
+
+    local AvatarStroke = Instance.new("UIStroke")
+    AvatarStroke.Color = Color3.fromRGB(255, 255, 255)
+    AvatarStroke.Thickness = 3
+    AvatarStroke.Transparency = 0.1
+    AvatarStroke.Parent = Avatar
+
+    -- Blank horizontal profile info strip, to the right of the avatar
+    local ProfileInfo = Instance.new("Frame")
+    ProfileInfo.Name = "ProfileInfo"
+    ProfileInfo.AnchorPoint = Vector2.new(0, 0.5)
+    ProfileInfo.Position = UDim2.new(0, 24 + AvatarSize + 16, 1, 0)
+    ProfileInfo.Size = UDim2.new(1, -(24 + AvatarSize + 16 + 10), 0, 50)
+    ProfileInfo.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    ProfileInfo.BackgroundTransparency = 0.85
+    ProfileInfo.BorderSizePixel = 0
+    ProfileInfo.ZIndex = 4
+    ProfileInfo.Parent = TopSection
+    Instance.new("UICorner", ProfileInfo).CornerRadius = UDim.new(0, 10)
+
+    local ProfileInfoStroke = Instance.new("UIStroke")
+    ProfileInfoStroke.Color = Color3.fromRGB(255, 255, 255)
+    ProfileInfoStroke.Thickness = 1
+    ProfileInfoStroke.Transparency = 0.5
+    ProfileInfoStroke.Parent = ProfileInfo
+
+    -- BODY SECTION (80% height): 25% sidebar, 75% content
+    local BodySection = Instance.new("Frame")
+    BodySection.Name = "BodySection"
+    BodySection.Position = UDim2.new(0, Pad, 0.2, 0)
+    BodySection.Size = UDim2.new(1, -Pad * 2, 0.8, -Pad)
+    BodySection.BackgroundTransparency = 1
+    BodySection.BorderSizePixel = 0
+    BodySection.ZIndex = 1
+    BodySection.Parent = MainPanel.Frame
+
+    local LeftColumn = Instance.new("Frame")
+    LeftColumn.Name = "LeftColumn"
+    LeftColumn.Size = UDim2.new(0.25, -6, 1, 0)
+    LeftColumn.Position = UDim2.new(0, 0, 0, 0)
+    LeftColumn.BackgroundTransparency = 1
+    LeftColumn.BorderSizePixel = 0
+    LeftColumn.Parent = BodySection
+
+    local RightColumn = Instance.new("Frame")
+    RightColumn.Name = "RightColumn"
+    RightColumn.Size = UDim2.new(0.75, -6, 1, 0)
+    RightColumn.Position = UDim2.new(0.25, 6, 0, 0)
+    RightColumn.BackgroundTransparency = 1
+    RightColumn.BorderSizePixel = 0
+    RightColumn.Parent = BodySection
+
+    -- LEFT SIDEBAR - vertical nav, fills the whole 25% column
+    local TabButtonsShadow = Instance.new("Frame")
+    TabButtonsShadow.Name = "TabButtonsShadow"
+    TabButtonsShadow.Size = UDim2.new(1, 0, 1, 0)
+    TabButtonsShadow.Position = UDim2.new(0, 0, 0, 0)
+    TabButtonsShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    TabButtonsShadow.BackgroundTransparency = 0.5
+    TabButtonsShadow.BorderSizePixel = 0
+    TabButtonsShadow.ZIndex = 0
+    TabButtonsShadow.Parent = LeftColumn
+    Instance.new("UICorner", TabButtonsShadow).CornerRadius = UDim.new(0, 10)
+
+    local TabButtons = Instance.new("ScrollingFrame")
+    TabButtons.Name = "TabButtons"
+    TabButtons.Size = UDim2.new(1, 0, 1, 0)
+    TabButtons.Position = UDim2.new(0, 0, 0, 0)
+    TabButtons.BackgroundTransparency = 1
+    TabButtons.BorderSizePixel = 0
+    TabButtons.CanvasSize = UDim2.new(0, 0, 0, 0)
+    TabButtons.ScrollBarThickness = 4
+    TabButtons.ZIndex = 1
+    TabButtons.Parent = LeftColumn
+
+    local TabButtonsList = Instance.new("UIListLayout")
+    TabButtonsList.SortOrder = Enum.SortOrder.LayoutOrder
+    TabButtonsList.Padding = UDim.new(0, 5)
+    TabButtonsList.Parent = TabButtons
+
+    -- RIGHT CONTENT AREA - one large rounded panel, fills the whole 75% column
     local TabsBox = Instance.new("Frame")
     TabsBox.Name = "TabsBox"
-    TabsBox.Size = UDim2.new(1, 0, 1, -(TopRowHeight + RowGap))
-    TabsBox.Position = UDim2.new(0, 0, 0, TopRowHeight + RowGap)
+    TabsBox.Size = UDim2.new(1, 0, 1, 0)
+    TabsBox.Position = UDim2.new(0, 0, 0, 0)
     TabsBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     TabsBox.BackgroundTransparency = 0.85
     TabsBox.BorderSizePixel = 0
@@ -567,33 +580,6 @@ function library:AddWindow(title, options)
     Tabs.BorderSizePixel = 0
     Tabs.Parent = TabsBox
 
-    -- TabButtons with drop shadow (fills the left column below the profile card)
-    local TabButtonsShadow = Instance.new("Frame")
-    TabButtonsShadow.Name = "TabButtonsShadow"
-    TabButtonsShadow.Size = UDim2.new(1, 0, 1, -(TopRowHeight + RowGap))
-    TabButtonsShadow.Position = UDim2.new(0, 0, 0, TopRowHeight + RowGap)
-    TabButtonsShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    TabButtonsShadow.BackgroundTransparency = 0.5
-    TabButtonsShadow.BorderSizePixel = 0
-    TabButtonsShadow.ZIndex = 0
-    TabButtonsShadow.Parent = LeftColumn
-    Instance.new("UICorner", TabButtonsShadow).CornerRadius = UDim.new(0, 10)
-
-    local TabButtons = Instance.new("ScrollingFrame")
-    TabButtons.Name = "TabButtons"
-    TabButtons.Size = UDim2.new(1, 0, 1, -(TopRowHeight + RowGap))
-    TabButtons.Position = UDim2.new(0, 0, 0, TopRowHeight + RowGap)
-    TabButtons.BackgroundTransparency = 1
-    TabButtons.BorderSizePixel = 0
-    TabButtons.CanvasSize = UDim2.new(0, 0, 0, 0)
-    TabButtons.ScrollBarThickness = 4
-    TabButtons.ZIndex = 1
-    TabButtons.Parent = LeftColumn
-
-    local TabButtonsList = Instance.new("UIListLayout")
-    TabButtonsList.SortOrder = Enum.SortOrder.LayoutOrder
-    TabButtonsList.Padding = UDim.new(0, 5)
-    TabButtonsList.Parent = TabButtons
 
     do -- Add Tab
         function window_data:AddTab(tab_name)
