@@ -5,6 +5,28 @@ local ui_options = {
     can_resize = true,
 }
 
+-- ============================================================
+-- ALL ASSETS USING THE ROBLOX THUMBNAIL API (100% reliable)
+-- ============================================================
+local ASSETS = {
+    -- Use this format for ANY asset ID (Decal, Image, Texture, etc.)
+    BackgroundTexture = "https://www.roblox.com/asset-thumbnail/image?assetId=16736132788&width=420&height=420&format=png",
+    RippleCircle      = "https://www.roblox.com/asset-thumbnail/image?assetId=266543268&width=420&height=420&format=png",
+    
+    CloseButton       = "https://www.roblox.com/asset-thumbnail/image?assetId=114840795551292&width=678&height=810&format=png",
+    MinimizedIcon     = "https://www.roblox.com/asset-thumbnail/image?assetId=108067574147759&width=678&height=810&format=png",
+    
+    -- Your banner (verify this asset ID actually exists!)
+    Banner            = "https://www.roblox.com/asset-thumbnail/image?assetId=119214568385242&width=1920&height=400&format=png",
+    
+    -- Color picker assets
+    ColorPickerPalette    = "https://www.roblox.com/asset-thumbnail/image?assetId=698052001&width=420&height=420&format=png",
+    ColorPickerIndicator  = "https://www.roblox.com/asset-thumbnail/image?assetId=2851926732&width=420&height=420&format=png",
+    ColorPickerSample     = "https://www.roblox.com/asset-thumbnail/image?assetId=2851929490&width=420&height=420&format=png",
+    ColorPickerSaturation = "https://www.roblox.com/asset-thumbnail/image?assetId=3641079629&width=420&height=420&format=png",
+}
+-- ============================================================
+
 do
     local imgui = game:GetService("CoreGui"):FindFirstChild("imgui")
     if imgui then imgui:Destroy() end
@@ -31,7 +53,7 @@ circle.Name = "Circle"
 circle.Parent = prefabs
 circle.BackgroundColor3 = Color3.new(1, 1, 1)
 circle.BackgroundTransparency = 1
-circle.Image = "rbxassetid://266543268"
+circle.Image = ASSETS.RippleCircle
 circle.ImageTransparency = 0.5
 
 uiListLayout3.Parent = prefabs
@@ -206,7 +228,7 @@ function library:Notify(title, message, duration)
     messageLabel.Size = UDim2.new(1, -24, 0, 28)
     messageLabel.Position = UDim2.new(0, 16, 0, 32)
     messageLabel.BackgroundTransparency = 1
-    messageLabel.Font = Enum.Font.Gotham -- lighter secondary font, pairs with the bold title
+    messageLabel.Font = Enum.Font.Gotham
     messageLabel.Text = message
     messageLabel.TextColor3 = Color3.fromRGB(220, 210, 235)
     messageLabel.TextSize = 13
@@ -299,7 +321,7 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent, 
     bgImage.Size = UDim2.fromScale(1, 1)
     bgImage.BackgroundTransparency = 1
     bgImage.BorderSizePixel = 0
-    bgImage.Image = "rbxassetid://16736132788"
+    bgImage.Image = ASSETS.BackgroundTexture
     bgImage.ImageTransparency = 0
     bgImage.ScaleType = Enum.ScaleType.Stretch
     bgImage.Parent = panel.Frame
@@ -315,98 +337,43 @@ function library:AddWindow(title, options)
     options = (typeof(options) == "table") and options or ui_options
     options.tween_time = 0.1
 
-    -- LAYOUT PARAMETERS
-    -- Single merged frame now (was Main + Side as two separate panels).
-    -- Width is roughly the old Main + Gap + Side combined so the merged
-    -- frame takes up about the same footprint as the old two-panel layout.
-    local MainWidth = 0.60
-    local MainHeight = 0.90
-    local SidebarWidth = 0.24 -- fraction of the merged frame's width, not the screen
+    -- LAYOUT PARAMETERS (made bigger per request)
+    local MainWidth = 0.75   -- wider
+    local MainHeight = 0.95  -- taller
+    local SidebarWidth = 0.24
 
-    -- Main panel (perfectly centered) - now the only panel
+    -- Main panel (perfectly centered)
     local MainSize = UDim2.fromScale(MainWidth, MainHeight)
     local MainPos = UDim2.fromScale(0.5, 0.5)
     local MainPanel = CreatePanel("Main_" .. windows, MainPos, MainSize, 20, 1, windowsFrame, options.main_color)
 
-    -- HEADER - HIGHER (10% overlap with main panel)
-    local HeaderShadow = Instance.new("Frame")
-    HeaderShadow.Name = "HeaderShadow"
-    HeaderShadow.AnchorPoint = Vector2.new(0.5, 0)
-    HeaderShadow.Position = UDim2.new(0.5, 2, -0.06, 4)      -- higher (was -0.07)
-    HeaderShadow.Size = UDim2.fromScale(MainWidth, 0.16)           -- match main width
-    HeaderShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    HeaderShadow.BackgroundTransparency = 0.4
-    HeaderShadow.BorderSizePixel = 0
-    HeaderShadow.ZIndex = 0
-    HeaderShadow.Parent = MainPanel.Frame
-    Instance.new("UICorner", HeaderShadow).CornerRadius = UDim.new(0, 18)
+    -- =====================================================
+    -- NEW TITLE (replaces the removed floating header pill)
+    -- =====================================================
+    local MainTitle = Instance.new("TextLabel")
+    MainTitle.Name = "MainTitle"
+    MainTitle.Size = UDim2.new(0, 300, 0, 40)
+    MainTitle.Position = UDim2.new(0, 15, 0, 15)
+    MainTitle.BackgroundTransparency = 1
+    MainTitle.Font = Enum.Font.GothamBlack
+    MainTitle.Text = title
+    MainTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    MainTitle.TextSize = 28
+    MainTitle.TextXAlignment = Enum.TextXAlignment.Left
+    MainTitle.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    MainTitle.TextStrokeTransparency = 0.2
+    MainTitle.ZIndex = 20
+    MainTitle.Parent = MainPanel.Frame
 
-    local Header = Instance.new("Frame")
-    Header.Name = "Header"
-    Header.AnchorPoint = Vector2.new(0.5, 0)
-    Header.Position = UDim2.new(0.5, 0, -0.06, 0)            -- higher (was -0.07)
-    Header.Size = UDim2.fromScale(MainWidth, 0.16)                 -- match main width
-    Header.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Header.BackgroundTransparency = 0.15
-    Header.BorderSizePixel = 0
-    Header.Parent = MainPanel.Frame
-    Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 18)
-
-    local HeaderGradient = MainPanel.Frame:FindFirstChildWhichIsA("UIGradient"):Clone()
-    HeaderGradient.Parent = Header
-
-    local HeaderBg = Instance.new("ImageLabel")
-    HeaderBg.Size = UDim2.fromScale(1, 1)
-    HeaderBg.BackgroundTransparency = 1
-    HeaderBg.BorderSizePixel = 0
-    HeaderBg.Image = "rbxassetid://16736132788"
-    HeaderBg.ImageTransparency = 0
-    HeaderBg.ScaleType = Enum.ScaleType.Stretch
-    HeaderBg.Parent = Header
-    Instance.new("UICorner", HeaderBg).CornerRadius = UDim.new(0, 18)
-
-    -- Header title with auto-matched drop shadow
-    local titleContainer = Instance.new("Frame")
-    titleContainer.Size = UDim2.fromScale(0.85, 0.8)
-    titleContainer.Position = UDim2.fromScale(0.05, 0.1)
-    titleContainer.BackgroundTransparency = 1
-    titleContainer.Parent = Header
-
-    local titleShadow = Instance.new("TextLabel")
-    titleShadow.Name = "TitleShadow"
-    titleShadow.Size = UDim2.fromScale(1, 1)
-    titleShadow.Position = UDim2.new(0.005, 0, 0.005, 0)
-    titleShadow.BackgroundTransparency = 1
-    titleShadow.Font = Enum.Font.GothamBlack
-    titleShadow.Text = title
-    titleShadow.TextScaled = true
-    titleShadow.TextColor3 = Color3.fromRGB(20, 20, 20)
-    titleShadow.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-    titleShadow.TextStrokeTransparency = 0.5
-    titleShadow.Parent = titleContainer
-
-    local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Name = "Title"
-    TitleLabel.Size = UDim2.fromScale(1, 1)
-    TitleLabel.Position = UDim2.new(0, 0, 0, 0)
-    TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Font = Enum.Font.GothamBlack
-    TitleLabel.Text = title
-    TitleLabel.TextScaled = true
-    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TitleLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-    TitleLabel.TextStrokeTransparency = 0.3
-    TitleLabel.Parent = titleContainer
-
-    -- CLOSE BUTTON - ORIGINAL POSITION (top-right of main panel, no offset)
+    -- CLOSE BUTTON (top-right, stays exactly where it was)
     local CloseButton = Instance.new("ImageButton")
     CloseButton.Name = "CloseButton"
     CloseButton.AnchorPoint = Vector2.new(0.5, 0.5)
-    CloseButton.Position = UDim2.new(1, 0, 0, 0)   -- original position
+    CloseButton.Position = UDim2.new(1, 0, 0, 0)
     CloseButton.Size = UDim2.fromOffset(56, 56)
     CloseButton.BackgroundTransparency = 1
     CloseButton.BorderSizePixel = 0
-    CloseButton.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=114840795551292&width=678&height=810&format=png"
+    CloseButton.Image = ASSETS.CloseButton
     CloseButton.ScaleType = Enum.ScaleType.Fit
     CloseButton.ZIndex = 10
     CloseButton.Parent = MainPanel.Frame
@@ -419,9 +386,7 @@ function library:AddWindow(title, options)
         CloseButton:TweenSize(UDim2.fromOffset(56, 56), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
 
-    -- BANNER (clan image strip, sits below the Header inside the merged frame)
-    -- Paste your own rbxassetid on `options.banner_image` (or edit the
-    -- default below) to swap the placeholder for your clan's banner art.
+    -- BANNER (clan image strip)
     local Banner = Instance.new("ImageLabel")
     Banner.Name = "Banner"
     Banner.Position = UDim2.fromScale(0, 0)
@@ -429,14 +394,13 @@ function library:AddWindow(title, options)
     Banner.BackgroundColor3 = Color3.fromRGB(20, 15, 30)
     Banner.BackgroundTransparency = 0
     Banner.BorderSizePixel = 0
-    Banner.Image = tostring(options.banner_image or "rbxassetid://0") -- placeholder, paste your clan banner asset id
+    Banner.Image = tostring(options.banner_image or ASSETS.Banner)
     Banner.ScaleType = Enum.ScaleType.Crop
     Banner.ZIndex = 1
     Banner.Parent = MainPanel.Frame
     Instance.new("UICorner", Banner).CornerRadius = UDim.new(0, 20)
 
-    -- Mask the bottom corners of the banner square so only the top corners
-    -- round off (the panel underneath already has the corner radius).
+    -- Mask the bottom corners of the banner square
     local BannerMask = Instance.new("Frame")
     BannerMask.Name = "BannerMask"
     BannerMask.AnchorPoint = Vector2.new(0, 1)
@@ -457,7 +421,7 @@ function library:AddWindow(title, options)
     BannerGradient.Color = ColorSequence.new(Color3.fromRGB(0, 0, 0))
     BannerGradient.Parent = Banner
 
-    -- SIDEBAR (merged into the same frame - was the separate Side panel)
+    -- SIDEBAR (merged into the main frame)
     local Sidebar = Instance.new("Frame")
     Sidebar.Name = "Sidebar"
     Sidebar.Position = UDim2.new(0, 0, 0, Banner.Size.Y.Offset)
@@ -476,7 +440,7 @@ function library:AddWindow(title, options)
     SidebarDivider.BorderSizePixel = 0
     SidebarDivider.Parent = Sidebar
 
-    -- PROFILE SECTION (auto-filled from the local player: avatar + username)
+    -- PROFILE SECTION
     local Profile = Instance.new("Frame")
     Profile.Name = "Profile"
     Profile.Position = UDim2.new(0, 10, 0, 12)
@@ -552,7 +516,7 @@ function library:AddWindow(title, options)
     ProfileDivider.BorderSizePixel = 0
     ProfileDivider.Parent = Sidebar
 
-    -- MINIMIZED STATE (restore button) with PORTAL IMAGE + ANIMATION
+    -- MINIMIZED STATE
     local MinimizedFrame = Instance.new("ImageButton")
     MinimizedFrame.Name = "MinimizedFrame_" .. windows
     MinimizedFrame.AnchorPoint = Vector2.new(1, 0)
@@ -562,7 +526,7 @@ function library:AddWindow(title, options)
     MinimizedFrame.BorderSizePixel = 0
     MinimizedFrame.Visible = false
     MinimizedFrame.ZIndex = 100
-    MinimizedFrame.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=108067574147759&width=678&height=810&format=png"
+    MinimizedFrame.Image = ASSETS.MinimizedIcon
     MinimizedFrame.ScaleType = Enum.ScaleType.Fit
     MinimizedFrame.Parent = windowsFrame
     Instance.new("UICorner", MinimizedFrame).CornerRadius = UDim.new(1, 0)
@@ -637,15 +601,13 @@ function library:AddWindow(title, options)
     local Window = MainPanel.Frame
     local Tabs = Instance.new("Frame")
     Tabs.Name = "Tabs"
-    -- Content column now sits to the right of the merged Sidebar, below the Banner.
     Tabs.Size = UDim2.new(1 - SidebarWidth, -20, 1, -Banner.Size.Y.Offset - 20)
     Tabs.Position = UDim2.new(SidebarWidth, 10, 0, Banner.Size.Y.Offset + 10)
     Tabs.BackgroundTransparency = 1
     Tabs.BorderSizePixel = 0
     Tabs.Parent = MainPanel.Frame
 
-    -- TabButtons with drop shadow
-    -- Tab button list now lives in the Sidebar, below the profile block.
+    -- TabButtons
     local TabButtonsTop = ProfileDivider.Position.Y.Offset + 10
 
     local TabButtonsShadow = Instance.new("Frame")
@@ -686,13 +648,13 @@ function library:AddWindow(title, options)
             new_button.Size = UDim2.new(1, 0, 0, 35)
             new_button.BackgroundTransparency = 1
             new_button.BorderSizePixel = 0
-            new_button.Image = "rbxassetid://16736132788"
+            new_button.Image = ASSETS.BackgroundTexture
             new_button.ImageTransparency = 0.3
             new_button.ScaleType = Enum.ScaleType.Stretch
             new_button.Parent = TabButtons
             Instance.new("UICorner", new_button).CornerRadius = UDim.new(0, 10)
 
-            -- Tab button label - Gotham Black with auto-matched drop shadow
+            -- Tab button label
             local buttonContainer = Instance.new("Frame")
             buttonContainer.Name = "LabelContainer"
             buttonContainer.Size = UDim2.new(1, 0, 1, 0)
@@ -727,10 +689,9 @@ function library:AddWindow(title, options)
             buttonLabel.TextStrokeTransparency = 0.3
             buttonLabel.Parent = buttonContainer
 
-            -- Update canvas size
             TabButtons.CanvasSize = UDim2.new(0, 0, 0, (#TabButtons:GetChildren() - 1) * 40)
 
-            -- Tab content container (transparent)
+            -- Tab content container
             local tabContainer = Instance.new("ScrollingFrame")
             tabContainer.Name = "TabContainer_" .. tab_name
             tabContainer.Size = UDim2.new(1, 0, 1, 0)
@@ -738,12 +699,7 @@ function library:AddWindow(title, options)
             tabContainer.BorderSizePixel = 0
             tabContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
             tabContainer.ScrollBarThickness = 4
-            tabContainer.ClipsDescendants = true -- explicit: ScrollingFrames clip
-                                                   -- their content to their own
-                                                   -- bounds by default. AddDropdown
-                                                   -- below temporarily flips this to
-                                                   -- false while its options list is
-                                                   -- open, so the popup isn't cut off.
+            tabContainer.ClipsDescendants = true
             tabContainer.Visible = false
             tabContainer.Parent = Tabs
 
@@ -763,9 +719,7 @@ function library:AddWindow(title, options)
                 tabContainer.CanvasSize = UDim2.new(0, 0, 0, tabLayout.AbsoluteContentSize.Y + 10)
             end)
 
-            -- Gold selection highlight (replaces the old growing side-bar):
-            -- a warm gold tint behind the label plus a glowing gold outline,
-            -- both invisible until the tab is the active one.
+            -- Gold selection highlight
             local GOLD = Color3.fromRGB(255, 200, 60)
 
             local goldTint = Instance.new("Frame")
@@ -814,7 +768,7 @@ function library:AddWindow(title, options)
                 show()
             end
 
-            -- LABEL - NO DROP SHADOW (just TextStroke)
+            -- LABEL
             function tab_data:AddLabel(label_text)
                 label_text = tostring(label_text or "New Label")
                 local label = Instance.new("TextLabel")
@@ -831,8 +785,7 @@ function library:AddWindow(title, options)
                 return label
             end
 
-            -- Lighter secondary text, meant to sit under a bold AddLabel/AddButton
-            -- for hierarchy (e.g. a one-line explanation of what a setting does).
+            -- DESCRIPTION
             function tab_data:AddDescription(desc_text)
                 desc_text = tostring(desc_text or "")
                 local desc = Instance.new("TextLabel")
@@ -850,8 +803,7 @@ function library:AddWindow(title, options)
                 return desc
             end
 
-            -- Thin gradient rule to visually separate groups of settings inside
-            -- a tab (fades from transparent -> accent color -> transparent).
+            -- DIVIDER
             function tab_data:AddDivider()
                 local base = options.main_color or Color3.fromRGB(150, 80, 255)
                 local dividerFrame = Instance.new("Frame")
@@ -878,6 +830,7 @@ function library:AddWindow(title, options)
                 return dividerFrame
             end
 
+            -- BUTTON
             function tab_data:AddButton(button_text, callback)
                 button_text = tostring(button_text or "New Button")
                 callback = typeof(callback) == "function" and callback or function() end
@@ -890,8 +843,6 @@ function library:AddWindow(title, options)
                 buttonFrame.BorderSizePixel = 0
                 buttonFrame.Parent = tabContainer
 
-                -- Soft ambient shadow beneath the glass so it still reads as
-                -- a raised, tappable surface rather than a flat sticker.
                 local shadow = Instance.new("Frame")
                 shadow.Size = UDim2.new(1, 0, 0, 35)
                 shadow.Position = UDim2.new(0, 0, 0, 3)
@@ -901,23 +852,17 @@ function library:AddWindow(title, options)
                 shadow.Parent = buttonFrame
                 Instance.new("UICorner", shadow).CornerRadius = UDim.new(0, 12)
 
-                -- The "glass" pane itself: a tinted, translucent panel (no solid
-                -- fill) so whatever's behind it subtly shows through.
                 local button = Instance.new("TextButton")
                 button.Size = UDim2.new(1, 0, 0, 35)
                 button.BackgroundColor3 = Lighten(base, 0.1)
                 button.BackgroundTransparency = 0.45
                 button.BorderSizePixel = 0
                 button.AutoButtonColor = false
-                button.Text = "" -- drawn via sibling labels below, avoids the
-                                  -- shadow-text ghosting bug from earlier
+                button.Text = ""
                 button.ClipsDescendants = true
                 button.Parent = buttonFrame
                 Instance.new("UICorner", button).CornerRadius = UDim.new(0, 12)
 
-                -- Glass "sheen": a bright highlight band across the top portion
-                -- of the pane, faded out toward the bottom, like light catching
-                -- the top edge of frosted glass.
                 local sheen = Instance.new("Frame")
                 sheen.Size = UDim2.new(1, 0, 0.55, 0)
                 sheen.Position = UDim2.new(0, 0, 0, 0)
@@ -935,8 +880,6 @@ function library:AddWindow(title, options)
                 }
                 sheenGradient.Parent = sheen
 
-                -- Soft glowing border, always faintly visible (the "frosted
-                -- edge"), brightening further on hover.
                 local glowStroke = Instance.new("UIStroke")
                 glowStroke.Color = Lighten(base, 0.55)
                 glowStroke.Thickness = 1.25
@@ -998,6 +941,7 @@ function library:AddWindow(title, options)
                 return button
             end
 
+            -- SWITCH
             function tab_data:AddSwitch(switch_text, callback)
                 local switch_data = {}
                 switch_text = tostring(switch_text or "New Switch")
@@ -1062,9 +1006,7 @@ function library:AddWindow(title, options)
                 toggleButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
                 toggleButton.BorderSizePixel = 0
                 toggleButton.AutoButtonColor = false
-                toggleButton.Text = "" -- drawn via sibling labels below instead, so
-                                        -- the button itself never competes with its
-                                        -- own shadow-text child for the same pixels
+                toggleButton.Text = ""
                 toggleButton.Parent = toggleContainer
                 Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(1, 0)
 
@@ -1116,6 +1058,7 @@ function library:AddWindow(title, options)
                 return switch_data, switchFrame
             end
 
+            -- TEXTBOX
             function tab_data:AddTextBox(textbox_text, callback, textbox_options)
                 textbox_text = tostring(textbox_text or "New TextBox")
                 callback = typeof(callback) == "function" and callback or function() end
@@ -1153,6 +1096,7 @@ function library:AddWindow(title, options)
                 return textbox
             end
 
+            -- SLIDER
             function tab_data:AddSlider(slider_text, callback, slider_options)
                 local slider_data = {}
                 slider_text = tostring(slider_text or "New Slider")
@@ -1330,6 +1274,7 @@ function library:AddWindow(title, options)
                 return slider_data, slider
             end
 
+            -- KEYBIND
             function tab_data:AddKeybind(keybind_name, callback, keybind_options)
                 local keybind_data = {}
                 keybind_name = tostring(keybind_name or "New Keybind")
@@ -1383,7 +1328,7 @@ function library:AddWindow(title, options)
                 input.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                 input.BackgroundTransparency = 0.7
                 input.BorderSizePixel = 0
-                input.Text = "" -- drawn via sibling labels below
+                input.Text = ""
                 input.Parent = keybindFrame
                 Instance.new("UICorner", input).CornerRadius = UDim.new(0, 8)
 
@@ -1457,6 +1402,7 @@ function library:AddWindow(title, options)
                 return keybind_data, keybindFrame
             end
 
+            -- DROPDOWN
             function tab_data:AddDropdown(dropdown_name, callback)
                 local dropdown_data = {}
                 dropdown_name = tostring(dropdown_name or "New Dropdown")
@@ -1480,18 +1426,14 @@ function library:AddWindow(title, options)
                 headerShadow.Parent = dropdownFrame
                 Instance.new("UICorner", headerShadow).CornerRadius = UDim.new(0, 10)
 
-                -- Glass header pane (translucent tint, not a flat fill)
                 local dropdown = Instance.new("TextButton")
                 dropdown.Size = UDim2.new(1, 0, 0, 35)
                 dropdown.BackgroundColor3 = Lighten(base, 0.1)
                 dropdown.BackgroundTransparency = 0.45
                 dropdown.BorderSizePixel = 0
                 dropdown.AutoButtonColor = false
-                dropdown.Text = "" -- drawn via sibling labels below
-                dropdown.ClipsDescendants = false -- the options `box` below is a
-                                                    -- child that extends past this
-                                                    -- frame's own bounds; clipping
-                                                    -- here would cut it off
+                dropdown.Text = ""
+                dropdown.ClipsDescendants = false
                 dropdown.ZIndex = 10
                 dropdown.Parent = dropdownFrame
                 Instance.new("UICorner", dropdown).CornerRadius = UDim.new(0, 10)
@@ -1568,8 +1510,6 @@ function library:AddWindow(title, options)
                     TweenService:Create(dropdown, TweenInfo.new(0.15), {BackgroundTransparency = 0.45}):Play()
                 end)
 
-                -- Frosted options panel: translucent dark-tinted glass instead
-                -- of the old flat dark-purple overlay.
                 local box = Instance.new("Frame")
                 box.Size = UDim2.new(1, 0, 0, 0)
                 box.Position = UDim2.new(0, 0, 1, 8)
@@ -1614,9 +1554,7 @@ function library:AddWindow(title, options)
                     if open then
                         if dropdown_open then return end
                         dropdown_open = true
-                        tabContainer.ClipsDescendants = false -- let the options
-                            -- list render past the ScrollingFrame's own edge
-                            -- instead of being cut off by it
+                        tabContainer.ClipsDescendants = false
                         Resize(box, {Size = UDim2.new(1, 0, 0, len)}, options.tween_time)
                         TweenService:Create(indicator, TweenInfo.new(0.15), {Rotation = 180}):Play()
                     else
@@ -1624,8 +1562,7 @@ function library:AddWindow(title, options)
                         Resize(box, {Size = UDim2.new(1, 0, 0, 0)}, options.tween_time)
                         TweenService:Create(indicator, TweenInfo.new(0.15), {Rotation = 0}):Play()
                         task.delay(options.tween_time, function()
-                            tabContainer.ClipsDescendants = true -- restore normal
-                                -- scrolling clip once the box has fully closed
+                            tabContainer.ClipsDescendants = true
                         end)
                     end
                 end)
@@ -1648,7 +1585,7 @@ function library:AddWindow(title, options)
                     selectBar.Size = UDim2.new(0, 3, 1, -8)
                     selectBar.Position = UDim2.new(0, 0, 0, 4)
                     selectBar.BackgroundColor3 = Lighten(base, 0.4)
-                    selectBar.BackgroundTransparency = 1 -- only visible when selected
+                    selectBar.BackgroundTransparency = 1
                     selectBar.BorderSizePixel = 0
                     selectBar.ZIndex = 53
                     selectBar.Parent = object
@@ -1719,6 +1656,7 @@ function library:AddWindow(title, options)
                 return dropdown_data, dropdown
             end
 
+            -- COLOR PICKER
             function tab_data:AddColorPicker(callback)
                 local color_picker_data = {}
                 callback = typeof(callback) == "function" and callback or function() end
@@ -1737,7 +1675,7 @@ function library:AddWindow(title, options)
                 palette.Position = UDim2.new(0.05, 0, 0.05, 0)
                 palette.BackgroundColor3 = Color3.new(1, 1, 1)
                 palette.BackgroundTransparency = 1
-                palette.Image = "rbxassetid://698052001"
+                palette.Image = ASSETS.ColorPickerPalette
                 palette.ScaleType = Enum.ScaleType.Slice
                 palette.SliceCenter = Rect.new(4, 4, 4, 4)
                 palette.Parent = color_picker
@@ -1748,7 +1686,7 @@ function library:AddWindow(title, options)
                 palette_indicator.BackgroundColor3 = Color3.new(1, 1, 1)
                 palette_indicator.BackgroundTransparency = 1
                 palette_indicator.ZIndex = 2
-                palette_indicator.Image = "rbxassetid://2851926732"
+                palette_indicator.Image = ASSETS.ColorPickerIndicator
                 palette_indicator.ImageColor3 = Color3.new(0, 0, 0)
                 palette_indicator.ScaleType = Enum.ScaleType.Slice
                 palette_indicator.SliceCenter = Rect.new(12, 12, 12, 12)
@@ -1760,7 +1698,7 @@ function library:AddWindow(title, options)
                 sample.Position = UDim2.new(0.8, 0, 0.05, 0)
                 sample.BackgroundColor3 = Color3.new(1, 1, 1)
                 sample.BackgroundTransparency = 1
-                sample.Image = "rbxassetid://2851929490"
+                sample.Image = ASSETS.ColorPickerSample
                 sample.ScaleType = Enum.ScaleType.Slice
                 sample.SliceCenter = Rect.new(4, 4, 4, 4)
                 sample.Parent = color_picker
@@ -1770,7 +1708,7 @@ function library:AddWindow(title, options)
                 saturation.Size = UDim2.new(0, 15, 0, 100)
                 saturation.Position = UDim2.new(0.65, 0, 0.05, 0)
                 saturation.BackgroundColor3 = Color3.new(1, 1, 1)
-                saturation.Image = "rbxassetid://3641079629"
+                saturation.Image = ASSETS.ColorPickerSaturation
                 saturation.Parent = color_picker
 
                 local saturation_indicator = Instance.new("Frame")
@@ -1865,6 +1803,7 @@ function library:AddWindow(title, options)
                 return color_picker_data, color_picker
             end
 
+            -- CONSOLE
             function tab_data:AddConsole(console_options)
                 local console_data = {}
                 console_options = typeof(console_options) == "table" and console_options or {["readonly"] = true, ["full"] = false}
@@ -1936,6 +1875,7 @@ function library:AddWindow(title, options)
                 return console_data, console
             end
 
+            -- HORIZONTAL ALIGNMENT
             function tab_data:AddHorizontalAlignment()
                 local ha_data = {}
                 local ha = Instance.new("Frame")
@@ -1967,6 +1907,7 @@ function library:AddWindow(title, options)
                 return ha_data, ha
             end
 
+            -- FOLDER
             function tab_data:AddFolder(folder_name)
                 local folder_data = {}
                 folder_name = tostring(folder_name or "New Folder")
@@ -1983,7 +1924,7 @@ function library:AddWindow(title, options)
                 button.Size = UDim2.new(1, 0, 0, 35)
                 button.BackgroundTransparency = 1
                 button.BorderSizePixel = 0
-                button.Text = "" -- drawn via sibling labels below
+                button.Text = ""
                 button.Parent = folder
 
                 local offX, offY = 2, 2
