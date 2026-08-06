@@ -250,57 +250,60 @@ function library:FormatWindows()
     format_windows()
 end
 
--- Helper function to create panels — light card with a soft purple glow border
+-- Helper function to create panels with new background
 local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent, accentColor)
     accentColor = accentColor or ui_options.main_color or Color3.fromRGB(150, 80, 255)
     local panel = {}
 
-    -- panel.Shadow doubles as the outer glow halo (kept as the same field name
-    -- so the existing minimize/restore tweens elsewhere still work unchanged).
     panel.Shadow = Instance.new("Frame")
-    panel.Shadow.Name = name .. "Glow"
+    panel.Shadow.Name = name .. "Shadow"
     panel.Shadow.AnchorPoint = Vector2.new(0.5, 0.5)
-    panel.Shadow.Position = anchorPos
-    panel.Shadow.Size = size + UDim2.fromOffset(20, 20)
-    panel.Shadow.BackgroundColor3 = accentColor
-    panel.Shadow.BackgroundTransparency = 0.45
+    panel.Shadow.Position = anchorPos + UDim2.new(0, 0, 0, 8)
+    panel.Shadow.Size = size
+    panel.Shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    panel.Shadow.BackgroundTransparency = 0.5
     panel.Shadow.BorderSizePixel = 0
     panel.Shadow.ZIndex = zIndex or 0
     panel.Shadow.Parent = parent or windowsFrame
-    Instance.new("UICorner", panel.Shadow).CornerRadius = UDim.new(0, (cornerRadius or 20) + 8)
-
-    local glowStroke = Instance.new("UIStroke")
-    glowStroke.Color = Lighten(accentColor, 0.25)
-    glowStroke.Thickness = 3
-    glowStroke.Transparency = 0.2
-    glowStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    glowStroke.Parent = panel.Shadow
+    Instance.new("UICorner", panel.Shadow).CornerRadius = UDim.new(0, cornerRadius or 20)
 
     panel.Frame = Instance.new("Frame")
     panel.Frame.Name = name
     panel.Frame.AnchorPoint = Vector2.new(0.5, 0.5)
     panel.Frame.Position = anchorPos
     panel.Frame.Size = size
-    panel.Frame.BackgroundColor3 = Color3.fromRGB(240, 237, 250)
+    panel.Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     panel.Frame.BackgroundTransparency = 0
     panel.Frame.BorderSizePixel = 0
     panel.Frame.Parent = parent or windowsFrame
     Instance.new("UICorner", panel.Frame).CornerRadius = UDim.new(0, cornerRadius or 20)
 
     local stroke = Instance.new("UIStroke")
-    stroke.Color = accentColor
+    stroke.Color = Color3.fromRGB(255, 255, 255)
     stroke.Thickness = 2
-    stroke.Transparency = 0.15
+    stroke.Transparency = 0.3
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     stroke.Parent = panel.Frame
 
-    local innerFade = Instance.new("UIGradient")
-    innerFade.Rotation = 90
-    innerFade.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 255, 255)),
-        ColorSequenceKeypoint.new(1.00, Lighten(accentColor, 0.82))
+    local gradient = Instance.new("UIGradient")
+    gradient.Rotation = 90
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0.00, accentColor),
+        ColorSequenceKeypoint.new(0.45, Lighten(accentColor, 0.2)),
+        ColorSequenceKeypoint.new(1.00, Lighten(accentColor, 0.55))
     }
-    innerFade.Parent = panel.Frame
+    gradient.Parent = panel.Frame
+
+    local bgImage = Instance.new("ImageLabel")
+    bgImage.Name = "BackgroundImage"
+    bgImage.Size = UDim2.fromScale(1, 1)
+    bgImage.BackgroundTransparency = 1
+    bgImage.BorderSizePixel = 0
+    bgImage.Image = "rbxassetid://16736132788"
+    bgImage.ImageTransparency = 0
+    bgImage.ScaleType = Enum.ScaleType.Stretch
+    bgImage.Parent = panel.Frame
+    Instance.new("UICorner", bgImage).CornerRadius = UDim.new(0, cornerRadius or 20)
 
     return panel
 end
@@ -312,276 +315,35 @@ function library:AddWindow(title, options)
     options = (typeof(options) == "table") and options or ui_options
     options.tween_time = 0.1
 
-    -- LAYOUT PARAMETERS (single merged panel — sidebar + content combined)
-    local PanelWidth = 0.50
-    local PanelHeight = 0.86
-    local BannerHeight = 68       -- px, kept compact per design
-    local ProfileBlockHeight = 78 -- px, room for avatar/name/rank OR the stat row beside it
-    local TopSectionHeight = BannerHeight + ProfileBlockHeight + 8
-    local SidebarScale = 0.28     -- fraction of panel width used by the tab list
-    local TimeWidgetHeight = 78
-    local ServerWidgetHeight = 128
-    local WidgetGap = 10
-    local ACCENT = options.main_color or ui_options.main_color or Color3.fromRGB(150, 80, 255)
+    -- LAYOUT PARAMETERS (single merged panel, centered + bigger)
+    local MainWidth = 0.62
+    local MainHeight = 0.85
 
-    -- Single panel (replaces the old separate Main/Side panels)
-    local PanelPos = UDim2.fromScale(0.5, 0.5)
-    local PanelSize = UDim2.fromScale(PanelWidth, PanelHeight)
-    local MainPanel = CreatePanel("Window_" .. windows, PanelPos, PanelSize, 20, 1, windowsFrame, ACCENT)
+    -- Main panel (perfectly centered) — side + main are now one frame
+    local MainSize = UDim2.fromScale(MainWidth, MainHeight)
+    local MainPos = UDim2.fromScale(0.5, 0.5)
+    local MainPanel = CreatePanel("Main_" .. windows, MainPos, MainSize, 20, 1, windowsFrame, options.main_color)
 
-    -- CLOSE BUTTON — solid accent-colored square with an X glyph
-    local CloseButton = Instance.new("TextButton")
+    -- CLOSE BUTTON - ORIGINAL POSITION (top-right of main panel, no offset)
+    local CloseButton = Instance.new("ImageButton")
     CloseButton.Name = "CloseButton"
     CloseButton.AnchorPoint = Vector2.new(0.5, 0.5)
-    CloseButton.Position = UDim2.new(1, 6, 0, -6)
-    CloseButton.Size = UDim2.fromOffset(42, 42)
-    CloseButton.BackgroundColor3 = ACCENT
+    CloseButton.Position = UDim2.new(1, 0, 0, 0)   -- original position
+    CloseButton.Size = UDim2.fromOffset(56, 56)
+    CloseButton.BackgroundTransparency = 1
     CloseButton.BorderSizePixel = 0
-    CloseButton.AutoButtonColor = false
-    CloseButton.Font = Enum.Font.GothamBlack
-    CloseButton.Text = "\226\156\149" -- "✕"
-    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    CloseButton.TextSize = 18
-    CloseButton.ZIndex = 20
+    CloseButton.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=114840795551292&width=678&height=810&format=png"
+    CloseButton.ScaleType = Enum.ScaleType.Fit
+    CloseButton.ZIndex = 10
     CloseButton.Parent = MainPanel.Frame
-    Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(0, 12)
+    Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(1, 0)
 
     CloseButton.MouseEnter:Connect(function()
-        CloseButton:TweenSize(UDim2.fromOffset(46, 46), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
+        CloseButton:TweenSize(UDim2.fromOffset(60, 60), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
     CloseButton.MouseLeave:Connect(function()
-        CloseButton:TweenSize(UDim2.fromOffset(42, 42), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
+        CloseButton:TweenSize(UDim2.fromOffset(56, 56), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
-
-    -- Floating rank badge pinned to the top-center edge of the panel
-    local RankBadge = Instance.new("Frame")
-    RankBadge.Name = "RankBadge"
-    RankBadge.AnchorPoint = Vector2.new(0.5, 0)
-    RankBadge.Position = UDim2.new(0.5, 0, 0, -34)
-    RankBadge.Size = UDim2.fromOffset(96, 76)
-    RankBadge.BackgroundColor3 = Color3.fromRGB(240, 237, 250)
-    RankBadge.BorderSizePixel = 0
-    RankBadge.ZIndex = 15
-    RankBadge.Parent = MainPanel.Frame
-    Instance.new("UICorner", RankBadge).CornerRadius = UDim.new(0, 16)
-
-    local rankBadgeStroke = Instance.new("UIStroke")
-    rankBadgeStroke.Color = ACCENT
-    rankBadgeStroke.Thickness = 2
-    rankBadgeStroke.Transparency = 0.2
-    rankBadgeStroke.Parent = RankBadge
-
-    local RankBadgeIcon = Instance.new("ImageLabel")
-    RankBadgeIcon.AnchorPoint = Vector2.new(0.5, 0)
-    RankBadgeIcon.Position = UDim2.new(0.5, 0, 0, 8)
-    RankBadgeIcon.Size = UDim2.fromOffset(38, 38)
-    RankBadgeIcon.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    RankBadgeIcon.BorderSizePixel = 0
-    RankBadgeIcon.ScaleType = Enum.ScaleType.Crop
-    RankBadgeIcon.Parent = RankBadge
-    Instance.new("UICorner", RankBadgeIcon).CornerRadius = UDim.new(1, 0)
-
-    local RankBadgeLabel = Instance.new("TextLabel")
-    RankBadgeLabel.AnchorPoint = Vector2.new(0.5, 0)
-    RankBadgeLabel.Position = UDim2.new(0.5, 0, 0, 50)
-    RankBadgeLabel.Size = UDim2.new(1, -8, 0, 18)
-    RankBadgeLabel.BackgroundTransparency = 1
-    RankBadgeLabel.Font = Enum.Font.GothamBold
-    RankBadgeLabel.Text = tostring(options.rank_label or "Member")
-    RankBadgeLabel.TextColor3 = ACCENT
-    RankBadgeLabel.TextSize = 13
-    RankBadgeLabel.Parent = RankBadge
-
-    -- ============================================================
-    -- BANNER + PROFILE SECTION (replaces the old floating header pill)
-    -- ============================================================
-    local TopSection = Instance.new("Frame")
-    TopSection.Name = "TopSection"
-    TopSection.BackgroundTransparency = 1
-    TopSection.Size = UDim2.new(1, 0, 0, TopSectionHeight)
-    TopSection.Position = UDim2.new(0, 0, 0, 0)
-    TopSection.Parent = MainPanel.Frame
-
-    -- Banner image, inset slightly, centered and cropped to fill (bigger/zoomed look)
-    local Banner = Instance.new("ImageLabel")
-    Banner.Name = "Banner"
-    Banner.Size = UDim2.new(1, -16, 0, BannerHeight)
-    Banner.Position = UDim2.new(0, 8, 0, 8)
-    Banner.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    Banner.BorderSizePixel = 0
-    Banner.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=119214568385242&width=678&height=810&format=png"
-    Banner.ScaleType = Enum.ScaleType.Crop -- crops centered so the image reads "bigger"/zoomed rather than letterboxed
-    Banner.ZIndex = 2
-    Banner.Parent = TopSection
-    Instance.new("UICorner", Banner).CornerRadius = UDim.new(0, 14)
-
-    local BannerStroke = Instance.new("UIStroke")
-    BannerStroke.Color = Color3.fromRGB(255, 255, 255)
-    BannerStroke.Thickness = 1.5
-    BannerStroke.Transparency = 0.5
-    BannerStroke.Parent = Banner
-
-    -- Profile section: avatar overlapping the banner + name/username to the right
-    local Avatar = Instance.new("ImageLabel")
-    Avatar.Name = "Avatar"
-    Avatar.AnchorPoint = Vector2.new(0, 0.5)
-    Avatar.Position = UDim2.new(0, 22, 0, BannerHeight + 8)
-    Avatar.Size = UDim2.fromOffset(50, 50)
-    Avatar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Avatar.BorderSizePixel = 0
-    Avatar.ScaleType = Enum.ScaleType.Crop
-    Avatar.ZIndex = 3
-    Avatar.Parent = TopSection
-    Instance.new("UICorner", Avatar).CornerRadius = UDim.new(1, 0)
-
-    local AvatarStroke = Instance.new("UIStroke")
-    AvatarStroke.Color = Color3.fromRGB(255, 255, 255)
-    AvatarStroke.Thickness = 3
-    AvatarStroke.Transparency = 0
-    AvatarStroke.Parent = Avatar
-
-    -- Small "online" status dot overlapping the avatar (style detail borrowed from reference)
-    local StatusDot = Instance.new("Frame")
-    StatusDot.Name = "StatusDot"
-    StatusDot.AnchorPoint = Vector2.new(0.5, 0.5)
-    StatusDot.Position = UDim2.new(1, -4, 1, -4)
-    StatusDot.Size = UDim2.fromOffset(15, 15)
-    StatusDot.BackgroundColor3 = Color3.fromRGB(60, 220, 100)
-    StatusDot.BorderSizePixel = 0
-    StatusDot.ZIndex = 4
-    StatusDot.Parent = Avatar
-    Instance.new("UICorner", StatusDot).CornerRadius = UDim.new(1, 0)
-    local StatusDotStroke = Instance.new("UIStroke")
-    StatusDotStroke.Color = Color3.fromRGB(255, 255, 255)
-    StatusDotStroke.Thickness = 2
-    StatusDotStroke.Parent = StatusDot
-
-    do -- best-effort: fetch the local player's real avatar thumbnail, fall back silently
-        local ok, content = pcall(function()
-            return ps:GetUserThumbnailAsync(p.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
-        end)
-        if ok and content then
-            Avatar.Image = content
-            RankBadgeIcon.Image = content
-        end
-    end
-
-    local NameLabel = Instance.new("TextLabel")
-    NameLabel.Name = "ProfileName"
-    NameLabel.AnchorPoint = Vector2.new(0, 0.5)
-    NameLabel.Position = UDim2.new(0, 82, 0, BannerHeight + 2)
-    NameLabel.Size = UDim2.new(0, 200, 0, 22)
-    NameLabel.BackgroundTransparency = 1
-    NameLabel.Font = Enum.Font.GothamBlack
-    NameLabel.Text = p.DisplayName or p.Name
-    NameLabel.TextColor3 = Color3.fromRGB(45, 25, 80)
-    NameLabel.TextSize = 17
-    NameLabel.TextXAlignment = Enum.TextXAlignment.Left
-    NameLabel.ZIndex = 3
-    NameLabel.Parent = TopSection
-
-    local UsernameLabel = Instance.new("TextLabel")
-    UsernameLabel.Name = "ProfileUsername"
-    UsernameLabel.AnchorPoint = Vector2.new(0, 0.5)
-    UsernameLabel.Position = UDim2.new(0, 82, 0, BannerHeight + 20)
-    UsernameLabel.Size = UDim2.new(0, 200, 0, 16)
-    UsernameLabel.BackgroundTransparency = 1
-    UsernameLabel.Font = Enum.Font.GothamMedium
-    UsernameLabel.Text = "@" .. p.Name
-    UsernameLabel.TextColor3 = Color3.fromRGB(140, 130, 165)
-    UsernameLabel.TextSize = 13
-    UsernameLabel.TextXAlignment = Enum.TextXAlignment.Left
-    UsernameLabel.ZIndex = 3
-    UsernameLabel.Parent = TopSection
-
-    -- "Rank: X" pill under the name/username
-    local RankPill = Instance.new("Frame")
-    RankPill.Name = "RankPill"
-    RankPill.AnchorPoint = Vector2.new(0, 0.5)
-    RankPill.Position = UDim2.new(0, 22, 0, BannerHeight + 44)
-    RankPill.Size = UDim2.new(0, 150, 0, 26)
-    RankPill.BackgroundColor3 = Color3.fromRGB(30, 20, 45)
-    RankPill.BorderSizePixel = 0
-    RankPill.ZIndex = 3
-    RankPill.Parent = TopSection
-    Instance.new("UICorner", RankPill).CornerRadius = UDim.new(1, 0)
-    local rankPillStroke = Instance.new("UIStroke")
-    rankPillStroke.Color = ACCENT
-    rankPillStroke.Transparency = 0.3
-    rankPillStroke.Parent = RankPill
-
-    local RankPillLabel = Instance.new("TextLabel")
-    RankPillLabel.Size = UDim2.new(1, -16, 1, 0)
-    RankPillLabel.Position = UDim2.new(0, 12, 0, 0)
-    RankPillLabel.BackgroundTransparency = 1
-    RankPillLabel.Font = Enum.Font.GothamMedium
-    RankPillLabel.RichText = true
-    RankPillLabel.Text = string.format(
-        "<font color=\"rgb(220,210,235)\">Rank: </font><font color=\"rgb(%d,%d,%d)\"><b>%s</b></font>",
-        math.floor(ACCENT.R * 255 + 0.5), math.floor(ACCENT.G * 255 + 0.5), math.floor(ACCENT.B * 255 + 0.5),
-        tostring(options.rank_label or "Member")
-    )
-    RankPillLabel.TextSize = 13
-    RankPillLabel.TextXAlignment = Enum.TextXAlignment.Left
-    RankPillLabel.Parent = RankPill
-
-    -- Stat row (Total Strength / Total Rebirths / Kills) — right side of the profile row
-    local StatRow = Instance.new("Frame")
-    StatRow.Name = "StatRow"
-    StatRow.AnchorPoint = Vector2.new(1, 0.5)
-    StatRow.Position = UDim2.new(1, -18, 0, BannerHeight + 26)
-    StatRow.Size = UDim2.new(0, 260, 0, 50)
-    StatRow.BackgroundTransparency = 1
-    StatRow.Parent = TopSection
-
-    local statRowLayout = Instance.new("UIListLayout")
-    statRowLayout.FillDirection = Enum.FillDirection.Horizontal
-    statRowLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
-    statRowLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-    statRowLayout.Padding = UDim.new(0, 18)
-    statRowLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    statRowLayout.Parent = StatRow
-
-    local function addStat(glyph, label)
-        local item = Instance.new("Frame")
-        item.Size = UDim2.fromOffset(72, 50)
-        item.BackgroundTransparency = 1
-        item.Parent = StatRow
-
-        local icon = Instance.new("TextLabel")
-        icon.Size = UDim2.new(1, 0, 0, 18)
-        icon.BackgroundTransparency = 1
-        icon.Font = Enum.Font.GothamBold
-        icon.Text = glyph
-        icon.TextColor3 = ACCENT
-        icon.TextSize = 16
-        icon.Parent = item
-
-        local lbl = Instance.new("TextLabel")
-        lbl.Position = UDim2.new(0, 0, 0, 18)
-        lbl.Size = UDim2.new(1, 0, 0, 14)
-        lbl.BackgroundTransparency = 1
-        lbl.Font = Enum.Font.GothamMedium
-        lbl.Text = string.upper(label)
-        lbl.TextColor3 = Color3.fromRGB(150, 140, 170)
-        lbl.TextSize = 9
-        lbl.Parent = item
-
-        local val = Instance.new("TextLabel")
-        val.Position = UDim2.new(0, 0, 0, 32)
-        val.Size = UDim2.new(1, 0, 0, 18)
-        val.BackgroundTransparency = 1
-        val.Font = Enum.Font.GothamBlack
-        val.Text = "0"
-        val.TextColor3 = Color3.fromRGB(45, 25, 80)
-        val.TextSize = 15
-        val.Parent = item
-        return val
-    end
-
-    addStat("\226\156\166", "Total Strength")   -- ✦
-    addStat("\226\159\179", "Total Rebirths")   -- ⟳ (approx)
-    addStat("\226\154\148", "Kills")            -- ⚔ (approx)
 
     -- MINIMIZED STATE (restore button) with PORTAL IMAGE + ANIMATION
     local MinimizedFrame = Instance.new("ImageButton")
@@ -658,8 +420,8 @@ function library:AddWindow(title, options)
         MainPanel.Shadow.Visible = true
 
         local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-        TweenService:Create(MainPanel.Frame, tweenInfo, {Size = PanelSize, Position = PanelPos}):Play()
-        TweenService:Create(MainPanel.Shadow, tweenInfo, {Size = PanelSize, Position = PanelPos + UDim2.new(0, 0, 0, 8)}):Play()
+        TweenService:Create(MainPanel.Frame, tweenInfo, {Size = MainSize, Position = MainPos}):Play()
+        TweenService:Create(MainPanel.Shadow, tweenInfo, {Size = MainSize, Position = MainPos + UDim2.new(0, 0, 0, 8)}):Play()
         isMinimized = false
     end)
 
@@ -667,232 +429,196 @@ function library:AddWindow(title, options)
     local window_data = {}
     local Window = MainPanel.Frame
 
-    -- CONTENT AREA (tab list on the left, tab content on the right — one frame now)
+    -- LEFT COLUMN (profile + tab nav) and RIGHT COLUMN (banner + content),
+    -- both living inside the single merged panel now.
+    local LeftColumn = Instance.new("Frame")
+    LeftColumn.Name = "LeftColumn"
+    LeftColumn.Size = UDim2.new(0.28, -6, 1, -20)
+    LeftColumn.Position = UDim2.new(0, 10, 0, 10)
+    LeftColumn.BackgroundTransparency = 1
+    LeftColumn.BorderSizePixel = 0
+    LeftColumn.Parent = MainPanel.Frame
+
+    local RightColumn = Instance.new("Frame")
+    RightColumn.Name = "RightColumn"
+    RightColumn.Size = UDim2.new(0.72, -14, 1, -20)
+    RightColumn.Position = UDim2.new(0.28, 4, 0, 10)
+    RightColumn.BackgroundTransparency = 1
+    RightColumn.BorderSizePixel = 0
+    RightColumn.Parent = MainPanel.Frame
+
+    -- PROFILE SECTION - name + username, above the tab buttons
+    local ProfileSection = Instance.new("Frame")
+    ProfileSection.Name = "ProfileSection"
+    ProfileSection.Size = UDim2.new(1, 0, 0, 90)
+    ProfileSection.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    ProfileSection.BackgroundTransparency = 0.85
+    ProfileSection.BorderSizePixel = 0
+    ProfileSection.Parent = LeftColumn
+    Instance.new("UICorner", ProfileSection).CornerRadius = UDim.new(0, 12)
+
+    local ProfileStroke = Instance.new("UIStroke")
+    ProfileStroke.Color = Color3.fromRGB(255, 255, 255)
+    ProfileStroke.Thickness = 1
+    ProfileStroke.Transparency = 0.6
+    ProfileStroke.Parent = ProfileSection
+
+    local ProfileLabel = Instance.new("TextLabel")
+    ProfileLabel.Name = "ProfileLabel"
+    ProfileLabel.Size = UDim2.new(1, -16, 0, 16)
+    ProfileLabel.Position = UDim2.new(0, 8, 0, 6)
+    ProfileLabel.BackgroundTransparency = 1
+    ProfileLabel.Font = Enum.Font.GothamBold
+    ProfileLabel.Text = "PROFILE"
+    ProfileLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ProfileLabel.TextTransparency = 0.35
+    ProfileLabel.TextSize = 11
+    ProfileLabel.TextXAlignment = Enum.TextXAlignment.Left
+    ProfileLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    ProfileLabel.TextStrokeTransparency = 0.5
+    ProfileLabel.Parent = ProfileSection
+
+    local DisplayNameLabel = Instance.new("TextLabel")
+    DisplayNameLabel.Name = "DisplayName"
+    DisplayNameLabel.Size = UDim2.new(1, -16, 0, 26)
+    DisplayNameLabel.Position = UDim2.new(0, 8, 0, 26)
+    DisplayNameLabel.BackgroundTransparency = 1
+    DisplayNameLabel.Font = Enum.Font.GothamBlack
+    DisplayNameLabel.Text = p.DisplayName
+    DisplayNameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    DisplayNameLabel.TextSize = 18
+    DisplayNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+    DisplayNameLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    DisplayNameLabel.TextStrokeTransparency = 0.3
+    DisplayNameLabel.TextTruncate = Enum.TextTruncate.AtEnd
+    DisplayNameLabel.Parent = ProfileSection
+
+    local UsernameLabel = Instance.new("TextLabel")
+    UsernameLabel.Name = "Username"
+    UsernameLabel.Size = UDim2.new(1, -16, 0, 18)
+    UsernameLabel.Position = UDim2.new(0, 8, 0, 54)
+    UsernameLabel.BackgroundTransparency = 1
+    UsernameLabel.Font = Enum.Font.Gotham
+    UsernameLabel.Text = "@" .. p.Name
+    UsernameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    UsernameLabel.TextTransparency = 0.25
+    UsernameLabel.TextSize = 13
+    UsernameLabel.TextXAlignment = Enum.TextXAlignment.Left
+    UsernameLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    UsernameLabel.TextStrokeTransparency = 0.5
+    UsernameLabel.TextTruncate = Enum.TextTruncate.AtEnd
+    UsernameLabel.Parent = ProfileSection
+
+    -- BANNER - centered image above the tab content
+    local Banner = Instance.new("ImageLabel")
+    Banner.Name = "Banner"
+    Banner.AnchorPoint = Vector2.new(0.5, 0)
+    Banner.Position = UDim2.new(0.5, 0, 0, 0)
+    Banner.Size = UDim2.new(1, 0, 0, 190)
+    Banner.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    Banner.BackgroundTransparency = 0.2
+    Banner.BorderSizePixel = 0
+    Banner.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=119214568385242&width=678&height=810&format=png"
+    Banner.ScaleType = Enum.ScaleType.Crop
+    Banner.Parent = RightColumn
+    Instance.new("UICorner", Banner).CornerRadius = UDim.new(0, 14)
+
+    local BannerStroke = Instance.new("UIStroke")
+    BannerStroke.Color = Color3.fromRGB(255, 255, 255)
+    BannerStroke.Thickness = 2
+    BannerStroke.Transparency = 0.4
+    BannerStroke.Parent = Banner
+
     local Tabs = Instance.new("Frame")
     Tabs.Name = "Tabs"
-    Tabs.Size = UDim2.new(1 - SidebarScale, -20, 1, -(TopSectionHeight + 20))
-    Tabs.Position = UDim2.new(SidebarScale, 10, 0, TopSectionHeight + 10)
+    Tabs.Size = UDim2.new(1, 0, 1, -200)
+    Tabs.Position = UDim2.new(0, 0, 0, 200)
     Tabs.BackgroundTransparency = 1
     Tabs.BorderSizePixel = 0
-    Tabs.Parent = MainPanel.Frame
+    Tabs.Parent = RightColumn
 
-    -- TabButtons ("farm" button list) — reserves space at the bottom of the
-    -- sidebar column for the Time + Server widgets below it.
-    local sidebarBottomReserve = TimeWidgetHeight + ServerWidgetHeight + (WidgetGap * 2)
-
+    -- TabButtons with drop shadow (fills the left column below the profile card)
     local TabButtonsShadow = Instance.new("Frame")
     TabButtonsShadow.Name = "TabButtonsShadow"
-    TabButtonsShadow.Size = UDim2.new(SidebarScale, -15, 1, -(TopSectionHeight + 20) - sidebarBottomReserve)
-    TabButtonsShadow.Position = UDim2.new(0, 10, 0, TopSectionHeight + 10)
+    TabButtonsShadow.Size = UDim2.new(1, 0, 1, -100)
+    TabButtonsShadow.Position = UDim2.new(0, 0, 0, 100)
     TabButtonsShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     TabButtonsShadow.BackgroundTransparency = 0.5
     TabButtonsShadow.BorderSizePixel = 0
     TabButtonsShadow.ZIndex = 0
-    TabButtonsShadow.Parent = MainPanel.Frame
+    TabButtonsShadow.Parent = LeftColumn
     Instance.new("UICorner", TabButtonsShadow).CornerRadius = UDim.new(0, 10)
 
     local TabButtons = Instance.new("ScrollingFrame")
     TabButtons.Name = "TabButtons"
-    TabButtons.Size = UDim2.new(SidebarScale, -15, 1, -(TopSectionHeight + 20) - sidebarBottomReserve)
-    TabButtons.Position = UDim2.new(0, 10, 0, TopSectionHeight + 10)
+    TabButtons.Size = UDim2.new(1, 0, 1, -100)
+    TabButtons.Position = UDim2.new(0, 0, 0, 100)
     TabButtons.BackgroundTransparency = 1
     TabButtons.BorderSizePixel = 0
     TabButtons.CanvasSize = UDim2.new(0, 0, 0, 0)
     TabButtons.ScrollBarThickness = 4
     TabButtons.ZIndex = 1
-    TabButtons.Parent = MainPanel.Frame
+    TabButtons.Parent = LeftColumn
 
     local TabButtonsList = Instance.new("UIListLayout")
     TabButtonsList.SortOrder = Enum.SortOrder.LayoutOrder
     TabButtonsList.Padding = UDim.new(0, 5)
     TabButtonsList.Parent = TabButtons
 
-    -- ============================================================
-    -- TIME WIDGET (light card, anchored to the bottom of the sidebar column)
-    -- ============================================================
-    local TimeWidget = Instance.new("Frame")
-    TimeWidget.Name = "TimeWidget"
-    TimeWidget.AnchorPoint = Vector2.new(0, 1)
-    TimeWidget.Position = UDim2.new(0, 10, 1, -10 - ServerWidgetHeight - WidgetGap)
-    TimeWidget.Size = UDim2.new(SidebarScale, -15, 0, TimeWidgetHeight)
-    TimeWidget.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    TimeWidget.BackgroundTransparency = 0.35
-    TimeWidget.BorderSizePixel = 0
-    TimeWidget.Parent = MainPanel.Frame
-    Instance.new("UICorner", TimeWidget).CornerRadius = UDim.new(0, 12)
-
-    local TimeIcon = Instance.new("TextLabel")
-    TimeIcon.Position = UDim2.new(0, 8, 0, 8)
-    TimeIcon.Size = UDim2.fromOffset(24, 24)
-    TimeIcon.BackgroundColor3 = ACCENT
-    TimeIcon.BackgroundTransparency = 0.8
-    TimeIcon.Font = Enum.Font.GothamBold
-    TimeIcon.Text = "\226\143\177" -- ⏱
-    TimeIcon.TextColor3 = ACCENT
-    TimeIcon.TextSize = 14
-    TimeIcon.Parent = TimeWidget
-    Instance.new("UICorner", TimeIcon).CornerRadius = UDim.new(0, 8)
-
-    local TimeLabel = Instance.new("TextLabel")
-    TimeLabel.Position = UDim2.new(0, 40, 0, 8)
-    TimeLabel.Size = UDim2.new(1, -48, 0, 16)
-    TimeLabel.BackgroundTransparency = 1
-    TimeLabel.Font = Enum.Font.GothamBlack
-    TimeLabel.Text = "TIME"
-    TimeLabel.TextColor3 = Color3.fromRGB(45, 25, 80)
-    TimeLabel.TextSize = 12
-    TimeLabel.TextXAlignment = Enum.TextXAlignment.Left
-    TimeLabel.Parent = TimeWidget
-
-    local TimeValue = Instance.new("TextLabel")
-    TimeValue.Position = UDim2.new(0, 8, 0, 38)
-    TimeValue.Size = UDim2.new(1, -16, 0, 20)
-    TimeValue.BackgroundTransparency = 1
-    TimeValue.Font = Enum.Font.GothamBlack
-    TimeValue.Text = "0d 0h 0m 0s"
-    TimeValue.TextColor3 = Color3.fromRGB(230, 60, 60)
-    TimeValue.TextSize = 15
-    TimeValue.TextXAlignment = Enum.TextXAlignment.Left
-    TimeValue.Parent = TimeWidget
-
-    local TimeStatus = Instance.new("TextLabel")
-    TimeStatus.Position = UDim2.new(0, 8, 0, 58)
-    TimeStatus.Size = UDim2.new(1, -16, 0, 14)
-    TimeStatus.BackgroundTransparency = 1
-    TimeStatus.Font = Enum.Font.GothamMedium
-    TimeStatus.Text = "- Inactive"
-    TimeStatus.TextColor3 = Color3.fromRGB(230, 60, 60)
-    TimeStatus.TextSize = 12
-    TimeStatus.TextXAlignment = Enum.TextXAlignment.Left
-    TimeStatus.Parent = TimeWidget
-
-    -- ============================================================
-    -- SERVER WIDGET (dark card, anchored below the Time widget)
-    -- ============================================================
-    local ServerWidget = Instance.new("Frame")
-    ServerWidget.Name = "ServerWidget"
-    ServerWidget.AnchorPoint = Vector2.new(0, 1)
-    ServerWidget.Position = UDim2.new(0, 10, 1, -10)
-    ServerWidget.Size = UDim2.new(SidebarScale, -15, 0, ServerWidgetHeight)
-    ServerWidget.BackgroundColor3 = Color3.fromRGB(25, 18, 38)
-    ServerWidget.BorderSizePixel = 0
-    ServerWidget.Parent = MainPanel.Frame
-    Instance.new("UICorner", ServerWidget).CornerRadius = UDim.new(0, 12)
-
-    local function addServerRow(order, glyph, label, value, valueColor)
-        local row = Instance.new("Frame")
-        row.Size = UDim2.new(1, -16, 0, 34)
-        row.Position = UDim2.new(0, 8, 0, 8 + (order - 1) * 38)
-        row.BackgroundTransparency = 1
-        row.Parent = ServerWidget
-
-        local icon = Instance.new("TextLabel")
-        icon.Size = UDim2.fromOffset(20, 34)
-        icon.BackgroundTransparency = 1
-        icon.Font = Enum.Font.GothamBold
-        icon.Text = glyph
-        icon.TextColor3 = ACCENT
-        icon.TextSize = 13
-        icon.Parent = row
-
-        local lbl = Instance.new("TextLabel")
-        lbl.Position = UDim2.new(0, 24, 0, 0)
-        lbl.Size = UDim2.new(1, -24, 0, 14)
-        lbl.BackgroundTransparency = 1
-        lbl.Font = Enum.Font.GothamMedium
-        lbl.Text = string.upper(label)
-        lbl.TextColor3 = Color3.fromRGB(170, 160, 195)
-        lbl.TextSize = 10
-        lbl.TextXAlignment = Enum.TextXAlignment.Left
-        lbl.Parent = row
-
-        local val = Instance.new("TextLabel")
-        val.Position = UDim2.new(0, 24, 0, 15)
-        val.Size = UDim2.new(1, -24, 0, 18)
-        val.BackgroundTransparency = 1
-        val.Font = Enum.Font.GothamBold
-        val.Text = value
-        val.TextColor3 = valueColor or Color3.fromRGB(255, 255, 255)
-        val.TextSize = 13
-        val.TextXAlignment = Enum.TextXAlignment.Left
-        val.Parent = row
-    end
-
-    addServerRow(1, "\226\152\134", "Server", "Main World", Color3.fromRGB(255, 255, 255))
-    addServerRow(2, "\226\151\139", "Status", "Online", Color3.fromRGB(70, 220, 110))
-    addServerRow(3, "\226\150\166", "Joined", "--/--/----", Color3.fromRGB(255, 255, 255))
-
     do -- Add Tab
-        function window_data:AddTab(tab_name, icon_glyph)
+        function window_data:AddTab(tab_name)
             local tab_data = {}
             tab_name = tostring(tab_name or "New Tab")
 
-            -- Tab button ("farm card" style): icon + label + chevron on a dark
-            -- rounded card. Becomes a solid accent color when it's the active tab.
-            local new_button = Instance.new("TextButton")
+            -- Tab button with background image
+            local new_button = Instance.new("ImageButton")
             new_button.Name = "TabButton_" .. tab_name
-            new_button.Size = UDim2.new(1, 0, 0, 52)
-            new_button.BackgroundColor3 = Color3.fromRGB(22, 16, 32)
-            new_button.AutoButtonColor = false
+            new_button.Size = UDim2.new(1, 0, 0, 35)
+            new_button.BackgroundTransparency = 1
             new_button.BorderSizePixel = 0
-            new_button.Text = ""
+            new_button.Image = "rbxassetid://16736132788"
+            new_button.ImageTransparency = 0.3
+            new_button.ScaleType = Enum.ScaleType.Stretch
             new_button.Parent = TabButtons
-            Instance.new("UICorner", new_button).CornerRadius = UDim.new(0, 12)
+            Instance.new("UICorner", new_button).CornerRadius = UDim.new(0, 10)
 
-            local activeTint = Instance.new("Frame")
-            activeTint.Name = "ActiveTint"
-            activeTint.Size = UDim2.new(1, 0, 1, 0)
-            activeTint.BackgroundColor3 = ACCENT
-            activeTint.BackgroundTransparency = 1
-            activeTint.BorderSizePixel = 0
-            activeTint.ZIndex = 0
-            activeTint.Parent = new_button
-            Instance.new("UICorner", activeTint).CornerRadius = UDim.new(0, 12)
+            -- Tab button label - Gotham Black with auto-matched drop shadow
+            local buttonContainer = Instance.new("Frame")
+            buttonContainer.Name = "LabelContainer"
+            buttonContainer.Size = UDim2.new(1, 0, 1, 0)
+            buttonContainer.BackgroundTransparency = 1
+            buttonContainer.Parent = new_button
 
-            local iconBadge = Instance.new("TextLabel")
-            iconBadge.Name = "IconGlyph"
-            iconBadge.AnchorPoint = Vector2.new(0, 0.5)
-            iconBadge.Position = UDim2.new(0, 10, 0.5, 0)
-            iconBadge.Size = UDim2.fromOffset(28, 28)
-            iconBadge.BackgroundTransparency = 1
-            iconBadge.Font = Enum.Font.GothamBold
-            iconBadge.Text = icon_glyph or "\226\151\143" -- ●
-            iconBadge.TextColor3 = Color3.fromRGB(255, 255, 255)
-            iconBadge.TextSize = 16
-            iconBadge.ZIndex = 2
-            iconBadge.Parent = new_button
+            local buttonShadow = Instance.new("TextLabel")
+            buttonShadow.Name = "ButtonShadow"
+            buttonShadow.Size = UDim2.new(1, 0, 1, 0)
+            buttonShadow.Position = UDim2.new(0.005, 0, 0.005, 0)
+            buttonShadow.BackgroundTransparency = 1
+            buttonShadow.Font = Enum.Font.GothamBlack
+            buttonShadow.Text = tab_name
+            buttonShadow.TextColor3 = Color3.fromRGB(20, 20, 20)
+            buttonShadow.TextScaled = true
+            buttonShadow.TextSize = 14
+            buttonShadow.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            buttonShadow.TextStrokeTransparency = 0.5
+            buttonShadow.Parent = buttonContainer
 
             local buttonLabel = Instance.new("TextLabel")
             buttonLabel.Name = "ButtonLabel"
-            buttonLabel.AnchorPoint = Vector2.new(0, 0.5)
-            buttonLabel.Position = UDim2.new(0, 44, 0.5, 0)
-            buttonLabel.Size = UDim2.new(1, -68, 1, -10)
+            buttonLabel.Size = UDim2.new(1, 0, 1, 0)
+            buttonLabel.Position = UDim2.new(0, 0, 0, 0)
             buttonLabel.BackgroundTransparency = 1
             buttonLabel.Font = Enum.Font.GothamBlack
             buttonLabel.Text = tab_name
-            buttonLabel.TextColor3 = Color3.fromRGB(230, 225, 240)
-            buttonLabel.TextSize = 13
-            buttonLabel.TextWrapped = true
-            buttonLabel.TextXAlignment = Enum.TextXAlignment.Left
-            buttonLabel.TextYAlignment = Enum.TextYAlignment.Center
-            buttonLabel.ZIndex = 2
-            buttonLabel.Parent = new_button
-
-            local chevron = Instance.new("TextLabel")
-            chevron.Name = "Chevron"
-            chevron.AnchorPoint = Vector2.new(1, 0.5)
-            chevron.Position = UDim2.new(1, -10, 0.5, 0)
-            chevron.Size = UDim2.fromOffset(16, 20)
-            chevron.BackgroundTransparency = 1
-            chevron.Font = Enum.Font.GothamBold
-            chevron.Text = ">"
-            chevron.TextColor3 = Color3.fromRGB(180, 170, 200)
-            chevron.TextSize = 16
-            chevron.ZIndex = 2
-            chevron.Parent = new_button
+            buttonLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            buttonLabel.TextScaled = true
+            buttonLabel.TextSize = 14
+            buttonLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            buttonLabel.TextStrokeTransparency = 0.3
+            buttonLabel.Parent = buttonContainer
 
             -- Update canvas size
-            TabButtons.CanvasSize = UDim2.new(0, 0, 0, (#TabButtons:GetChildren() - 1) * 57)
+            TabButtons.CanvasSize = UDim2.new(0, 0, 0, (#TabButtons:GetChildren() - 1) * 40)
 
             -- Tab content container (transparent)
             local tabContainer = Instance.new("ScrollingFrame")
@@ -927,18 +653,33 @@ function library:AddWindow(title, options)
                 tabContainer.CanvasSize = UDim2.new(0, 0, 0, tabLayout.AbsoluteContentSize.Y + 10)
             end)
 
-            -- Active-tab highlight: the card's tint fades in to a solid accent
-            -- color and the label/chevron turn white; everything else resets.
+            -- Gold selection highlight (replaces the old growing side-bar):
+            -- a warm gold tint behind the label plus a glowing gold outline,
+            -- both invisible until the tab is the active one.
+            local GOLD = Color3.fromRGB(255, 200, 60)
+
+            local goldTint = Instance.new("Frame")
+            goldTint.Name = "GoldTint"
+            goldTint.Size = UDim2.new(1, 0, 1, 0)
+            goldTint.BackgroundColor3 = GOLD
+            goldTint.BackgroundTransparency = 1
+            goldTint.BorderSizePixel = 0
+            goldTint.ZIndex = 0
+            goldTint.Parent = new_button
+            Instance.new("UICorner", goldTint).CornerRadius = UDim.new(0, 10)
+
             local function show()
                 if dropdown_open then return end
                 for i, v in pairs(TabButtons:GetChildren()) do
-                    if v:IsA("TextButton") then
-                        local tint = v:FindFirstChild("ActiveTint")
+                    if v:IsA("ImageButton") then
+                        v.ImageTransparency = 0.3
+                        local tint = v:FindFirstChild("GoldTint")
                         if tint then tint.BackgroundTransparency = 1 end
-                        local lbl = v:FindFirstChild("ButtonLabel")
-                        if lbl then lbl.TextColor3 = Color3.fromRGB(230, 225, 240) end
-                        local chev = v:FindFirstChild("Chevron")
-                        if chev then chev.TextColor3 = Color3.fromRGB(180, 170, 200) end
+                        local container = v:FindFirstChild("LabelContainer")
+                        if container then
+                            local lbl = container:FindFirstChild("ButtonLabel")
+                            if lbl then lbl.TextColor3 = Color3.fromRGB(255, 255, 255) end
+                        end
                     end
                 end
                 for i, v in pairs(Tabs:GetChildren()) do
@@ -946,9 +687,9 @@ function library:AddWindow(title, options)
                         v.Visible = false
                     end
                 end
-                TweenService:Create(activeTint, TweenInfo.new(0.15), {BackgroundTransparency = 0.05}):Play()
-                buttonLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-                chevron.TextColor3 = Color3.fromRGB(255, 255, 255)
+                new_button.ImageTransparency = 0
+                TweenService:Create(goldTint, TweenInfo.new(0.15), {BackgroundTransparency = 0.82}):Play()
+                buttonLabel.TextColor3 = GOLD
                 tabContainer.Visible = true
                 task.delay(0.05, function()
                     tabContainer.CanvasSize = UDim2.new(0, 0, 0, tabLayout.AbsoluteContentSize.Y + 10)
@@ -1025,69 +766,6 @@ function library:AddWindow(title, options)
                 grad.Parent = line
 
                 return dividerFrame
-            end
-
-            -- Horizontal "pace" stat card: an accent-colored icon square, a bold
-            -- title, and three Hour/Day/Week values on one line. Static display —
-            -- pass the values in yourself (e.g. tab:AddPaceCard("Strength Pace",
-            -- "\226\150\136", "12", "240", "1.6k")).
-            function tab_data:AddPaceCard(title, icon_glyph, hour_val, day_val, week_val)
-                title = tostring(title or "Pace")
-                local base = options.main_color or Color3.fromRGB(150, 80, 255)
-
-                local card = Instance.new("Frame")
-                card.Size = UDim2.new(1, 0, 0, 64)
-                card.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                card.BackgroundTransparency = 0.55
-                card.BorderSizePixel = 0
-                card.Parent = tabContainer
-                Instance.new("UICorner", card).CornerRadius = UDim.new(0, 12)
-
-                local iconSquare = Instance.new("Frame")
-                iconSquare.AnchorPoint = Vector2.new(0, 0.5)
-                iconSquare.Position = UDim2.new(0, 10, 0.5, 0)
-                iconSquare.Size = UDim2.fromOffset(44, 44)
-                iconSquare.BackgroundColor3 = base
-                iconSquare.BorderSizePixel = 0
-                iconSquare.Parent = card
-                Instance.new("UICorner", iconSquare).CornerRadius = UDim.new(0, 10)
-
-                local iconLabel = Instance.new("TextLabel")
-                iconLabel.Size = UDim2.new(1, 0, 1, 0)
-                iconLabel.BackgroundTransparency = 1
-                iconLabel.Font = Enum.Font.GothamBold
-                iconLabel.Text = tostring(icon_glyph or "\226\150\136")
-                iconLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-                iconLabel.TextSize = 18
-                iconLabel.Parent = iconSquare
-
-                local titleLabel = Instance.new("TextLabel")
-                titleLabel.AnchorPoint = Vector2.new(0, 0)
-                titleLabel.Position = UDim2.new(0, 66, 0, 10)
-                titleLabel.Size = UDim2.new(1, -76, 0, 18)
-                titleLabel.BackgroundTransparency = 1
-                titleLabel.Font = Enum.Font.GothamBlack
-                titleLabel.Text = string.upper(title)
-                titleLabel.TextColor3 = Color3.fromRGB(45, 25, 80)
-                titleLabel.TextSize = 13
-                titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-                titleLabel.Parent = card
-
-                local metricsLabel = Instance.new("TextLabel")
-                metricsLabel.Position = UDim2.new(0, 66, 0, 32)
-                metricsLabel.Size = UDim2.new(1, -76, 0, 20)
-                metricsLabel.BackgroundTransparency = 1
-                metricsLabel.Font = Enum.Font.GothamMedium
-                metricsLabel.RichText = true
-                metricsLabel.Text = string.format(
-                    "<font color=\"rgb(80,60,120)\"><b>%s</b>/Hour</font>  |  <font color=\"rgb(80,60,120)\"><b>%s</b>/Day</font>  |  <font color=\"rgb(80,60,120)\"><b>%s</b>/Week</font>",
-                    tostring(hour_val or "0"), tostring(day_val or "0"), tostring(week_val or "0")
-                )
-                metricsLabel.TextSize = 12
-                metricsLabel.TextXAlignment = Enum.TextXAlignment.Left
-                metricsLabel.Parent = card
-
-                return card
             end
 
             function tab_data:AddButton(button_text, callback)
