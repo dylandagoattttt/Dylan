@@ -5,22 +5,6 @@ local ui_options = {
     can_resize = true,
 }
 
--- IMAGES SERVICE: every image asset the library uses, in one place.
--- All entries are kept in "rbxassetid://<id>" format (or the full
--- roblox.com thumbnail URL for the two assets that need it) so nothing
--- has a bare numeric ID floating around in the code below.
-local Images = {
-    RippleCircle = "rbxassetid://266543268",
-    PanelBackground = "rbxassetid://16736132788", -- used for panel/tab-button backgrounds
-    CloseIcon = "https://www.roblox.com/asset-thumbnail/image?assetId=114840795551292&width=678&height=810&format=png",
-    MinimizedIcon = "https://www.roblox.com/asset-thumbnail/image?assetId=108067574147759&width=678&height=810&format=png",
-    ClanBanner = "rbxassetid://119214568385242",
-    ColorPalette = "rbxassetid://698052001",
-    ColorPaletteIndicator = "rbxassetid://2851926732",
-    ColorSample = "rbxassetid://2851929490",
-    SaturationBar = "rbxassetid://3641079629",
-}
-
 do
     local imgui = game:GetService("CoreGui"):FindFirstChild("imgui")
     if imgui then imgui:Destroy() end
@@ -47,7 +31,7 @@ circle.Name = "Circle"
 circle.Parent = prefabs
 circle.BackgroundColor3 = Color3.new(1, 1, 1)
 circle.BackgroundTransparency = 1
-circle.Image = Images.RippleCircle
+circle.Image = "rbxassetid://266543268"
 circle.ImageTransparency = 0.5
 
 uiListLayout3.Parent = prefabs
@@ -315,7 +299,7 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent, 
     bgImage.Size = UDim2.fromScale(1, 1)
     bgImage.BackgroundTransparency = 1
     bgImage.BorderSizePixel = 0
-    bgImage.Image = Images.PanelBackground
+    bgImage.Image = "rbxassetid://16736132788"
     bgImage.ImageTransparency = 0
     bgImage.ScaleType = Enum.ScaleType.Stretch
     bgImage.Parent = panel.Frame
@@ -332,173 +316,118 @@ function library:AddWindow(title, options)
     options.tween_time = 0.1
 
     -- LAYOUT PARAMETERS
-    -- Single merged frame now (was Main + Side as two separate panels).
-    -- Width is roughly the old Main + Gap + Side combined so the merged
-    -- frame takes up about the same footprint as the old two-panel layout.
-    local MainWidth = 0.78
-    local MainHeight = 0.92
-    local SidebarWidth = 0.24 -- fraction of the merged frame's width, not the screen
+    -- Single merged panel (was Main + Side as two separate floating panels).
+    -- Bigger and perfectly centered on screen.
+    local MainWidth = 0.62
+    local MainHeight = 0.82
 
-    -- Main panel (perfectly centered) - now the only panel
     local MainSize = UDim2.fromScale(MainWidth, MainHeight)
     local MainPos = UDim2.fromScale(0.5, 0.5)
-    local MainPanel = CreatePanel("Main_" .. windows, MainPos, MainSize, 20, 1, windowsFrame, options.main_color)
+    local MainPanel = CreatePanel("Window_" .. windows, MainPos, MainSize, 20, 1, windowsFrame, options.main_color)
+    MainPanel.Frame.ClipsDescendants = true -- keep banner corners rounded
 
-    -- CLOSE BUTTON - top-right corner of the main panel (header removed, so
-    -- this now sits directly on the panel's own corner instead of the
-    -- old title bar).
+    -- BANNER (clan image, fills the top of the merged panel)
+    local Banner = Instance.new("ImageLabel")
+    Banner.Name = "Banner"
+    Banner.Size = UDim2.new(1, 0, 0.26, 0)
+    Banner.Position = UDim2.new(0, 0, 0, 0)
+    Banner.BackgroundTransparency = 1
+    Banner.BorderSizePixel = 0
+    Banner.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=119214568385242&width=678&height=810&format=png"
+    Banner.ScaleType = Enum.ScaleType.Crop
+    Banner.ZIndex = 2
+    Banner.Parent = MainPanel.Frame
+
+    local BannerShade = Instance.new("Frame")
+    BannerShade.Name = "BannerShade"
+    BannerShade.Size = UDim2.new(1, 0, 1, 0)
+    BannerShade.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    BannerShade.BackgroundTransparency = 1
+    BannerShade.BorderSizePixel = 0
+    BannerShade.ZIndex = 3
+    BannerShade.Parent = Banner
+    local BannerGradient = Instance.new("UIGradient")
+    BannerGradient.Rotation = 90
+    BannerGradient.Transparency = NumberSequence.new{
+        NumberSequenceKeypoint.new(0, 1),
+        NumberSequenceKeypoint.new(0.7, 1),
+        NumberSequenceKeypoint.new(1, 0.15)
+    }
+    BannerGradient.Parent = BannerShade
+
+    -- PROFILE SECTION (overlaps the bottom edge of the banner)
+    local Profile = Instance.new("Frame")
+    Profile.Name = "Profile"
+    Profile.Size = UDim2.new(1, -30, 0, 74)
+    Profile.Position = UDim2.new(0, 15, 0.26, -37)
+    Profile.BackgroundTransparency = 1
+    Profile.ZIndex = 5
+    Profile.Parent = MainPanel.Frame
+
+    local Avatar = Instance.new("ImageLabel")
+    Avatar.Name = "Avatar"
+    Avatar.Size = UDim2.fromOffset(72, 72)
+    Avatar.Position = UDim2.new(0, 0, 0, 2)
+    Avatar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Avatar.Image = "" -- set clan/player thumbnail here
+    Avatar.ZIndex = 6
+    Avatar.Parent = Profile
+    Instance.new("UICorner", Avatar).CornerRadius = UDim.new(1, 0)
+    local AvatarStroke = Instance.new("UIStroke")
+    AvatarStroke.Color = Color3.fromRGB(255, 255, 255)
+    AvatarStroke.Thickness = 3
+    AvatarStroke.Parent = Avatar
+
+    local ProfileName = Instance.new("TextLabel")
+    ProfileName.Name = "ProfileName"
+    ProfileName.Size = UDim2.new(1, -90, 0, 30)
+    ProfileName.Position = UDim2.new(0, 88, 0, 10)
+    ProfileName.BackgroundTransparency = 1
+    ProfileName.Font = Enum.Font.GothamBlack
+    ProfileName.Text = title
+    ProfileName.TextScaled = true
+    ProfileName.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ProfileName.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    ProfileName.TextStrokeTransparency = 0.3
+    ProfileName.TextXAlignment = Enum.TextXAlignment.Left
+    ProfileName.ZIndex = 6
+    ProfileName.Parent = Profile
+
+    local ProfileSubtitle = Instance.new("TextLabel")
+    ProfileSubtitle.Name = "ProfileSubtitle"
+    ProfileSubtitle.Size = UDim2.new(1, -90, 0, 22)
+    ProfileSubtitle.Position = UDim2.new(0, 88, 0, 42)
+    ProfileSubtitle.BackgroundTransparency = 1
+    ProfileSubtitle.Font = Enum.Font.GothamMedium
+    ProfileSubtitle.Text = "Member"
+    ProfileSubtitle.TextScaled = true
+    ProfileSubtitle.TextColor3 = Color3.fromRGB(230, 230, 230)
+    ProfileSubtitle.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    ProfileSubtitle.TextStrokeTransparency = 0.5
+    ProfileSubtitle.TextXAlignment = Enum.TextXAlignment.Left
+    ProfileSubtitle.ZIndex = 6
+    ProfileSubtitle.Parent = Profile
+
+    -- CLOSE BUTTON (top-right corner, above the banner)
     local CloseButton = Instance.new("ImageButton")
     CloseButton.Name = "CloseButton"
-    CloseButton.AnchorPoint = Vector2.new(0.5, 0.5)
-    CloseButton.Position = UDim2.new(1, 0, 0, 0)   -- original position
-    CloseButton.Size = UDim2.fromOffset(56, 56)
+    CloseButton.AnchorPoint = Vector2.new(1, 0)
+    CloseButton.Position = UDim2.new(1, -14, 0, 14)
+    CloseButton.Size = UDim2.fromOffset(40, 40)
     CloseButton.BackgroundTransparency = 1
     CloseButton.BorderSizePixel = 0
-    CloseButton.Image = Images.CloseIcon
+    CloseButton.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=114840795551292&width=678&height=810&format=png"
     CloseButton.ScaleType = Enum.ScaleType.Fit
     CloseButton.ZIndex = 10
     CloseButton.Parent = MainPanel.Frame
     Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(1, 0)
 
     CloseButton.MouseEnter:Connect(function()
-        CloseButton:TweenSize(UDim2.fromOffset(60, 60), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
+        CloseButton:TweenSize(UDim2.fromOffset(44, 44), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
     CloseButton.MouseLeave:Connect(function()
-        CloseButton:TweenSize(UDim2.fromOffset(56, 56), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
+        CloseButton:TweenSize(UDim2.fromOffset(40, 40), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
-
-    -- BANNER (clan image strip, sits at the very top now that the header is gone)
-    -- Defaults to your clan banner asset; override per-window via
-    -- `options.banner_image` if you ever want a different one.
-    local Banner = Instance.new("ImageLabel")
-    Banner.Name = "Banner"
-    Banner.Position = UDim2.fromScale(0, 0)
-    Banner.Size = UDim2.new(1, 0, 0, 90)
-    Banner.BackgroundColor3 = Color3.fromRGB(20, 15, 30)
-    Banner.BackgroundTransparency = 0
-    Banner.BorderSizePixel = 0
-    Banner.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=119214568385242&width=678&height=810&format=png"
-    Banner.ScaleType = Enum.ScaleType.Crop
-    Banner.ZIndex = 1
-    Banner.Parent = MainPanel.Frame
-    Instance.new("UICorner", Banner).CornerRadius = UDim.new(0, 20)
-
-    -- Mask the bottom corners of the banner square so only the top corners
-    -- round off (the panel underneath already has the corner radius).
-    local BannerMask = Instance.new("Frame")
-    BannerMask.Name = "BannerMask"
-    BannerMask.AnchorPoint = Vector2.new(0, 1)
-    BannerMask.Position = UDim2.new(0, 0, 1, 0)
-    BannerMask.Size = UDim2.new(1, 0, 0, 20)
-    BannerMask.BackgroundColor3 = Banner.BackgroundColor3
-    BannerMask.BorderSizePixel = 0
-    BannerMask.ZIndex = 1
-    BannerMask.Parent = Banner
-
-    local BannerGradient = Instance.new("UIGradient")
-    BannerGradient.Rotation = 90
-    BannerGradient.Transparency = NumberSequence.new{
-        NumberSequenceKeypoint.new(0, 1),
-        NumberSequenceKeypoint.new(0.6, 1),
-        NumberSequenceKeypoint.new(1, 0.15),
-    }
-    BannerGradient.Color = ColorSequence.new(Color3.fromRGB(0, 0, 0))
-    BannerGradient.Parent = Banner
-
-    -- SIDEBAR (merged into the same frame - was the separate Side panel)
-    local Sidebar = Instance.new("Frame")
-    Sidebar.Name = "Sidebar"
-    Sidebar.Position = UDim2.new(0, 0, 0, Banner.Size.Y.Offset)
-    Sidebar.Size = UDim2.new(SidebarWidth, 0, 1, -Banner.Size.Y.Offset)
-    Sidebar.BackgroundTransparency = 1
-    Sidebar.BorderSizePixel = 0
-    Sidebar.Parent = MainPanel.Frame
-
-    local SidebarDivider = Instance.new("Frame")
-    SidebarDivider.Name = "Divider"
-    SidebarDivider.AnchorPoint = Vector2.new(1, 0)
-    SidebarDivider.Position = UDim2.new(1, 0, 0, 0)
-    SidebarDivider.Size = UDim2.new(0, 1, 1, 0)
-    SidebarDivider.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    SidebarDivider.BackgroundTransparency = 0.85
-    SidebarDivider.BorderSizePixel = 0
-    SidebarDivider.Parent = Sidebar
-
-    -- PROFILE SECTION (auto-filled from the local player: avatar + username)
-    local Profile = Instance.new("Frame")
-    Profile.Name = "Profile"
-    Profile.Position = UDim2.new(0, 10, 0, 12)
-    Profile.Size = UDim2.new(1, -20, 0, 60)
-    Profile.BackgroundTransparency = 1
-    Profile.BorderSizePixel = 0
-    Profile.Parent = Sidebar
-
-    local Avatar = Instance.new("ImageLabel")
-    Avatar.Name = "Avatar"
-    Avatar.Size = UDim2.fromOffset(48, 48)
-    Avatar.Position = UDim2.new(0, 0, 0.5, 0)
-    Avatar.AnchorPoint = Vector2.new(0, 0.5)
-    Avatar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Avatar.BackgroundTransparency = 0.85
-    Avatar.BorderSizePixel = 0
-    Avatar.ScaleType = Enum.ScaleType.Crop
-    Avatar.Parent = Profile
-    Instance.new("UICorner", Avatar).CornerRadius = UDim.new(1, 0)
-
-    local AvatarStroke = Instance.new("UIStroke")
-    AvatarStroke.Color = Color3.fromRGB(255, 255, 255)
-    AvatarStroke.Thickness = 1.5
-    AvatarStroke.Transparency = 0.4
-    AvatarStroke.Parent = Avatar
-
-    task.spawn(function()
-        local ok, content = pcall(function()
-            return ps:GetUserThumbnailAsync(p.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
-        end)
-        if ok and content then
-            Avatar.Image = content
-        end
-    end)
-
-    local Username = Instance.new("TextLabel")
-    Username.Name = "Username"
-    Username.Position = UDim2.new(0, 58, 0.5, -18)
-    Username.Size = UDim2.new(1, -58, 0, 18)
-    Username.BackgroundTransparency = 1
-    Username.Font = Enum.Font.GothamBlack
-    Username.Text = p.DisplayName or p.Name
-    Username.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Username.TextSize = 14
-    Username.TextXAlignment = Enum.TextXAlignment.Left
-    Username.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-    Username.TextStrokeTransparency = 0.4
-    Username.TextTruncate = Enum.TextTruncate.AtEnd
-    Username.Parent = Profile
-
-    local Handle = Instance.new("TextLabel")
-    Handle.Name = "Handle"
-    Handle.Position = UDim2.new(0, 58, 0.5, 2)
-    Handle.Size = UDim2.new(1, -58, 0, 16)
-    Handle.BackgroundTransparency = 1
-    Handle.Font = Enum.Font.Gotham
-    Handle.Text = "@" .. p.Name
-    Handle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Handle.TextTransparency = 0.35
-    Handle.TextSize = 12
-    Handle.TextXAlignment = Enum.TextXAlignment.Left
-    Handle.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-    Handle.TextStrokeTransparency = 0.5
-    Handle.TextTruncate = Enum.TextTruncate.AtEnd
-    Handle.Parent = Profile
-
-    local ProfileDivider = Instance.new("Frame")
-    ProfileDivider.Name = "ProfileDivider"
-    ProfileDivider.Position = UDim2.new(0, 10, 0, Profile.Position.Y.Offset + Profile.Size.Y.Offset + 8)
-    ProfileDivider.Size = UDim2.new(1, -20, 0, 1)
-    ProfileDivider.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    ProfileDivider.BackgroundTransparency = 0.85
-    ProfileDivider.BorderSizePixel = 0
-    ProfileDivider.Parent = Sidebar
 
     -- MINIMIZED STATE (restore button) with PORTAL IMAGE + ANIMATION
     local MinimizedFrame = Instance.new("ImageButton")
@@ -510,7 +439,7 @@ function library:AddWindow(title, options)
     MinimizedFrame.BorderSizePixel = 0
     MinimizedFrame.Visible = false
     MinimizedFrame.ZIndex = 100
-    MinimizedFrame.Image = Images.MinimizedIcon
+    MinimizedFrame.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=108067574147759&width=678&height=810&format=png"
     MinimizedFrame.ScaleType = Enum.ScaleType.Fit
     MinimizedFrame.Parent = windowsFrame
     Instance.new("UICorner", MinimizedFrame).CornerRadius = UDim.new(1, 0)
@@ -583,40 +512,61 @@ function library:AddWindow(title, options)
     -- Store references
     local window_data = {}
     local Window = MainPanel.Frame
+
+    -- BODY: the merged Nav (left) + Content (right) area, below the
+    -- banner/profile section. Replaces what used to be two separate
+    -- floating panels.
+    local Body = Instance.new("Frame")
+    Body.Name = "Body"
+    Body.Position = UDim2.new(0, 12, 0.26, 48)
+    Body.Size = UDim2.new(1, -24, 0.74, -60)
+    Body.BackgroundTransparency = 1
+    Body.BorderSizePixel = 0
+    Body.Parent = MainPanel.Frame
+
+    local NavWidth = 0.27
+    local Nav = Instance.new("Frame")
+    Nav.Name = "Nav"
+    Nav.Size = UDim2.new(NavWidth, -5, 1, 0)
+    Nav.BackgroundTransparency = 1
+    Nav.BorderSizePixel = 0
+    Nav.Parent = Body
+
+    local ContentArea = Instance.new("Frame")
+    ContentArea.Name = "ContentArea"
+    ContentArea.Position = UDim2.new(NavWidth, 5, 0, 0)
+    ContentArea.Size = UDim2.new(1 - NavWidth, -5, 1, 0)
+    ContentArea.BackgroundTransparency = 1
+    ContentArea.BorderSizePixel = 0
+    ContentArea.Parent = Body
+
     local Tabs = Instance.new("Frame")
     Tabs.Name = "Tabs"
-    -- Content column now sits to the right of the merged Sidebar, below the Banner.
-    Tabs.Size = UDim2.new(1 - SidebarWidth, -20, 1, -Banner.Size.Y.Offset - 20)
-    Tabs.Position = UDim2.new(SidebarWidth, 10, 0, Banner.Size.Y.Offset + 10)
+    Tabs.Size = UDim2.new(1, 0, 1, 0)
     Tabs.BackgroundTransparency = 1
     Tabs.BorderSizePixel = 0
-    Tabs.Parent = MainPanel.Frame
+    Tabs.Parent = ContentArea
 
     -- TabButtons with drop shadow
-    -- Tab button list now lives in the Sidebar, below the profile block.
-    local TabButtonsTop = ProfileDivider.Position.Y.Offset + 10
-
     local TabButtonsShadow = Instance.new("Frame")
     TabButtonsShadow.Name = "TabButtonsShadow"
-    TabButtonsShadow.Size = UDim2.new(1, -20, 1, -(TabButtonsTop + 10))
-    TabButtonsShadow.Position = UDim2.new(0, 10, 0, TabButtonsTop)
+    TabButtonsShadow.Size = UDim2.new(1, 0, 1, 0)
     TabButtonsShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     TabButtonsShadow.BackgroundTransparency = 0.5
     TabButtonsShadow.BorderSizePixel = 0
     TabButtonsShadow.ZIndex = 0
-    TabButtonsShadow.Parent = Sidebar
+    TabButtonsShadow.Parent = Nav
     Instance.new("UICorner", TabButtonsShadow).CornerRadius = UDim.new(0, 10)
 
     local TabButtons = Instance.new("ScrollingFrame")
     TabButtons.Name = "TabButtons"
-    TabButtons.Size = UDim2.new(1, -20, 1, -(TabButtonsTop + 10))
-    TabButtons.Position = UDim2.new(0, 10, 0, TabButtonsTop)
+    TabButtons.Size = UDim2.new(1, 0, 1, 0)
     TabButtons.BackgroundTransparency = 1
     TabButtons.BorderSizePixel = 0
     TabButtons.CanvasSize = UDim2.new(0, 0, 0, 0)
     TabButtons.ScrollBarThickness = 4
     TabButtons.ZIndex = 1
-    TabButtons.Parent = Sidebar
+    TabButtons.Parent = Nav
 
     local TabButtonsList = Instance.new("UIListLayout")
     TabButtonsList.SortOrder = Enum.SortOrder.LayoutOrder
@@ -634,7 +584,7 @@ function library:AddWindow(title, options)
             new_button.Size = UDim2.new(1, 0, 0, 35)
             new_button.BackgroundTransparency = 1
             new_button.BorderSizePixel = 0
-            new_button.Image = Images.PanelBackground
+            new_button.Image = "rbxassetid://16736132788"
             new_button.ImageTransparency = 0.3
             new_button.ScaleType = Enum.ScaleType.Stretch
             new_button.Parent = TabButtons
@@ -1685,7 +1635,7 @@ function library:AddWindow(title, options)
                 palette.Position = UDim2.new(0.05, 0, 0.05, 0)
                 palette.BackgroundColor3 = Color3.new(1, 1, 1)
                 palette.BackgroundTransparency = 1
-                palette.Image = Images.ColorPalette
+                palette.Image = "rbxassetid://698052001"
                 palette.ScaleType = Enum.ScaleType.Slice
                 palette.SliceCenter = Rect.new(4, 4, 4, 4)
                 palette.Parent = color_picker
@@ -1696,7 +1646,7 @@ function library:AddWindow(title, options)
                 palette_indicator.BackgroundColor3 = Color3.new(1, 1, 1)
                 palette_indicator.BackgroundTransparency = 1
                 palette_indicator.ZIndex = 2
-                palette_indicator.Image = Images.ColorPaletteIndicator
+                palette_indicator.Image = "rbxassetid://2851926732"
                 palette_indicator.ImageColor3 = Color3.new(0, 0, 0)
                 palette_indicator.ScaleType = Enum.ScaleType.Slice
                 palette_indicator.SliceCenter = Rect.new(12, 12, 12, 12)
@@ -1708,7 +1658,7 @@ function library:AddWindow(title, options)
                 sample.Position = UDim2.new(0.8, 0, 0.05, 0)
                 sample.BackgroundColor3 = Color3.new(1, 1, 1)
                 sample.BackgroundTransparency = 1
-                sample.Image = Images.ColorSample
+                sample.Image = "rbxassetid://2851929490"
                 sample.ScaleType = Enum.ScaleType.Slice
                 sample.SliceCenter = Rect.new(4, 4, 4, 4)
                 sample.Parent = color_picker
@@ -1718,7 +1668,7 @@ function library:AddWindow(title, options)
                 saturation.Size = UDim2.new(0, 15, 0, 100)
                 saturation.Position = UDim2.new(0.65, 0, 0.05, 0)
                 saturation.BackgroundColor3 = Color3.new(1, 1, 1)
-                saturation.Image = Images.SaturationBar
+                saturation.Image = "rbxassetid://3641079629"
                 saturation.Parent = color_picker
 
                 local saturation_indicator = Instance.new("Frame")
