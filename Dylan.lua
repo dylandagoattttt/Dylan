@@ -315,7 +315,7 @@ function library:AddWindow(title, options)
     options = (typeof(options) == "table") and options or ui_options
     options.tween_time = 0.1
 
-    -- LAYOUT PARAMETERS (single merged panel â€” sidebar + content combined)
+    -- LAYOUT PARAMETERS (single merged panel — sidebar + content combined)
     local PanelWidth = 0.50
     local PanelHeight = 0.86
     local BannerHeight = 74      -- px, kept compact per design
@@ -406,6 +406,22 @@ function library:AddWindow(title, options)
     AvatarStroke.Thickness = 2.5
     AvatarStroke.Transparency = 0.1
     AvatarStroke.Parent = Avatar
+
+    -- Small "online" status dot overlapping the avatar (style detail borrowed from reference)
+    local StatusDot = Instance.new("Frame")
+    StatusDot.Name = "StatusDot"
+    StatusDot.AnchorPoint = Vector2.new(0.5, 0.5)
+    StatusDot.Position = UDim2.new(1, -4, 1, -4)
+    StatusDot.Size = UDim2.fromOffset(14, 14)
+    StatusDot.BackgroundColor3 = Color3.fromRGB(60, 220, 100)
+    StatusDot.BorderSizePixel = 0
+    StatusDot.ZIndex = 4
+    StatusDot.Parent = Avatar
+    Instance.new("UICorner", StatusDot).CornerRadius = UDim.new(1, 0)
+    local StatusDotStroke = Instance.new("UIStroke")
+    StatusDotStroke.Color = Color3.fromRGB(255, 255, 255)
+    StatusDotStroke.Thickness = 2
+    StatusDotStroke.Parent = StatusDot
 
     do -- best-effort: fetch the local player's real avatar thumbnail, fall back silently
         local ok, content = pcall(function()
@@ -533,7 +549,7 @@ function library:AddWindow(title, options)
     local window_data = {}
     local Window = MainPanel.Frame
 
-    -- CONTENT AREA (tab list on the left, tab content on the right â€” one frame now)
+    -- CONTENT AREA (tab list on the left, tab content on the right — one frame now)
     local Tabs = Instance.new("Frame")
     Tabs.Name = "Tabs"
     Tabs.Size = UDim2.new(1 - SidebarScale, -20, 1, -(TopSectionHeight + 20))
@@ -1446,7 +1462,7 @@ function library:AddWindow(title, options)
                 indicator.Position = UDim2.new(1, -30, 0, 0)
                 indicator.BackgroundTransparency = 1
                 indicator.Font = Enum.Font.GothamBlack
-                indicator.Text = "â–¼"
+                indicator.Text = "▼"
                 indicator.TextColor3 = Lighten(base, 0.5)
                 indicator.TextSize = 14
                 indicator.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
@@ -1887,7 +1903,7 @@ function library:AddWindow(title, options)
                 folderTextShadow.Position = UDim2.new(0, offX, 0, offY)
                 folderTextShadow.BackgroundTransparency = 1
                 folderTextShadow.Font = Enum.Font.GothamBlack
-                folderTextShadow.Text = "â–¼ " .. folder_name
+                folderTextShadow.Text = "▼ " .. folder_name
                 folderTextShadow.TextColor3 = Color3.fromRGB(20, 20, 20)
                 folderTextShadow.TextSize = 14
                 folderTextShadow.TextXAlignment = Enum.TextXAlignment.Left
@@ -1900,7 +1916,7 @@ function library:AddWindow(title, options)
                 folderTextLabel.Size = UDim2.new(1, 0, 1, 0)
                 folderTextLabel.BackgroundTransparency = 1
                 folderTextLabel.Font = Enum.Font.GothamBlack
-                folderTextLabel.Text = "â–¼ " .. folder_name
+                folderTextLabel.Text = "▼ " .. folder_name
                 folderTextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
                 folderTextLabel.TextSize = 14
                 folderTextLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -1937,12 +1953,12 @@ function library:AddWindow(title, options)
                 button.MouseButton1Click:Connect(function()
                     open = not open
                     if open then
-                        folderTextLabel.Text = "â–² " .. folder_name
-                        folderTextShadow.Text = "â–² " .. folder_name
+                        folderTextLabel.Text = "▲ " .. folder_name
+                        folderTextShadow.Text = "▲ " .. folder_name
                         objects.Visible = true
                     else
-                        folderTextLabel.Text = "â–¼ " .. folder_name
-                        folderTextShadow.Text = "â–¼ " .. folder_name
+                        folderTextLabel.Text = "▼ " .. folder_name
+                        folderTextShadow.Text = "▼ " .. folder_name
                         objects.Visible = false
                     end
                     Resize(folder, {Size = UDim2.new(1, 0, 0, (open and gFolderLen() or 35))}, options.tween_time)
