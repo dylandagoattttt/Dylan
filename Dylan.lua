@@ -1525,7 +1525,7 @@ function library:AddWindow(title, options)
                 indicator.Position = UDim2.new(1, -30, 0, 0)
                 indicator.BackgroundTransparency = 1
                 indicator.Font = Enum.Font.GothamBlack
-                indicator.Text = "▼"
+                indicator.Text = "â–¼"
                 indicator.TextColor3 = Lighten(base, 0.5)
                 indicator.TextSize = 14
                 indicator.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
@@ -1577,6 +1577,14 @@ function library:AddWindow(title, options)
 
                 local open = false
                 local selectedObject = nil
+                local boxTween = nil
+
+                local function resizeBox(size)
+                    if boxTween then boxTween:Cancel() end
+                    local tweenInfo = TweenInfo.new(options.tween_time, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+                    boxTween = TweenService:Create(box, tweenInfo, {Size = size})
+                    boxTween:Play()
+                end
 
                 local closeDropdown, openDropdown
 
@@ -1584,11 +1592,8 @@ function library:AddWindow(title, options)
                     if not open then return end
                     open = false
                     dropdown_open = false
-                    Resize(box, {Size = UDim2.new(1, 0, 0, 0)}, options.tween_time)
+                    resizeBox(UDim2.new(1, 0, 0, 0))
                     TweenService:Create(indicator, TweenInfo.new(0.15), {Rotation = 0}):Play()
-                    task.delay(options.tween_time, function()
-                        tabContainer.ScrollingEnabled = true
-                    end)
                     if activeDropdownClose == closeDropdown then
                         activeDropdownClose = nil
                     end
@@ -1613,12 +1618,18 @@ function library:AddWindow(title, options)
                     -- causing the whole tab's content to spill out over the UI.
                     -- The box (ZIndex 50) will simply get clipped if it's opened
                     -- near the bottom of the visible scroll area.
-                    tabContainer.ScrollingEnabled = false -- lock scrolling while
-                        -- the options list is open so it can't be scrolled
-                        -- out from under/over the rest of the UI
-                    Resize(box, {Size = UDim2.new(1, 0, 0, len)}, options.tween_time)
+                    resizeBox(UDim2.new(1, 0, 0, len))
                     TweenService:Create(indicator, TweenInfo.new(0.15), {Rotation = 180}):Play()
                 end
+
+                -- Auto-close instead of locking scroll: locking scroll while a
+                -- dropdown is open meant that if it ever ended up out of view
+                -- (scrolled past), you couldn't reach it to close it again and
+                -- the whole tab would freeze. Closing it on scroll keeps
+                -- scrolling always usable.
+                tabContainer:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
+                    if open then closeDropdown() end
+                end)
 
                 dropdown.MouseButton1Click:Connect(function()
                     if open then
@@ -1682,7 +1693,7 @@ function library:AddWindow(title, options)
                             len = 10 * 34
                             objects.CanvasSize = UDim2.new(0, 0, 0, (#objects:GetChildren() - 1) * 34)
                         end
-                        Resize(box, {Size = UDim2.new(1, 0, 0, len)}, options.tween_time)
+                        resizeBox(UDim2.new(1, 0, 0, len))
                     end
 
                     object.MouseButton1Click:Connect(function()
@@ -1984,7 +1995,7 @@ function library:AddWindow(title, options)
                 folderTextShadow.Position = UDim2.new(0, offX, 0, offY)
                 folderTextShadow.BackgroundTransparency = 1
                 folderTextShadow.Font = Enum.Font.GothamBlack
-                folderTextShadow.Text = "▼ " .. folder_name
+                folderTextShadow.Text = "â–¼ " .. folder_name
                 folderTextShadow.TextColor3 = Color3.fromRGB(20, 20, 20)
                 folderTextShadow.TextSize = 14
                 folderTextShadow.TextXAlignment = Enum.TextXAlignment.Left
@@ -1997,7 +2008,7 @@ function library:AddWindow(title, options)
                 folderTextLabel.Size = UDim2.new(1, 0, 1, 0)
                 folderTextLabel.BackgroundTransparency = 1
                 folderTextLabel.Font = Enum.Font.GothamBlack
-                folderTextLabel.Text = "▼ " .. folder_name
+                folderTextLabel.Text = "â–¼ " .. folder_name
                 folderTextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
                 folderTextLabel.TextSize = 14
                 folderTextLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -2034,12 +2045,12 @@ function library:AddWindow(title, options)
                 button.MouseButton1Click:Connect(function()
                     open = not open
                     if open then
-                        folderTextLabel.Text = "▲ " .. folder_name
-                        folderTextShadow.Text = "▲ " .. folder_name
+                        folderTextLabel.Text = "â–² " .. folder_name
+                        folderTextShadow.Text = "â–² " .. folder_name
                         objects.Visible = true
                     else
-                        folderTextLabel.Text = "▼ " .. folder_name
-                        folderTextShadow.Text = "▼ " .. folder_name
+                        folderTextLabel.Text = "â–¼ " .. folder_name
+                        folderTextShadow.Text = "â–¼ " .. folder_name
                         objects.Visible = false
                     end
                     Resize(folder, {Size = UDim2.new(1, 0, 0, (open and gFolderLen() or 35))}, options.tween_time)
@@ -2064,9 +2075,173 @@ function library:AddWindow(title, options)
                 return folder_data, folder
             end
 
+            -- Live global chat, rendered in the UI but backed by Roblox's
+            -- real chat system - other players actually see what you send,
+            -- and you see what they say, same as the normal chat bar.
+            function tab_data:AddChat(chat_options)
+                local chat_data = {}
+                chat_options = typeof(chat_options) == "table" and chat_options or {}
+                chat_options = {
+                    ["y"] = tonumber(chat_options.y) or 220,
+                    ["placeholder"] = tostring(chat_options.placeholder or "Say something..."),
+                }
+
+                local chatFrame = Instance.new("Frame")
+                chatFrame.Size = UDim2.new(1, 0, 0, chat_options.y)
+                chatFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                chatFrame.BackgroundTransparency = 0.85
+                chatFrame.BorderSizePixel = 0
+                chatFrame.ClipsDescendants = true
+                chatFrame.Parent = tabContainer
+                Instance.new("UICorner", chatFrame).CornerRadius = UDim.new(0, 10)
+
+                local log = Instance.new("ScrollingFrame")
+                log.Name = "Log"
+                log.Size = UDim2.new(1, -10, 1, -42)
+                log.Position = UDim2.new(0, 5, 0, 5)
+                log.BackgroundTransparency = 1
+                log.BorderSizePixel = 0
+                log.CanvasSize = UDim2.new(0, 0, 0, 0)
+                log.ScrollBarThickness = 4
+                log.Parent = chatFrame
+
+                local logLayout = Instance.new("UIListLayout")
+                logLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                logLayout.Padding = UDim.new(0, 2)
+                logLayout.Parent = log
+
+                logLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                    log.CanvasSize = UDim2.new(0, 0, 0, logLayout.AbsoluteContentSize.Y + 6)
+                    log.CanvasPosition = Vector2.new(0, math.max(0, logLayout.AbsoluteContentSize.Y - log.AbsoluteSize.Y))
+                end)
+
+                local inputBox = Instance.new("TextBox")
+                inputBox.Size = UDim2.new(1, -10, 0, 30)
+                inputBox.Position = UDim2.new(0, 5, 1, -35)
+                inputBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                inputBox.BackgroundTransparency = 0.8
+                inputBox.BorderSizePixel = 0
+                inputBox.ClearTextOnFocus = false
+                inputBox.Font = Enum.Font.Gotham
+                inputBox.PlaceholderColor3 = Color3.fromRGB(200, 200, 200)
+                inputBox.PlaceholderText = chat_options.placeholder
+                inputBox.Text = ""
+                inputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+                inputBox.TextSize = 13
+                inputBox.TextXAlignment = Enum.TextXAlignment.Left
+                inputBox.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                inputBox.TextStrokeTransparency = 0.4
+                inputBox.Parent = chatFrame
+                Instance.new("UICorner", inputBox).CornerRadius = UDim.new(0, 8)
+
+                -- Deterministic per-name color, same idea as Roblox's own chat tag colors
+                local namePalette = {
+                    Color3.fromRGB(253, 41, 67), Color3.fromRGB(1, 162, 255), Color3.fromRGB(2, 184, 87),
+                    Color3.fromRGB(255, 151, 0), Color3.fromRGB(178, 89, 255), Color3.fromRGB(255, 91, 172),
+                    Color3.fromRGB(0, 190, 190), Color3.fromRGB(240, 200, 0),
+                }
+                local function nameColor(username)
+                    local sum = 0
+                    for i = 1, #username do sum = sum + string.byte(username, i) end
+                    return namePalette[(sum % #namePalette) + 1]
+                end
+
+                -- RichText is used for name coloring, so untrusted chat text
+                -- (from other players) must be escaped before it goes in
+                local function escapeRichText(s)
+                    s = s:gsub("&", "&amp;")
+                    s = s:gsub("<", "&lt;")
+                    s = s:gsub(">", "&gt;")
+                    s = s:gsub('"', "&quot;")
+                    return s
+                end
+
+                function chat_data:AddMessage(playerName, text, color)
+                    local line = Instance.new("TextLabel")
+                    line.Size = UDim2.new(1, 0, 0, 0)
+                    line.AutomaticSize = Enum.AutomaticSize.Y
+                    line.BackgroundTransparency = 1
+                    line.Font = Enum.Font.Gotham
+                    line.RichText = true
+                    line.TextWrapped = true
+                    line.TextXAlignment = Enum.TextXAlignment.Left
+                    line.TextYAlignment = Enum.TextYAlignment.Top
+                    line.TextColor3 = Color3.fromRGB(230, 230, 230)
+                    line.TextSize = 13
+                    line.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                    line.TextStrokeTransparency = 0.5
+                    local hex = (color or Color3.fromRGB(255, 255, 255)):ToHex()
+                    line.Text = string.format(
+                        '<font color="#%s"><b>%s:</b></font> %s',
+                        hex, escapeRichText(tostring(playerName)), escapeRichText(tostring(text))
+                    )
+                    line.Parent = log
+                    return line
+                end
+
+                -- Hook every current + future player's real chat messages
+                local function hook(plr)
+                    plr.Chatted:Connect(function(message)
+                        chat_data:AddMessage(plr.DisplayName ~= "" and plr.DisplayName or plr.Name, message, nameColor(plr.Name))
+                    end)
+                end
+                for _, plr in pairs(ps:GetPlayers()) do
+                    hook(plr)
+                end
+                ps.PlayerAdded:Connect(hook)
+
+                -- Send through Roblox's own chat plumbing so it's a real,
+                -- server-relayed message other players actually receive
+                local function sendChatMessage(text)
+                    local TCS = game:GetService("TextChatService")
+                    if TCS.ChatVersion == Enum.ChatVersion.TextChatService then
+                        local channel = TCS.TextChannels and TCS.TextChannels:FindFirstChild("RBXGeneral")
+                        if channel then
+                            channel:SendAsync(text)
+                            return
+                        end
+                    end
+                    -- Legacy chat fallback (used by games still on the classic
+                    -- chat system) - this is the same remote the default
+                    -- Roblox chat bar itself fires
+                    pcall(function()
+                        local chatEvents = game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents", 2)
+                        local sayMessageRequest = chatEvents and chatEvents:WaitForChild("SayMessageRequest", 2)
+                        if sayMessageRequest then
+                            sayMessageRequest:FireServer(text, "All")
+                        end
+                    end)
+                end
+
+                inputBox.FocusLost:Connect(function(enterPressed)
+                    if enterPressed and #inputBox.Text > 0 then
+                        sendChatMessage(inputBox.Text)
+                        inputBox.Text = ""
+                    end
+                end)
+
+                function chat_data:Send(text)
+                    text = tostring(text or "")
+                    if #text > 0 then
+                        sendChatMessage(text)
+                    end
+                end
+
+                return chat_data, chatFrame
+            end
+
             return tab_data, tabContainer
         end
     end
+
+    -- Built-in Chat tab - every window gets one automatically
+    do
+        local chatTabData, chatTabContainer = window_data:AddTab("Chat")
+        local chatWidgetData, chatWidgetFrame = chatTabData:AddChat()
+        window_data.ChatTab = chatTabData
+        window_data.Chat = chatWidgetData
+    end
+
     return window_data, Window
 end
 
