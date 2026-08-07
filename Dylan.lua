@@ -1587,8 +1587,6 @@ function library:AddWindow(title, options)
                     Resize(box, {Size = UDim2.new(1, 0, 0, 0)}, options.tween_time)
                     TweenService:Create(indicator, TweenInfo.new(0.15), {Rotation = 0}):Play()
                     task.delay(options.tween_time, function()
-                        tabContainer.ClipsDescendants = true -- restore normal
-                            -- scrolling clip once the box has fully closed
                         tabContainer.ScrollingEnabled = true
                     end)
                     if activeDropdownClose == closeDropdown then
@@ -1609,9 +1607,12 @@ function library:AddWindow(title, options)
                         len = 10 * 34
                         objects.CanvasSize = UDim2.new(0, 0, 0, (#objects:GetChildren() - 1) * 34)
                     end
-                    tabContainer.ClipsDescendants = false -- let the options
-                        -- list render past the ScrollingFrame's own edge
-                        -- instead of being cut off by it
+                    -- NOTE: tabContainer.ClipsDescendants stays on (default true).
+                    -- Turning it off would reveal every OTHER child scrolled out
+                    -- of view too, not just this dropdown's box - that's what was
+                    -- causing the whole tab's content to spill out over the UI.
+                    -- The box (ZIndex 50) will simply get clipped if it's opened
+                    -- near the bottom of the visible scroll area.
                     tabContainer.ScrollingEnabled = false -- lock scrolling while
                         -- the options list is open so it can't be scrolled
                         -- out from under/over the rest of the UI
