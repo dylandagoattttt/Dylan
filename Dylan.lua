@@ -250,6 +250,10 @@ function library:FormatWindows()
     format_windows()
 end
 
+-- Texture used specifically for the header and tab buttons (separate from the
+-- main panel's background texture)
+local accentTextureId = "https://www.roblox.com/asset-thumbnail/image?assetId=118097097134181&width=678&height=810&format=png"
+
 -- Helper function to create panels with new background
 local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent, accentColor, useTexture)
     accentColor = accentColor or ui_options.main_color or Color3.fromRGB(150, 80, 255)
@@ -316,13 +320,15 @@ end
 function library:AddWindow(title, options)
     windows = windows + 1
     local dropdown_open = false
+    local activeDropdownClose = nil -- tracks the currently-open dropdown's close()
+        -- function so opening a new one closes the previous one first
     title = tostring(title or "New Window")
     options = (typeof(options) == "table") and options or ui_options
     options.tween_time = 0.1
 
     -- LAYOUT PARAMETERS - one big, centered frame (side + main merged)
     local MainWidth = 0.66
-    local MainHeight = 0.88
+    local MainHeight = 0.95
     local SideColumnWidth = 0.27  -- fraction of the merged frame used by the tab-list column
     local InnerPad = 0.018
 
@@ -359,10 +365,21 @@ function library:AddWindow(title, options)
     Header.Parent = MainPanel.Frame
     Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 18)
 
-    -- Header is gradient-only now (no texture) - clone the panel's dark gradient
+    -- Header: new texture blended with the same dark gradient
     Header.BackgroundTransparency = 0
     local HeaderGradient = MainPanel.Gradient:Clone()
     HeaderGradient.Parent = Header
+
+    local HeaderBg = Instance.new("ImageLabel")
+    HeaderBg.Name = "HeaderTexture"
+    HeaderBg.Size = UDim2.fromScale(1, 1)
+    HeaderBg.BackgroundTransparency = 1
+    HeaderBg.BorderSizePixel = 0
+    HeaderBg.Image = accentTextureId
+    HeaderBg.ImageTransparency = 0.5
+    HeaderBg.ScaleType = Enum.ScaleType.Stretch
+    HeaderBg.Parent = Header
+    Instance.new("UICorner", HeaderBg).CornerRadius = UDim.new(0, 18)
 
     -- Header title with auto-matched drop shadow
     local titleContainer = Instance.new("Frame")
@@ -556,7 +573,7 @@ function library:AddWindow(title, options)
             local tab_data = {}
             tab_name = tostring(tab_name or "New Tab")
 
-            -- Tab button - gradient only now, no texture
+            -- Tab button - new texture blended with the same dark gradient
             local new_button = Instance.new("ImageButton")
             new_button.Name = "TabButton_" .. tab_name
             new_button.Size = UDim2.new(1, 0, 0, 35)
@@ -569,6 +586,18 @@ function library:AddWindow(title, options)
 
             local buttonGradient = MainPanel.Gradient:Clone()
             buttonGradient.Parent = new_button
+
+            local buttonTexture = Instance.new("ImageLabel")
+            buttonTexture.Name = "ButtonTexture"
+            buttonTexture.Size = UDim2.fromScale(1, 1)
+            buttonTexture.BackgroundTransparency = 1
+            buttonTexture.BorderSizePixel = 0
+            buttonTexture.Image = accentTextureId
+            buttonTexture.ImageTransparency = 0.5
+            buttonTexture.ScaleType = Enum.ScaleType.Stretch
+            buttonTexture.ZIndex = new_button.ZIndex
+            buttonTexture.Parent = new_button
+            Instance.new("UICorner", buttonTexture).CornerRadius = UDim.new(0, 10)
 
             -- Tab button label - Gotham Black with auto-matched drop shadow
             local buttonContainer = Instance.new("Frame")
@@ -1482,29 +1511,48 @@ function library:AddWindow(title, options)
                 local open = false
                 local selectedObject = nil
 
-                dropdown.MouseButton1Click:Connect(function()
-                    open = not open
+                local closeDropdown, openDropdown
+
+                closeDropdown = function()
+                    if not open then return end
+                    open = false
+                    dropdown_open = false
+                    Resize(box, {Size = UDim2.new(1, 0, 0, 0)}, options.tween_time)
+                    TweenService:Create(indicator, TweenInfo.new(0.15), {Rotation = 0}):Play()
+                    task.delay(options.tween_time, function()
+                        tabContainer.ClipsDescendants = true -- restore normal
+                            -- scrolling clip once the box has fully closed
+                    end)
+                    if activeDropdownClose == closeDropdown then
+                        activeDropdownClose = nil
+                    end
+                end
+
+                openDropdown = function()
+                    if open then return end
+                    if activeDropdownClose then activeDropdownClose() end -- close whichever
+                        -- other dropdown is currently open first
+                    open = true
+                    dropdown_open = true
+                    activeDropdownClose = closeDropdown
+
                     local len = (#objects:GetChildren() - 1) * 34
                     if #objects:GetChildren() - 1 >= 10 then
                         len = 10 * 34
                         objects.CanvasSize = UDim2.new(0, 0, 0, (#objects:GetChildren() - 1) * 34)
                     end
+                    tabContainer.ClipsDescendants = false -- let the options
+                        -- list render past the ScrollingFrame's own edge
+                        -- instead of being cut off by it
+                    Resize(box, {Size = UDim2.new(1, 0, 0, len)}, options.tween_time)
+                    TweenService:Create(indicator, TweenInfo.new(0.15), {Rotation = 180}):Play()
+                end
+
+                dropdown.MouseButton1Click:Connect(function()
                     if open then
-                        if dropdown_open then return end
-                        dropdown_open = true
-                        tabContainer.ClipsDescendants = false -- let the options
-                            -- list render past the ScrollingFrame's own edge
-                            -- instead of being cut off by it
-                        Resize(box, {Size = UDim2.new(1, 0, 0, len)}, options.tween_time)
-                        TweenService:Create(indicator, TweenInfo.new(0.15), {Rotation = 180}):Play()
+                        closeDropdown()
                     else
-                        dropdown_open = false
-                        Resize(box, {Size = UDim2.new(1, 0, 0, 0)}, options.tween_time)
-                        TweenService:Create(indicator, TweenInfo.new(0.15), {Rotation = 0}):Play()
-                        task.delay(options.tween_time, function()
-                            tabContainer.ClipsDescendants = true -- restore normal
-                                -- scrolling clip once the box has fully closed
-                        end)
+                        openDropdown()
                     end
                 end)
 
@@ -1566,7 +1614,7 @@ function library:AddWindow(title, options)
                     end
 
                     object.MouseButton1Click:Connect(function()
-                        if dropdown_open then
+                        if open then
                             if selectedObject and selectedObject ~= object then
                                 local prevBar = selectedObject:FindFirstChild("Frame")
                                 TweenService:Create(selectedObject, TweenInfo.new(0.12), {BackgroundTransparency = 0.75}):Play()
@@ -1578,13 +1626,7 @@ function library:AddWindow(title, options)
 
                             dropdownTextLabel.Text = n
                             dropdownTextShadow.Text = n
-                            dropdown_open = false
-                            open = false
-                            Resize(box, {Size = UDim2.new(1, 0, 0, 0)}, options.tween_time)
-                            TweenService:Create(indicator, TweenInfo.new(0.15), {Rotation = 0}):Play()
-                            task.delay(options.tween_time, function()
-                                tabContainer.ClipsDescendants = true
-                            end)
+                            closeDropdown()
                             pcall(callback, n)
                         end
                     end)
