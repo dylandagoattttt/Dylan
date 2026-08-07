@@ -251,8 +251,9 @@ function library:FormatWindows()
 end
 
 -- Helper function to create panels with new background
-local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent, accentColor)
+local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent, accentColor, useTexture)
     accentColor = accentColor or ui_options.main_color or Color3.fromRGB(150, 80, 255)
+    if useTexture == nil then useTexture = true end
     local panel = {}
 
     panel.Shadow = Instance.new("Frame")
@@ -285,25 +286,29 @@ local function CreatePanel(name, anchorPos, size, cornerRadius, zIndex, parent, 
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     stroke.Parent = panel.Frame
 
+    -- Theme gradient: dark slate blend (#121417 -> #2B3038 @ 90deg)
     local gradient = Instance.new("UIGradient")
     gradient.Rotation = 90
     gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0.00, accentColor),
-        ColorSequenceKeypoint.new(0.45, Lighten(accentColor, 0.2)),
-        ColorSequenceKeypoint.new(1.00, Lighten(accentColor, 0.55))
+        ColorSequenceKeypoint.new(0.00, Color3.fromRGB(18, 20, 23)),   -- #121417
+        ColorSequenceKeypoint.new(1.00, Color3.fromRGB(43, 48, 56))    -- #2B3038
     }
     gradient.Parent = panel.Frame
+    panel.Gradient = gradient
 
-    local bgImage = Instance.new("ImageLabel")
-    bgImage.Name = "BackgroundImage"
-    bgImage.Size = UDim2.fromScale(1, 1)
-    bgImage.BackgroundTransparency = 1
-    bgImage.BorderSizePixel = 0
-    bgImage.Image = "rbxassetid://16736132788"
-    bgImage.ImageTransparency = 0
-    bgImage.ScaleType = Enum.ScaleType.Stretch
-    bgImage.Parent = panel.Frame
-    Instance.new("UICorner", bgImage).CornerRadius = UDim.new(0, cornerRadius or 20)
+    if useTexture then
+        local bgImage = Instance.new("ImageLabel")
+        bgImage.Name = "BackgroundImage"
+        bgImage.Size = UDim2.fromScale(1, 1)
+        bgImage.BackgroundTransparency = 1
+        bgImage.BorderSizePixel = 0
+        bgImage.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=108618342844964&width=678&height=810&format=png"
+        bgImage.ImageTransparency = 0.55 -- a little transparent so the gradient blends through
+        bgImage.ScaleType = Enum.ScaleType.Stretch
+        bgImage.Parent = panel.Frame
+        Instance.new("UICorner", bgImage).CornerRadius = UDim.new(0, cornerRadius or 20)
+        panel.BackgroundImage = bgImage
+    end
 
     return panel
 end
@@ -315,14 +320,82 @@ function library:AddWindow(title, options)
     options = (typeof(options) == "table") and options or ui_options
     options.tween_time = 0.1
 
-    -- LAYOUT PARAMETERS (single merged panel, centered + bigger)
-    local MainWidth = 0.62
-    local MainHeight = 0.85
+    -- LAYOUT PARAMETERS - one big, centered frame (side + main merged)
+    local MainWidth = 0.66
+    local MainHeight = 0.88
+    local SideColumnWidth = 0.27  -- fraction of the merged frame used by the tab-list column
+    local InnerPad = 0.018
 
-    -- Main panel (perfectly centered) — side + main are now one frame
+    -- Single merged panel (perfectly centered, larger than before)
     local MainSize = UDim2.fromScale(MainWidth, MainHeight)
     local MainPos = UDim2.fromScale(0.5, 0.5)
-    local MainPanel = CreatePanel("Main_" .. windows, MainPos, MainSize, 20, 1, windowsFrame, options.main_color)
+    local MainPanel = CreatePanel("Window_" .. windows, MainPos, MainSize, 20, 1, windowsFrame, options.main_color, true)
+
+    -- Kept as an alias: everything below still refers to SidePanel.Frame /
+    -- SidePanel.Shadow, but there's now only one physical frame.
+    local SidePanel = MainPanel
+
+    -- HEADER - HIGHER (10% overlap with main panel)
+    local HeaderShadow = Instance.new("Frame")
+    HeaderShadow.Name = "HeaderShadow"
+    HeaderShadow.AnchorPoint = Vector2.new(0.5, 0)
+    HeaderShadow.Position = UDim2.new(0.5, 2, -0.06, 4)      -- higher (was -0.07)
+    HeaderShadow.Size = UDim2.fromScale(0.43, 0.16)           -- match main width
+    HeaderShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    HeaderShadow.BackgroundTransparency = 0.4
+    HeaderShadow.BorderSizePixel = 0
+    HeaderShadow.ZIndex = 0
+    HeaderShadow.Parent = MainPanel.Frame
+    Instance.new("UICorner", HeaderShadow).CornerRadius = UDim.new(0, 18)
+
+    local Header = Instance.new("Frame")
+    Header.Name = "Header"
+    Header.AnchorPoint = Vector2.new(0.5, 0)
+    Header.Position = UDim2.new(0.5, 0, -0.06, 0)            -- higher (was -0.07)
+    Header.Size = UDim2.fromScale(0.43, 0.16)                 -- match main width
+    Header.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Header.BackgroundTransparency = 0.15
+    Header.BorderSizePixel = 0
+    Header.Parent = MainPanel.Frame
+    Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 18)
+
+    -- Header is gradient-only now (no texture) - clone the panel's dark gradient
+    Header.BackgroundTransparency = 0
+    local HeaderGradient = MainPanel.Gradient:Clone()
+    HeaderGradient.Parent = Header
+
+    -- Header title with auto-matched drop shadow
+    local titleContainer = Instance.new("Frame")
+    titleContainer.Size = UDim2.fromScale(0.85, 0.8)
+    titleContainer.Position = UDim2.fromScale(0.05, 0.1)
+    titleContainer.BackgroundTransparency = 1
+    titleContainer.Parent = Header
+
+    local titleShadow = Instance.new("TextLabel")
+    titleShadow.Name = "TitleShadow"
+    titleShadow.Size = UDim2.fromScale(1, 1)
+    titleShadow.Position = UDim2.new(0.005, 0, 0.005, 0)
+    titleShadow.BackgroundTransparency = 1
+    titleShadow.Font = Enum.Font.GothamBlack
+    titleShadow.Text = title
+    titleShadow.TextScaled = true
+    titleShadow.TextColor3 = Color3.fromRGB(20, 20, 20)
+    titleShadow.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    titleShadow.TextStrokeTransparency = 0.5
+    titleShadow.Parent = titleContainer
+
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Name = "Title"
+    TitleLabel.Size = UDim2.fromScale(1, 1)
+    TitleLabel.Position = UDim2.new(0, 0, 0, 0)
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Font = Enum.Font.GothamBlack
+    TitleLabel.Text = title
+    TitleLabel.TextScaled = true
+    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    TitleLabel.TextStrokeTransparency = 0.3
+    TitleLabel.Parent = titleContainer
 
     -- CLOSE BUTTON - ORIGINAL POSITION (top-right of main panel, no offset)
     local CloseButton = Instance.new("ImageButton")
@@ -429,174 +502,73 @@ function library:AddWindow(title, options)
     local window_data = {}
     local Window = MainPanel.Frame
 
-    local Pad = 10
+    -- Side column (tab list) and content column now live on the SAME frame,
+    -- split by scale instead of being two separate panels.
+    local Tabs = Instance.new("Frame")
+    Tabs.Name = "Tabs"
+    Tabs.Size = UDim2.new(1 - SideColumnWidth - InnerPad * 2, -20, 1, -40)
+    Tabs.Position = UDim2.new(SideColumnWidth + InnerPad * 2, 10, 0, 30)
+    Tabs.BackgroundTransparency = 1
+    Tabs.BorderSizePixel = 0
+    Tabs.Parent = MainPanel.Frame
 
-    -- TOP SECTION (20% height): full-width banner, with a circular avatar
-    -- overlapping its bottom edge and a blank horizontal info strip beside it.
-    local TopSection = Instance.new("Frame")
-    TopSection.Name = "TopSection"
-    TopSection.Position = UDim2.new(0, Pad, 0, Pad)
-    TopSection.Size = UDim2.new(1, -Pad * 2, 0.2, -Pad)
-    TopSection.BackgroundTransparency = 1
-    TopSection.BorderSizePixel = 0
-    TopSection.ClipsDescendants = false
-    TopSection.ZIndex = 2
-    TopSection.Parent = MainPanel.Frame
+    -- Thin divider between the tab list and the content column
+    local Divider = Instance.new("Frame")
+    Divider.Name = "Divider"
+    Divider.AnchorPoint = Vector2.new(0.5, 0)
+    Divider.Position = UDim2.new(SideColumnWidth + InnerPad, 0, 0, 20)
+    Divider.Size = UDim2.new(0, 1, 1, -40)
+    Divider.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Divider.BackgroundTransparency = 0.85
+    Divider.BorderSizePixel = 0
+    Divider.Parent = MainPanel.Frame
 
-    local Banner = Instance.new("ImageLabel")
-    Banner.Name = "Banner"
-    Banner.Size = UDim2.new(1, 0, 1, 0)
-    Banner.Position = UDim2.new(0, 0, 0, 0)
-    Banner.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    Banner.BackgroundTransparency = 0.2
-    Banner.BorderSizePixel = 0
-    Banner.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=119214568385242&width=678&height=810&format=png"
-    Banner.ScaleType = Enum.ScaleType.Crop
-    Banner.ZIndex = 2
-    Banner.Parent = TopSection
-    Instance.new("UICorner", Banner).CornerRadius = UDim.new(0, 14)
-
-    local BannerStroke = Instance.new("UIStroke")
-    BannerStroke.Color = Color3.fromRGB(255, 255, 255)
-    BannerStroke.Thickness = 2
-    BannerStroke.Transparency = 0.4
-    BannerStroke.Parent = Banner
-
-    -- Circular avatar, overlapping the banner's bottom edge
-    local AvatarSize = 84
-    local Avatar = Instance.new("ImageLabel")
-    Avatar.Name = "Avatar"
-    Avatar.AnchorPoint = Vector2.new(0, 0.5)
-    Avatar.Position = UDim2.new(0, 24, 1, 0)
-    Avatar.Size = UDim2.new(0, AvatarSize, 0, AvatarSize)
-    Avatar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Avatar.BorderSizePixel = 0
-    Avatar.Image = "rbxthumb://type=AvatarHeadShot&id=" .. p.UserId .. "&w=150&h=150"
-    Avatar.ZIndex = 4
-    Avatar.Parent = TopSection
-    Instance.new("UICorner", Avatar).CornerRadius = UDim.new(1, 0)
-
-    local AvatarStroke = Instance.new("UIStroke")
-    AvatarStroke.Color = Color3.fromRGB(255, 255, 255)
-    AvatarStroke.Thickness = 3
-    AvatarStroke.Transparency = 0.1
-    AvatarStroke.Parent = Avatar
-
-    -- Blank horizontal profile info strip, to the right of the avatar
-    local ProfileInfo = Instance.new("Frame")
-    ProfileInfo.Name = "ProfileInfo"
-    ProfileInfo.AnchorPoint = Vector2.new(0, 0.5)
-    ProfileInfo.Position = UDim2.new(0, 24 + AvatarSize + 16, 1, 0)
-    ProfileInfo.Size = UDim2.new(1, -(24 + AvatarSize + 16 + 10), 0, 50)
-    ProfileInfo.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    ProfileInfo.BackgroundTransparency = 0.85
-    ProfileInfo.BorderSizePixel = 0
-    ProfileInfo.ZIndex = 4
-    ProfileInfo.Parent = TopSection
-    Instance.new("UICorner", ProfileInfo).CornerRadius = UDim.new(0, 10)
-
-    local ProfileInfoStroke = Instance.new("UIStroke")
-    ProfileInfoStroke.Color = Color3.fromRGB(255, 255, 255)
-    ProfileInfoStroke.Thickness = 1
-    ProfileInfoStroke.Transparency = 0.5
-    ProfileInfoStroke.Parent = ProfileInfo
-
-    -- BODY SECTION (80% height): 25% sidebar, 75% content
-    local BodySection = Instance.new("Frame")
-    BodySection.Name = "BodySection"
-    BodySection.Position = UDim2.new(0, Pad, 0.2, 0)
-    BodySection.Size = UDim2.new(1, -Pad * 2, 0.8, -Pad)
-    BodySection.BackgroundTransparency = 1
-    BodySection.BorderSizePixel = 0
-    BodySection.ZIndex = 1
-    BodySection.Parent = MainPanel.Frame
-
-    local LeftColumn = Instance.new("Frame")
-    LeftColumn.Name = "LeftColumn"
-    LeftColumn.Size = UDim2.new(0.25, -6, 1, 0)
-    LeftColumn.Position = UDim2.new(0, 0, 0, 0)
-    LeftColumn.BackgroundTransparency = 1
-    LeftColumn.BorderSizePixel = 0
-    LeftColumn.Parent = BodySection
-
-    local RightColumn = Instance.new("Frame")
-    RightColumn.Name = "RightColumn"
-    RightColumn.Size = UDim2.new(0.75, -6, 1, 0)
-    RightColumn.Position = UDim2.new(0.25, 6, 0, 0)
-    RightColumn.BackgroundTransparency = 1
-    RightColumn.BorderSizePixel = 0
-    RightColumn.Parent = BodySection
-
-    -- LEFT SIDEBAR - vertical nav, fills the whole 25% column
+    -- TabButtons with drop shadow
     local TabButtonsShadow = Instance.new("Frame")
     TabButtonsShadow.Name = "TabButtonsShadow"
-    TabButtonsShadow.Size = UDim2.new(1, 0, 1, 0)
-    TabButtonsShadow.Position = UDim2.new(0, 0, 0, 0)
+    TabButtonsShadow.Size = UDim2.new(SideColumnWidth - InnerPad * 2, -10, 1, -20)
+    TabButtonsShadow.Position = UDim2.new(InnerPad, 5, 0, 10)
     TabButtonsShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     TabButtonsShadow.BackgroundTransparency = 0.5
     TabButtonsShadow.BorderSizePixel = 0
     TabButtonsShadow.ZIndex = 0
-    TabButtonsShadow.Parent = LeftColumn
+    TabButtonsShadow.Parent = MainPanel.Frame
     Instance.new("UICorner", TabButtonsShadow).CornerRadius = UDim.new(0, 10)
 
     local TabButtons = Instance.new("ScrollingFrame")
     TabButtons.Name = "TabButtons"
-    TabButtons.Size = UDim2.new(1, 0, 1, 0)
-    TabButtons.Position = UDim2.new(0, 0, 0, 0)
+    TabButtons.Size = UDim2.new(SideColumnWidth - InnerPad * 2, -10, 1, -20)
+    TabButtons.Position = UDim2.new(InnerPad, 5, 0, 10)
     TabButtons.BackgroundTransparency = 1
     TabButtons.BorderSizePixel = 0
     TabButtons.CanvasSize = UDim2.new(0, 0, 0, 0)
     TabButtons.ScrollBarThickness = 4
     TabButtons.ZIndex = 1
-    TabButtons.Parent = LeftColumn
+    TabButtons.Parent = MainPanel.Frame
 
     local TabButtonsList = Instance.new("UIListLayout")
     TabButtonsList.SortOrder = Enum.SortOrder.LayoutOrder
     TabButtonsList.Padding = UDim.new(0, 5)
     TabButtonsList.Parent = TabButtons
 
-    -- RIGHT CONTENT AREA - one large rounded panel, fills the whole 75% column
-    local TabsBox = Instance.new("Frame")
-    TabsBox.Name = "TabsBox"
-    TabsBox.Size = UDim2.new(1, 0, 1, 0)
-    TabsBox.Position = UDim2.new(0, 0, 0, 0)
-    TabsBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    TabsBox.BackgroundTransparency = 0.85
-    TabsBox.BorderSizePixel = 0
-    TabsBox.Parent = RightColumn
-    Instance.new("UICorner", TabsBox).CornerRadius = UDim.new(0, 14)
-
-    local TabsBoxStroke = Instance.new("UIStroke")
-    TabsBoxStroke.Color = Color3.fromRGB(255, 255, 255)
-    TabsBoxStroke.Thickness = 2
-    TabsBoxStroke.Transparency = 0.4
-    TabsBoxStroke.Parent = TabsBox
-
-    local Tabs = Instance.new("Frame")
-    Tabs.Name = "Tabs"
-    Tabs.Size = UDim2.new(1, -20, 1, -20)
-    Tabs.Position = UDim2.new(0, 10, 0, 10)
-    Tabs.BackgroundTransparency = 1
-    Tabs.BorderSizePixel = 0
-    Tabs.Parent = TabsBox
-
-
     do -- Add Tab
         function window_data:AddTab(tab_name)
             local tab_data = {}
             tab_name = tostring(tab_name or "New Tab")
 
-            -- Tab button with background image
+            -- Tab button - gradient only now, no texture
             local new_button = Instance.new("ImageButton")
             new_button.Name = "TabButton_" .. tab_name
             new_button.Size = UDim2.new(1, 0, 0, 35)
-            new_button.BackgroundTransparency = 1
+            new_button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            new_button.BackgroundTransparency = 0
             new_button.BorderSizePixel = 0
-            new_button.Image = "rbxassetid://16736132788"
-            new_button.ImageTransparency = 0.3
-            new_button.ScaleType = Enum.ScaleType.Stretch
+            new_button.Image = ""
             new_button.Parent = TabButtons
             Instance.new("UICorner", new_button).CornerRadius = UDim.new(0, 10)
+
+            local buttonGradient = MainPanel.Gradient:Clone()
+            buttonGradient.Parent = new_button
 
             -- Tab button label - Gotham Black with auto-matched drop shadow
             local buttonContainer = Instance.new("Frame")
