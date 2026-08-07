@@ -327,8 +327,8 @@ function library:AddWindow(title, options)
     options.tween_time = 0.1
 
     -- LAYOUT PARAMETERS - one big, centered frame (side + main merged)
-    local MainWidth = 0.66
-    local MainHeight = 0.95
+    local MainWidth = 0.5
+    local MainHeight = 0.97
     local SideColumnWidth = 0.27  -- fraction of the merged frame used by the tab-list column
     local InnerPad = 0.018
 
@@ -434,6 +434,73 @@ function library:AddWindow(title, options)
     CloseButton.MouseLeave:Connect(function()
         CloseButton:TweenSize(UDim2.fromOffset(56, 56), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
     end)
+
+    -- DRAGGING: move the window from the header or any of its 4 edges
+    do
+        local dragging = false
+        local dragInput, dragStart, startFramePos
+
+        local function updateDrag(input)
+            local delta = input.Position - dragStart
+            local newPos = UDim2.new(
+                startFramePos.X.Scale, startFramePos.X.Offset + delta.X,
+                startFramePos.Y.Scale, startFramePos.Y.Offset + delta.Y
+            )
+            MainPanel.Frame.Position = newPos
+            MainPanel.Shadow.Position = newPos + UDim2.new(0, 0, 0, 8)
+        end
+
+        local function connectDragSource(source)
+            source.InputBegan:Connect(function(input)
+                if dropdown_open then return end -- don't start a drag while an
+                    -- options list is open
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    dragging = true
+                    dragStart = input.Position
+                    startFramePos = MainPanel.Frame.Position
+                    input.Changed:Connect(function()
+                        if input.UserInputState == Enum.UserInputState.End then
+                            dragging = false
+                        end
+                    end)
+                end
+            end)
+            source.InputChanged:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                    dragInput = input
+                end
+            end)
+        end
+
+        UIS.InputChanged:Connect(function(input)
+            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                updateDrag(input)
+            end
+        end)
+
+        connectDragSource(Header)
+
+        local edgeThickness = 8
+        local edgeDefs = {
+            {name = "Top", pos = UDim2.new(0, 0, 0, 0), size = UDim2.new(1, 0, 0, edgeThickness)},
+            {name = "Bottom", pos = UDim2.new(0, 0, 1, -edgeThickness), size = UDim2.new(1, 0, 0, edgeThickness)},
+            {name = "Left", pos = UDim2.new(0, 0, 0, 0), size = UDim2.new(0, edgeThickness, 1, 0)},
+            {name = "Right", pos = UDim2.new(1, -edgeThickness, 0, 0), size = UDim2.new(0, edgeThickness, 1, 0)},
+        }
+        for _, def in ipairs(edgeDefs) do
+            local edge = Instance.new("TextButton")
+            edge.Name = "DragEdge_" .. def.name
+            edge.Text = ""
+            edge.AutoButtonColor = false
+            edge.BackgroundTransparency = 1
+            edge.BorderSizePixel = 0
+            edge.Position = def.pos
+            edge.Size = def.size
+            edge.ZIndex = 5
+            edge.Parent = MainPanel.Frame
+            connectDragSource(edge)
+        end
+    end
 
     -- MINIMIZED STATE (restore button) with PORTAL IMAGE + ANIMATION
     local MinimizedFrame = Instance.new("ImageButton")
@@ -1522,6 +1589,7 @@ function library:AddWindow(title, options)
                     task.delay(options.tween_time, function()
                         tabContainer.ClipsDescendants = true -- restore normal
                             -- scrolling clip once the box has fully closed
+                        tabContainer.ScrollingEnabled = true
                     end)
                     if activeDropdownClose == closeDropdown then
                         activeDropdownClose = nil
@@ -1544,6 +1612,9 @@ function library:AddWindow(title, options)
                     tabContainer.ClipsDescendants = false -- let the options
                         -- list render past the ScrollingFrame's own edge
                         -- instead of being cut off by it
+                    tabContainer.ScrollingEnabled = false -- lock scrolling while
+                        -- the options list is open so it can't be scrolled
+                        -- out from under/over the rest of the UI
                     Resize(box, {Size = UDim2.new(1, 0, 0, len)}, options.tween_time)
                     TweenService:Create(indicator, TweenInfo.new(0.15), {Rotation = 180}):Play()
                 end
