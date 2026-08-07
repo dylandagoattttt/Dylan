@@ -3,6 +3,10 @@ local ui_options = {
     min_size = Vector2.new(400, 300),
     toggle_key = Enum.KeyCode.RightShift,
     can_resize = true,
+    -- Point this at your own chat relay backend (see AddChat for the
+    -- expected /send and /messages contract). The built-in Chat tab won't
+    -- be able to send/receive anything until this is set.
+    chat_backend_url = "",
 }
 
 do
@@ -52,8 +56,14 @@ local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local RS = game:GetService("RunService")
 local ps = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
 local p = ps.LocalPlayer
 local mouse = p:GetMouse()
+
+-- Cross-executor HTTP request function, used only by the built-in chat to
+-- talk to your relay backend (see AddChat). nil if none is available.
+local httpRequest = (syn and syn.request) or (http and http.request) or (fluxus and fluxus.request)
+    or (typeof(http_request) == "function" and http_request) or (typeof(request) == "function" and request) or nil
 local Prefabs = prefabs
 local Windows = windowsFrame
 
@@ -1622,15 +1632,6 @@ function library:AddWindow(title, options)
                     TweenService:Create(indicator, TweenInfo.new(0.15), {Rotation = 180}):Play()
                 end
 
-                -- Auto-close instead of locking scroll: locking scroll while a
-                -- dropdown is open meant that if it ever ended up out of view
-                -- (scrolled past), you couldn't reach it to close it again and
-                -- the whole tab would freeze. Closing it on scroll keeps
-                -- scrolling always usable.
-                tabContainer:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
-                    if open then closeDropdown() end
-                end)
-
                 dropdown.MouseButton1Click:Connect(function()
                     if open then
                         closeDropdown()
@@ -2075,30 +2076,88 @@ function library:AddWindow(title, options)
                 return folder_data, folder
             end
 
-            -- Live global chat, rendered in the UI but backed by Roblox's
-            -- real chat system - other players actually see what you send,
-            -- and you see what they say, same as the normal chat bar.
+            -- Live chat between players - NOT Roblox's built-in chat. This
+            -- talks to your own backend over HTTP so it can work either
+            -- scoped to the current server or across every server/game
+            -- (see ui_options.chat_backend_url). Expected API:
+            --   POST {backend_url}/send
+            --     body: {channel, userId, username, text, timestamp}
+            --   GET  {backend_url}/messages?channel=<channel>&since=<ts>
+            --     returns: JSON array of {userId, username, text, timestamp}
+            -- Without a backend set, this UI still renders but can't
+            -- actually send/receive anything.
             function tab_data:AddChat(chat_options)
                 local chat_data = {}
                 chat_options = typeof(chat_options) == "table" and chat_options or {}
                 chat_options = {
-                    ["y"] = tonumber(chat_options.y) or 220,
-                    ["placeholder"] = tostring(chat_options.placeholder or "Say something..."),
+                    ["placeholder"] = tostring(chat_options.placeholder or "Message..."),
+                    ["poll_interval"] = tonumber(chat_options.poll_interval) or 2,
                 }
 
+                local base = options.main_color or Color3.fromRGB(150, 80, 255)
+
+                -- Fill the entire tab, no boxed/padded background
+                tabContainer.ScrollingEnabled = false -- the log below scrolls itself
                 local chatFrame = Instance.new("Frame")
-                chatFrame.Size = UDim2.new(1, 0, 0, chat_options.y)
-                chatFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                chatFrame.BackgroundTransparency = 0.85
+                chatFrame.Name = "Chat"
+                chatFrame.Size = UDim2.new(1, 0, 1, 0)
+                chatFrame.Position = UDim2.new(0, 0, 0, 0)
+                chatFrame.BackgroundTransparency = 1
                 chatFrame.BorderSizePixel = 0
                 chatFrame.ClipsDescendants = true
                 chatFrame.Parent = tabContainer
-                Instance.new("UICorner", chatFrame).CornerRadius = UDim.new(0, 10)
+
+                -- Scope switch: chat inside this server only, or across all
+                -- servers/games (both hit the same backend, just a different
+                -- channel key)
+                local scopeBar = Instance.new("Frame")
+                scopeBar.Size = UDim2.new(1, 0, 0, 26)
+                scopeBar.Position = UDim2.new(0, 0, 0, 0)
+                scopeBar.BackgroundTransparency = 1
+                scopeBar.Parent = chatFrame
+
+                local scopeLayout = Instance.new("UIListLayout")
+                scopeLayout.FillDirection = Enum.FillDirection.Horizontal
+                scopeLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                scopeLayout.Padding = UDim.new(0, 6)
+                scopeLayout.Parent = scopeBar
+
+                local currentScope = "server"
+                local scopeButtons = {}
+
+                local function makeScopeButton(scopeKey, label)
+                    local btn = Instance.new("TextButton")
+                    btn.Size = UDim2.new(0, 64, 1, 0)
+                    btn.BackgroundColor3 = base
+                    btn.BackgroundTransparency = 0.6
+                    btn.BorderSizePixel = 0
+                    btn.AutoButtonColor = false
+                    btn.Font = Enum.Font.GothamBold
+                    btn.Text = label
+                    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    btn.TextSize = 12
+                    btn.Parent = scopeBar
+                    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+                    scopeButtons[scopeKey] = btn
+                    return btn
+                end
+
+                local serverScopeBtn = makeScopeButton("server", "Server")
+                local globalScopeBtn = makeScopeButton("global", "Global")
+
+                local function refreshScopeVisuals()
+                    for key, btn in pairs(scopeButtons) do
+                        TweenService:Create(btn, TweenInfo.new(0.15), {
+                            BackgroundTransparency = (key == currentScope) and 0.15 or 0.6
+                        }):Play()
+                    end
+                end
+                refreshScopeVisuals()
 
                 local log = Instance.new("ScrollingFrame")
                 log.Name = "Log"
-                log.Size = UDim2.new(1, -10, 1, -42)
-                log.Position = UDim2.new(0, 5, 0, 5)
+                log.Size = UDim2.new(1, 0, 1, -74)
+                log.Position = UDim2.new(0, 0, 0, 32)
                 log.BackgroundTransparency = 1
                 log.BorderSizePixel = 0
                 log.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -2107,7 +2166,7 @@ function library:AddWindow(title, options)
 
                 local logLayout = Instance.new("UIListLayout")
                 logLayout.SortOrder = Enum.SortOrder.LayoutOrder
-                logLayout.Padding = UDim.new(0, 2)
+                logLayout.Padding = UDim.new(0, 10)
                 logLayout.Parent = log
 
                 logLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
@@ -2115,11 +2174,33 @@ function library:AddWindow(title, options)
                     log.CanvasPosition = Vector2.new(0, math.max(0, logLayout.AbsoluteContentSize.Y - log.AbsoluteSize.Y))
                 end)
 
+                -- Input row: textbox, then a send button to its right
+                local inputRow = Instance.new("Frame")
+                inputRow.Size = UDim2.new(1, 0, 0, 36)
+                inputRow.Position = UDim2.new(0, 0, 1, -36)
+                inputRow.BackgroundTransparency = 1
+                inputRow.Parent = chatFrame
+
+                local sendButton = Instance.new("TextButton")
+                sendButton.AnchorPoint = Vector2.new(1, 0)
+                sendButton.Size = UDim2.new(0, 64, 1, 0)
+                sendButton.Position = UDim2.new(1, 0, 0, 0)
+                sendButton.BackgroundColor3 = base
+                sendButton.BackgroundTransparency = 0.1
+                sendButton.BorderSizePixel = 0
+                sendButton.AutoButtonColor = false
+                sendButton.Font = Enum.Font.GothamBold
+                sendButton.Text = "Send"
+                sendButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+                sendButton.TextSize = 13
+                sendButton.Parent = inputRow
+                Instance.new("UICorner", sendButton).CornerRadius = UDim.new(0, 8)
+
                 local inputBox = Instance.new("TextBox")
-                inputBox.Size = UDim2.new(1, -10, 0, 30)
-                inputBox.Position = UDim2.new(0, 5, 1, -35)
+                inputBox.Size = UDim2.new(1, -72, 1, 0)
+                inputBox.Position = UDim2.new(0, 0, 0, 0)
                 inputBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                inputBox.BackgroundTransparency = 0.8
+                inputBox.BackgroundTransparency = 0.85
                 inputBox.BorderSizePixel = 0
                 inputBox.ClearTextOnFocus = false
                 inputBox.Font = Enum.Font.Gotham
@@ -2129,12 +2210,10 @@ function library:AddWindow(title, options)
                 inputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
                 inputBox.TextSize = 13
                 inputBox.TextXAlignment = Enum.TextXAlignment.Left
-                inputBox.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-                inputBox.TextStrokeTransparency = 0.4
-                inputBox.Parent = chatFrame
+                inputBox.Parent = inputRow
                 Instance.new("UICorner", inputBox).CornerRadius = UDim.new(0, 8)
 
-                -- Deterministic per-name color, same idea as Roblox's own chat tag colors
+                -- Deterministic per-name color
                 local namePalette = {
                     Color3.fromRGB(253, 41, 67), Color3.fromRGB(1, 162, 255), Color3.fromRGB(2, 184, 87),
                     Color3.fromRGB(255, 151, 0), Color3.fromRGB(178, 89, 255), Color3.fromRGB(255, 91, 172),
@@ -2146,89 +2225,214 @@ function library:AddWindow(title, options)
                     return namePalette[(sum % #namePalette) + 1]
                 end
 
-                -- RichText is used for name coloring, so untrusted chat text
-                -- (from other players) must be escaped before it goes in
-                local function escapeRichText(s)
-                    s = s:gsub("&", "&amp;")
-                    s = s:gsub("<", "&lt;")
-                    s = s:gsub(">", "&gt;")
-                    s = s:gsub('"', "&quot;")
-                    return s
-                end
+                -- Instagram-DM style row: circular avatar, then a column with
+                -- @name above a message bubble
+                function chat_data:AddMessage(userId, username, text)
+                    username = tostring(username or "Unknown")
+                    text = tostring(text or "")
 
-                function chat_data:AddMessage(playerName, text, color)
-                    local line = Instance.new("TextLabel")
-                    line.Size = UDim2.new(1, 0, 0, 0)
-                    line.AutomaticSize = Enum.AutomaticSize.Y
-                    line.BackgroundTransparency = 1
-                    line.Font = Enum.Font.Gotham
-                    line.RichText = true
-                    line.TextWrapped = true
-                    line.TextXAlignment = Enum.TextXAlignment.Left
-                    line.TextYAlignment = Enum.TextYAlignment.Top
-                    line.TextColor3 = Color3.fromRGB(230, 230, 230)
-                    line.TextSize = 13
-                    line.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-                    line.TextStrokeTransparency = 0.5
-                    local hex = (color or Color3.fromRGB(255, 255, 255)):ToHex()
-                    line.Text = string.format(
-                        '<font color="#%s"><b>%s:</b></font> %s',
-                        hex, escapeRichText(tostring(playerName)), escapeRichText(tostring(text))
-                    )
-                    line.Parent = log
-                    return line
-                end
+                    local row = Instance.new("Frame")
+                    row.Size = UDim2.new(1, 0, 0, 0)
+                    row.AutomaticSize = Enum.AutomaticSize.Y
+                    row.BackgroundTransparency = 1
+                    row.Parent = log
 
-                -- Hook every current + future player's real chat messages
-                local function hook(plr)
-                    plr.Chatted:Connect(function(message)
-                        chat_data:AddMessage(plr.DisplayName ~= "" and plr.DisplayName or plr.Name, message, nameColor(plr.Name))
-                    end)
-                end
-                for _, plr in pairs(ps:GetPlayers()) do
-                    hook(plr)
-                end
-                ps.PlayerAdded:Connect(hook)
+                    local rowLayout = Instance.new("UIListLayout")
+                    rowLayout.FillDirection = Enum.FillDirection.Horizontal
+                    rowLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                    rowLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+                    rowLayout.Padding = UDim.new(0, 8)
+                    rowLayout.Parent = row
 
-                -- Send through Roblox's own chat plumbing so it's a real,
-                -- server-relayed message other players actually receive
-                local function sendChatMessage(text)
-                    local TCS = game:GetService("TextChatService")
-                    if TCS.ChatVersion == Enum.ChatVersion.TextChatService then
-                        local channel = TCS.TextChannels and TCS.TextChannels:FindFirstChild("RBXGeneral")
-                        if channel then
-                            channel:SendAsync(text)
-                            return
-                        end
+                    local avatar = Instance.new("ImageLabel")
+                    avatar.LayoutOrder = 1
+                    avatar.Size = UDim2.fromOffset(36, 36)
+                    avatar.BackgroundColor3 = Color3.fromRGB(55, 55, 62)
+                    avatar.BorderSizePixel = 0
+                    avatar.Image = ""
+                    avatar.Parent = row
+                    Instance.new("UICorner", avatar).CornerRadius = UDim.new(1, 0)
+
+                    if userId then
+                        task.spawn(function()
+                            local ok, content = pcall(function()
+                                return ps:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.X100)
+                            end)
+                            if ok and avatar.Parent then
+                                avatar.Image = content
+                            end
+                        end)
                     end
-                    -- Legacy chat fallback (used by games still on the classic
-                    -- chat system) - this is the same remote the default
-                    -- Roblox chat bar itself fires
-                    pcall(function()
-                        local chatEvents = game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents", 2)
-                        local sayMessageRequest = chatEvents and chatEvents:WaitForChild("SayMessageRequest", 2)
-                        if sayMessageRequest then
-                            sayMessageRequest:FireServer(text, "All")
+
+                    local body = Instance.new("Frame")
+                    body.LayoutOrder = 2
+                    body.Size = UDim2.new(1, -44, 0, 0)
+                    body.AutomaticSize = Enum.AutomaticSize.Y
+                    body.BackgroundTransparency = 1
+                    body.Parent = row
+
+                    local bodyLayout = Instance.new("UIListLayout")
+                    bodyLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                    bodyLayout.Padding = UDim.new(0, 2)
+                    bodyLayout.Parent = body
+
+                    local nameLabel = Instance.new("TextLabel")
+                    nameLabel.Size = UDim2.new(1, 0, 0, 14)
+                    nameLabel.BackgroundTransparency = 1
+                    nameLabel.Font = Enum.Font.GothamBold
+                    nameLabel.Text = "@" .. username
+                    nameLabel.TextColor3 = nameColor(username)
+                    nameLabel.TextSize = 12
+                    nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+                    nameLabel.Parent = body
+
+                    local bubble = Instance.new("Frame")
+                    bubble.Size = UDim2.new(1, 0, 0, 0)
+                    bubble.AutomaticSize = Enum.AutomaticSize.Y
+                    bubble.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
+                    bubble.BackgroundTransparency = 0.15
+                    bubble.BorderSizePixel = 0
+                    bubble.Parent = body
+                    Instance.new("UICorner", bubble).CornerRadius = UDim.new(0, 12)
+
+                    local bubblePadding = Instance.new("UIPadding")
+                    bubblePadding.PaddingLeft = UDim.new(0, 10)
+                    bubblePadding.PaddingRight = UDim.new(0, 10)
+                    bubblePadding.PaddingTop = UDim.new(0, 6)
+                    bubblePadding.PaddingBottom = UDim.new(0, 6)
+                    bubblePadding.Parent = bubble
+
+                    local msgLabel = Instance.new("TextLabel")
+                    msgLabel.Size = UDim2.new(1, 0, 0, 0)
+                    msgLabel.AutomaticSize = Enum.AutomaticSize.Y
+                    msgLabel.BackgroundTransparency = 1
+                    msgLabel.Font = Enum.Font.Gotham
+                    msgLabel.RichText = false -- messages come from other
+                        -- players/servers over HTTP, so treat as plain text
+                    msgLabel.Text = text
+                    msgLabel.TextColor3 = Color3.fromRGB(230, 230, 230)
+                    msgLabel.TextSize = 13
+                    msgLabel.TextWrapped = true
+                    msgLabel.TextXAlignment = Enum.TextXAlignment.Left
+                    msgLabel.Parent = bubble
+
+                    return row
+                end
+
+                -- ===== Backend relay (HTTP) =====
+                local function currentChannel()
+                    if currentScope == "global" then
+                        return "global"
+                    end
+                    return "server_" .. tostring(game.PlaceId) .. "_" .. (game.JobId ~= "" and game.JobId or "studio")
+                end
+
+                local backendUrl = options.chat_backend_url or ui_options.chat_backend_url or ""
+                local lastTimestamp = {["server"] = 0, ["global"] = 0}
+
+                local function sendMessage(text)
+                    if backendUrl == "" then
+                        chat_data:AddMessage(nil, "System", "No chat backend configured (set ui_options.chat_backend_url).")
+                        return
+                    end
+                    if not httpRequest then
+                        chat_data:AddMessage(nil, "System", "HTTP requests aren't available in this environment.")
+                        return
+                    end
+                    task.spawn(function()
+                        pcall(function()
+                            httpRequest({
+                                Url = backendUrl .. "/send",
+                                Method = "POST",
+                                Headers = {["Content-Type"] = "application/json"},
+                                Body = HttpService:JSONEncode({
+                                    channel = currentChannel(),
+                                    userId = p.UserId,
+                                    username = p.Name,
+                                    text = text,
+                                    timestamp = os.time(),
+                                }),
+                            })
+                        end)
+                    end)
+                end
+
+                local function poll()
+                    if backendUrl == "" or not httpRequest then return end
+                    local channel = currentChannel()
+                    task.spawn(function()
+                        local ok, result = pcall(function()
+                            return httpRequest({
+                                Url = backendUrl .. "/messages?channel=" .. HttpService:UrlEncode(channel)
+                                    .. "&since=" .. tostring(lastTimestamp[currentScope]),
+                                Method = "GET",
+                            })
+                        end)
+                        if ok and result and result.Body then
+                            local decodeOk, data = pcall(function()
+                                return HttpService:JSONDecode(result.Body)
+                            end)
+                            if decodeOk and typeof(data) == "table" then
+                                for _, msg in ipairs(data) do
+                                    chat_data:AddMessage(msg.userId, msg.username, msg.text)
+                                    if typeof(msg.timestamp) == "number" and msg.timestamp > lastTimestamp[currentScope] then
+                                        lastTimestamp[currentScope] = msg.timestamp
+                                    end
+                                end
+                            end
                         end
                     end)
                 end
 
-                inputBox.FocusLost:Connect(function(enterPressed)
-                    if enterPressed and #inputBox.Text > 0 then
-                        sendChatMessage(inputBox.Text)
+                local function switchScope(scopeKey)
+                    if currentScope == scopeKey then return end
+                    currentScope = scopeKey
+                    refreshScopeVisuals()
+                    for _, child in pairs(log:GetChildren()) do
+                        if child:IsA("Frame") then child:Destroy() end
+                    end
+                    poll()
+                end
+
+                serverScopeBtn.MouseButton1Click:Connect(function() switchScope("server") end)
+                globalScopeBtn.MouseButton1Click:Connect(function() switchScope("global") end)
+
+                task.spawn(function()
+                    while chatFrame.Parent do
+                        poll()
+                        task.wait(chat_options.poll_interval)
+                    end
+                end)
+
+                local function trySend()
+                    local text = inputBox.Text
+                    if #text > 0 then
+                        sendMessage(text)
                         inputBox.Text = ""
                     end
+                end
+
+                sendButton.MouseButton1Click:Connect(trySend)
+                inputBox.FocusLost:Connect(function(enterPressed)
+                    if enterPressed then trySend() end
                 end)
 
                 function chat_data:Send(text)
                     text = tostring(text or "")
                     if #text > 0 then
-                        sendChatMessage(text)
+                        sendMessage(text)
+                    end
+                end
+
+                function chat_data:SetScope(scopeKey)
+                    if scopeKey == "server" or scopeKey == "global" then
+                        switchScope(scopeKey)
                     end
                 end
 
                 return chat_data, chatFrame
             end
+
 
             return tab_data, tabContainer
         end
